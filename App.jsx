@@ -10,6 +10,7 @@ import RealTimeUpdatesQuiz from './real-time-updates-quiz';
 import ScalingReadsQuiz from './scaling-reads-quiz';
 import ScalingWritesQuiz from './scaling-writes-quiz';
 import LongRunningTasksQuiz from './managing-long-running-tasks-quiz';
+import DataModelingQuiz from './data-modeling-quiz';
 
 // Map output file names to imported components
 const componentsMap = {
@@ -20,6 +21,7 @@ const componentsMap = {
   'real-time-updates-quiz.jsx': RealTimeUpdatesQuiz,
   'scaling-reads-quiz.jsx': ScalingReadsQuiz,
   'scaling-writes-quiz.jsx': ScalingWritesQuiz,
+  'data-modeling-quiz.jsx': DataModelingQuiz,
 };
 
 function Index() {

@@ -98,9 +98,9 @@
       "name": "Data Modeling",
       "path": "/learn/system-design/core-concepts/data-modeling",
       "slug": "core-concepts-data-modeling",
-      "status": "pending",
-      "lastAttempt": null,
-      "outputFile": null,
+      "status": "completed",
+      "lastAttempt": "2026-03-28T00:00:00Z",
+      "outputFile": "data-modeling-quiz.jsx",
       "retryCount": 0
     },
     {
