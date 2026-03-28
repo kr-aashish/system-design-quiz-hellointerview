@@ -15,6 +15,62 @@ const QUIZ_DATA = {
   ],
   questions: [
     {
+      id: "rev-1",
+      category: "Client-Server Protocols",
+      question: "You used Server-Sent Events (SSE) for a live dashboard, but users report receiving updates in 30-second bulk chunks instead of a real-time stream. What is the most likely cause?",
+      options: [
+        { label: "A", text: "The backend database is enforcing a strict pull-based consistency model." },
+        { label: "B", text: "An intermediate L7 Proxy or Load Balancer does not natively support streaming responses and is buffering the Transfer-Encoding: chunked payload." },
+        { label: "C", text: "The browser's EventSource object is throttling connections to prevent memory leaks." },
+        { label: "D", text: "The SSE protocol inherently batches payloads into 30-second windows." }
+      ],
+      correct: 1,
+      explanation: "SSE relies on holding an HTTP connection open and streaming data in chunks. However, many older or poorly configured Layer 7 proxies/load balancers do not natively support streaming responses. They will 'helpfully' try to buffer the entire response until it finishes before sending it to the client, which completely breaks the real-time stream. It is not an issue with the database.",
+      proTip: "This is a massive operational trap with SSE. If you ever see 'chunking' behavior in an SSE stream, immediately look at your proxy/LB layer's configuration."
+    },
+    {
+      id: "rev-2",
+      category: "Client-Server Protocols",
+      question: "An SSE client drops offline for 5 seconds and reconnects. How does the protocol handle the gap in missed messages?",
+      options: [
+        { label: "A", text: "It doesn't. SSE is strictly fire-and-forget; you must manually pair SSE with a secondary polling fallback." },
+        { label: "B", text: "The server stores a full replica of the user's session state in memory and simply replays the entire history." },
+        { label: "C", text: "The browser's EventSource API inherently tracks connection drops and automatically sends a Last-Event-ID header when it reconnects." },
+        { label: "D", text: "SSE utilizes a bidirectional ping-pong frame structure to send a 'Diff' payload upon reconnection." }
+      ],
+      correct: 2,
+      explanation: "SSE is not fire-and-forget! One of its biggest advantages over raw WebSockets is that the browser natively handles reconnections. Because it sends the Last-Event-ID header upon reconnecting, your server knows exactly where the client left off and can instantly replay the missed events without you having to build complex custom application logic.",
+      proTip: "When asked to compare WebSockets and SSE, always mention the built-in reconnection and Last-Event-ID functionality of SSE. It saves hundreds of lines of client-side error handling code compared to WebSockets."
+    },
+    {
+      id: "rev-3",
+      category: "Server-Side Propagation",
+      question: "You architect a chat system using a Pub/Sub model (like Redis/Kafka) where stateless endpoint servers hold WebSockets and subscribe to user topics. What is the primary disadvantage of this specific architecture?",
+      options: [
+        { label: "A", text: "You lose the ability to use a simple 'least connections' load balancing strategy." },
+        { label: "B", text: "The Pub/Sub service itself becomes a massive single point of failure, and you lose native backend visibility into whether a specific user is actually connected." },
+        { label: "C", text: "The endpoint servers must buffer the entire chat history in memory, causing severe out-of-memory (OOM) crashes." },
+        { label: "D", text: "You must explicitly build a complex STUN/TURN relay to bounce the Pub/Sub messages across enterprise firewalls." }
+      ],
+      correct: 1,
+      explanation: "'Least connections' routing is actually an advantage of this architecture because the endpoint servers are stateless. The real trade-off is operational complexity: you've introduced a massive centralized piece of infrastructure (the Pub/Sub cluster) that can bottleneck or fail, and your core application servers no longer inherently know if a user's WebSocket is actually alive.",
+      proTip: "Never propose Pub/Sub as a magic bullet. Always highlight that it distances your core application servers from the actual connection state, making presence (online/offline status) much harder to track accurately."
+    },
+    {
+      id: "rev-4",
+      category: "System Design Scenarios",
+      question: "You are designing 'BoardCast', a collaborative platform. Feature A (Editors): 50 users actively drawing on a heavily stateful board requiring bidirectional sync. Feature B (Viewers): 100,000 passive viewers watching updates as fast as possible. Which architectural combination correctly handles Hop 1 (Server<->Client) and Hop 2 (Source->Server) for both features?",
+      options: [
+        { label: "A", text: "Feature A: WebSockets + Consistent Hashing. Feature B: SSE + No Hop 2 required." },
+        { label: "B", text: "Feature A: WebSockets + Consistent Hashing (to pinpoint stateful compute on one server). Feature B: SSE + Pub/Sub (to cross-server fan-out updates to stateless viewer endpoints)." },
+        { label: "C", text: "Feature A: WebRTC + Pub/Sub. Feature B: Long Polling + Consistent Hashing." },
+        { label: "D", text: "Feature A: Simple Polling + Direct DB writes. Feature B: WebSockets + Pub/Sub." }
+      ],
+      correct: 1,
+      explanation: "Feature A needs WebSockets for bidirectional low-latency data, and Consistent Hashing to ensure all 50 editors land on the exact same server to prevent complex distributed state conflicts. Feature B needs SSE for unidirectional streaming (no wasted bidirectional overhead). Viewers also require Pub/Sub for Hop 2: 100,000 viewers cannot connect to the single server hosting the Editors; their connections are spread across many endpoint servers, requiring a Pub/Sub topic to fan out the draw events from the Editor's server to all Viewer endpoint servers.",
+      proTip: "If a user base is drastically larger than the active participants, always split the architecture. Isolating heavy computations (Editors + Consistent Hashing) from massive distribution (Viewers + PubSub) is a classic scaling pattern."
+    },
+    {
       id: 1,
       category: "Client-Server Protocols",
       question: "You're designing a live sports scoreboard that serves 5 million concurrent viewers. Scores update every 30-60 seconds per game, and users only need to see scores (no chat or interaction). Your infrastructure team tells you their reverse proxies have inconsistent support for chunked transfer encoding. Which approach minimizes operational risk while meeting latency requirements?",
