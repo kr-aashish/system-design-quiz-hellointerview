@@ -33,10 +33,21 @@ function Index() {
   return (
     <div className="min-h-screen bg-[#1c2331] text-slate-300 p-8 font-sans">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-slate-100 flex items-center gap-3">
-          <BookOpen className="text-teal-500" />
-          System Design Learning Paths
-        </h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-slate-100 flex items-center gap-3">
+            <BookOpen className="text-teal-500" />
+            System Design Learning Paths
+          </h1>
+          <a
+            href="https://www.hellointerview.com/dashboard"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg font-semibold transition-colors border border-slate-700 max-sm:hidden"
+          >
+            <ExternalLink size={16} className="text-slate-400" />
+            Dashboard
+          </a>
+        </div>
         
         <div className="space-y-4 bg-[#232a3b] p-6 rounded-xl border border-[#2d3748] shadow-2xl">
           {Object.entries(topicsByCategory).map(([category, items]) => (
