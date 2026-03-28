@@ -130,7 +130,7 @@
       "slug": "core-concepts-sharding",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "sharding-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -140,7 +140,7 @@
       "slug": "core-concepts-consistent-hashing",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "consistent-hashing-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -148,9 +148,9 @@
       "name": "CAP Theorem",
       "path": "/learn/system-design/core-concepts/cap-theorem",
       "slug": "core-concepts-cap-theorem",
-      "status": "pending",
-      "lastAttempt": null,
-      "outputFile": null,
+      "status": "completed",
+      "lastAttempt": "2026-03-28T00:00:00Z",
+      "outputFile": "cap-theorem-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -160,7 +160,7 @@
       "slug": "core-concepts-numbers-to-know",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "numbers-to-know-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -170,7 +170,7 @@
       "slug": "advanced-data-structures-big-data",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "big-data-structures-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -180,7 +180,7 @@
       "slug": "advanced-vector-databases",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "vector-database-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -188,9 +188,9 @@
       "name": "Time Series Databases",
       "path": "/learn/system-design/deep-dives/time-series-databases",
       "slug": "advanced-time-series-databases",
-      "status": "pending",
-      "lastAttempt": null,
-      "outputFile": null,
+      "status": "completed",
+      "lastAttempt": "2026-03-28T00:00:00Z",
+      "outputFile": "time-series-databases-quiz.jsx",
       "retryCount": 0
     },
     {

@@ -16,6 +16,13 @@ import NetworkingEssentialsQuiz from './networking-essentials-quiz';
 import ApiDesignQuiz from './api-design-quiz';
 import CachingQuiz from './caching-quiz';
 import DatabaseIndexingQuiz from './database-indexing-quiz';
+import ShardingQuiz from './sharding-quiz';
+import CAPTheoremQuiz from './cap-theorem-quiz';
+import BigDataStructuresQuiz from './big-data-structures-quiz';
+import ConsistentHashingQuiz from './consistent-hashing-quiz';
+import NumbersToKnowQuiz from './numbers-to-know-quiz';
+import TimeSeriesDatabasesQuiz from './time-series-databases-quiz';
+import VectorDatabaseQuiz from './vector-database-quiz';
 
 // Map output file names to imported components
 const componentsMap = {
@@ -31,6 +38,13 @@ const componentsMap = {
   'api-design-quiz.jsx': ApiDesignQuiz,
   'caching-quiz.jsx': CachingQuiz,
   'database-indexing-quiz.jsx': DatabaseIndexingQuiz,
+  'sharding-quiz.jsx': ShardingQuiz,
+  'cap-theorem-quiz.jsx': CAPTheoremQuiz,
+  'big-data-structures-quiz.jsx': BigDataStructuresQuiz,
+  'consistent-hashing-quiz.jsx': ConsistentHashingQuiz,
+  'numbers-to-know-quiz.jsx': NumbersToKnowQuiz,
+  'time-series-databases-quiz.jsx': TimeSeriesDatabasesQuiz,
+  'vector-database-quiz.jsx': VectorDatabaseQuiz,
 };
 
 function timeAgo(isoStr) {
@@ -208,7 +222,7 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-[#1c2331] text-slate-300 p-8 font-sans">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-slate-100 flex items-center gap-3">
             <BookOpen className="text-teal-500" />

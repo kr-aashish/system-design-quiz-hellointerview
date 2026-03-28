@@ -18,6 +18,12 @@ QUIZ_FILES = {
     'data-modeling-quiz.jsx': ('DataModelingQuiz', 'core-concepts-data-modeling'),
     'networking-essentials-quiz.jsx': ('NetworkingEssentialsQuiz', 'core-concepts-networking-essentials'),
     'database-indexing-quiz.jsx': ('DatabaseIndexingQuiz', 'core-concepts-db-indexing'),
+    'big-data-structures-quiz.jsx': ('BigDataStructuresQuiz', 'advanced-data-structures-big-data'),
+    'consistent-hashing-quiz.jsx': ('ConsistentHashingQuiz', 'core-concepts-consistent-hashing'),
+    'numbers-to-know-quiz.jsx': ('NumbersToKnowQuiz', 'core-concepts-numbers-to-know'),
+    'sharding-quiz.jsx': ('ShardingQuiz', 'core-concepts-sharding'),
+    'time-series-databases-quiz.jsx': ('TimeSeriesDatabasesQuiz', 'advanced-time-series-databases'),
+    'vector-database-quiz.jsx': ('VectorDatabaseQuiz', 'advanced-vector-databases'),
 }
 
 
