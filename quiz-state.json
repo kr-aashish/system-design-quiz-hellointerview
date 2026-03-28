@@ -1,0 +1,357 @@
+{
+  "version": 1,
+  "lastUpdated": null,
+  "lastProcessedLink": null,
+  "topics": [
+    {
+      "category": "Patterns",
+      "name": "Real-time Updates",
+      "path": "/learn/system-design/patterns/realtime-updates",
+      "slug": "patterns-realtime-updates",
+      "status": "completed",
+      "lastAttempt": "2026-03-27T00:00:00Z",
+      "outputFile": "real-time-updates-quiz.jsx",
+      "retryCount": 0
+    },
+    {
+      "category": "Patterns",
+      "name": "Dealing with Contention",
+      "path": "/learn/system-design/patterns/dealing-with-contention",
+      "slug": "patterns-dealing-with-contention",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Patterns",
+      "name": "Multi-step Processes",
+      "path": "/learn/system-design/patterns/multi-step-processes",
+      "slug": "patterns-multi-step-processes",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Patterns",
+      "name": "Scaling Reads",
+      "path": "/learn/system-design/patterns/scaling-reads",
+      "slug": "patterns-scaling-reads",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Patterns",
+      "name": "Scaling Writes",
+      "path": "/learn/system-design/patterns/scaling-writes",
+      "slug": "patterns-scaling-writes",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Patterns",
+      "name": "Handling Large Blobs",
+      "path": "/learn/system-design/patterns/large-blobs",
+      "slug": "patterns-large-blobs",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Patterns",
+      "name": "Managing Long Running Tasks",
+      "path": "/learn/system-design/patterns/long-running-tasks",
+      "slug": "patterns-long-running-tasks",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Core Concepts",
+      "name": "Networking Essentials",
+      "path": "/learn/system-design/core-concepts/networking-essentials",
+      "slug": "core-concepts-networking-essentials",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Core Concepts",
+      "name": "API Design",
+      "path": "/learn/system-design/core-concepts/api-design",
+      "slug": "core-concepts-api-design",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Core Concepts",
+      "name": "Data Modeling",
+      "path": "/learn/system-design/core-concepts/data-modeling",
+      "slug": "core-concepts-data-modeling",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Core Concepts",
+      "name": "Database Indexing",
+      "path": "/learn/system-design/core-concepts/db-indexing",
+      "slug": "core-concepts-db-indexing",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Core Concepts",
+      "name": "Caching",
+      "path": "/learn/system-design/core-concepts/caching",
+      "slug": "core-concepts-caching",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Core Concepts",
+      "name": "Sharding",
+      "path": "/learn/system-design/core-concepts/sharding",
+      "slug": "core-concepts-sharding",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Core Concepts",
+      "name": "Consistent Hashing",
+      "path": "/learn/system-design/core-concepts/consistent-hashing",
+      "slug": "core-concepts-consistent-hashing",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Core Concepts",
+      "name": "CAP Theorem",
+      "path": "/learn/system-design/core-concepts/cap-theorem",
+      "slug": "core-concepts-cap-theorem",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Core Concepts",
+      "name": "Numbers to Know",
+      "path": "/learn/system-design/core-concepts/numbers-to-know",
+      "slug": "core-concepts-numbers-to-know",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Advanced Topics",
+      "name": "Data Structures for Big Data",
+      "path": "/learn/system-design/deep-dives/data-structures-for-big-data",
+      "slug": "advanced-data-structures-big-data",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Advanced Topics",
+      "name": "Vector Databases",
+      "path": "/learn/system-design/deep-dives/vector-databases",
+      "slug": "advanced-vector-databases",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Advanced Topics",
+      "name": "Time Series Databases",
+      "path": "/learn/system-design/deep-dives/time-series-databases",
+      "slug": "advanced-time-series-databases",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Key Technologies",
+      "name": "Redis",
+      "path": "/learn/system-design/deep-dives/redis",
+      "slug": "key-tech-redis",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Key Technologies",
+      "name": "Elasticsearch",
+      "path": "/learn/system-design/deep-dives/elasticsearch",
+      "slug": "key-tech-elasticsearch",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Key Technologies",
+      "name": "Kafka",
+      "path": "/learn/system-design/deep-dives/kafka",
+      "slug": "key-tech-kafka",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Key Technologies",
+      "name": "API Gateway",
+      "path": "/learn/system-design/deep-dives/api-gateway",
+      "slug": "key-tech-api-gateway",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Key Technologies",
+      "name": "Cassandra",
+      "path": "/learn/system-design/deep-dives/cassandra",
+      "slug": "key-tech-cassandra",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Key Technologies",
+      "name": "DynamoDB",
+      "path": "/learn/system-design/deep-dives/dynamodb",
+      "slug": "key-tech-dynamodb",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Key Technologies",
+      "name": "PostgreSQL",
+      "path": "/learn/system-design/deep-dives/postgres",
+      "slug": "key-tech-postgres",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Key Technologies",
+      "name": "Flink",
+      "path": "/learn/system-design/deep-dives/flink",
+      "slug": "key-tech-flink",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Key Technologies",
+      "name": "ZooKeeper",
+      "path": "/learn/system-design/deep-dives/zookeeper",
+      "slug": "key-tech-zookeeper",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "In a Hurry",
+      "name": "Introduction",
+      "path": "/learn/system-design/in-a-hurry/introduction",
+      "slug": "in-a-hurry-introduction",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "In a Hurry",
+      "name": "How to Prepare",
+      "path": "/learn/system-design/in-a-hurry/how-to-prepare",
+      "slug": "in-a-hurry-how-to-prepare",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "In a Hurry",
+      "name": "Delivery Framework",
+      "path": "/learn/system-design/in-a-hurry/delivery",
+      "slug": "in-a-hurry-delivery",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "In a Hurry",
+      "name": "Core Concepts",
+      "path": "/learn/system-design/in-a-hurry/core-concepts",
+      "slug": "in-a-hurry-core-concepts",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "In a Hurry",
+      "name": "Key Technologies",
+      "path": "/learn/system-design/in-a-hurry/key-technologies",
+      "slug": "in-a-hurry-key-technologies",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "In a Hurry",
+      "name": "Common Patterns",
+      "path": "/learn/system-design/in-a-hurry/patterns",
+      "slug": "in-a-hurry-patterns",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "In a Hurry",
+      "name": "Question Breakdowns",
+      "path": "/learn/system-design/in-a-hurry/problem-breakdowns",
+      "slug": "in-a-hurry-problem-breakdowns",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    }
+  ]
+}
