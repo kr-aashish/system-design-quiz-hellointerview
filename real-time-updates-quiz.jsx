@@ -430,7 +430,7 @@ function ProgressBar({ current, total }) {
   );
 }
 
-function QuestionScreen({ question, questionIndex, total, score, onAnswer, selectedAnswer, showFeedback, onNext, timer }) {
+function QuestionScreen({ question, questionIndex, total, score, onAnswer, onSkip, selectedAnswer, showFeedback, onNext, timer }) {
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
       <div className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm sticky top-0 z-10">
@@ -514,6 +514,17 @@ function QuestionScreen({ question, questionIndex, total, score, onAnswer, selec
               );
             })}
           </div>
+
+          {!showFeedback && (
+            <div className="mt-8 flex justify-center animate-fadeIn">
+              <button
+                onClick={onSkip}
+                className="px-6 py-2.5 rounded-xl font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+              >
+                Skip Question
+              </button>
+            </div>
+          )}
 
           {showFeedback && (
             <div className="space-y-4 mb-8 animate-fadeIn">
@@ -649,7 +660,9 @@ function ResultsScreen({ score, total, answers, questions, onRestart }) {
                   <div className="space-y-1.5 mb-3">
                     <div className="flex items-start gap-2 text-sm">
                       <XCircle size={14} className="text-red-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-red-300">Your answer: <span className="text-red-400 font-medium">{q.options[q.userAnswer].label}. {q.options[q.userAnswer].text}</span></span>
+                      <span className="text-red-300">Your answer: <span className="text-red-400 font-medium">
+                        {q.userAnswer === -1 ? 'Skipped' : `${q.options[q.userAnswer].label}. ${q.options[q.userAnswer].text}`}
+                      </span></span>
                     </div>
                     <div className="flex items-start gap-2 text-sm">
                       <CheckCircle size={14} className="text-emerald-400 mt-0.5 flex-shrink-0" />
@@ -728,6 +741,13 @@ export default function RealTimeUpdatesQuiz() {
     setAnswers(prev => [...prev, idx]);
   };
 
+  const handleSkip = () => {
+    setSelectedAnswer(-1);
+    setShowFeedback(true);
+    stopTimer();
+    setAnswers(prev => [...prev, -1]);
+  };
+
   const handleNext = () => {
     if (currentQ < questions.length - 1) {
       setCurrentQ(q => q + 1);
@@ -763,6 +783,7 @@ export default function RealTimeUpdatesQuiz() {
       total={questions.length}
       score={score}
       onAnswer={handleAnswer}
+      onSkip={handleSkip}
       selectedAnswer={selectedAnswer}
       showFeedback={showFeedback}
       onNext={handleNext}

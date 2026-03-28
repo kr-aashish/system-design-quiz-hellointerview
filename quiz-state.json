@@ -20,7 +20,7 @@
       "slug": "patterns-dealing-with-contention",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "contention-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -30,7 +30,7 @@
       "slug": "patterns-multi-step-processes",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "multi-step-processes-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -40,7 +40,7 @@
       "slug": "patterns-scaling-reads",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "scaling-reads-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -50,7 +50,7 @@
       "slug": "patterns-scaling-writes",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "scaling-writes-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -60,7 +60,7 @@
       "slug": "patterns-large-blobs",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "handling-large-blobs-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -70,7 +70,7 @@
       "slug": "patterns-long-running-tasks",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "managing-long-running-tasks-quiz.jsx",
       "retryCount": 0
     },
     {
