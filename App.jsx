@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import { ChevronDown, ChevronRight, CheckCircle2, LayoutGrid, BookOpen, ExternalLink, PlayCircle } from 'lucide-react';
 import quizState from './quiz-state.json';
 
@@ -118,7 +118,7 @@ function CategorySection({ category, items }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Index />} />
         {quizState.topics.filter(t => t.outputFile && componentsMap[t.outputFile]).map((quiz) => {
@@ -132,6 +132,6 @@ export default function App() {
           );
         })}
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
