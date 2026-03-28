@@ -20,6 +20,7 @@
 // ========================
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQuizProgress } from './useQuizProgress';
 import { Clock, Flag, SkipForward, ChevronRight, ChevronLeft, RotateCcw, CheckCircle, XCircle, AlertTriangle, Award, Brain, Target, Zap, BarChart3, BookOpen } from "lucide-react";
 
 const QUESTIONS = [
@@ -889,7 +890,7 @@ function ResultsScreen({ answers, questions, flaggedIds, totalElapsed, onRetryMi
   );
 }
 
-export default function DataModelingQuiz() {
+export default function DataModelingQuiz({ quizSlug = 'core-concepts-data-modeling' }) {
   const [screen, setScreen] = useState("landing");
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -899,6 +900,8 @@ export default function DataModelingQuiz() {
   const [timeLeft, setTimeLeft] = useState(90);
   const [totalElapsed, setTotalElapsed] = useState(0);
   const timerRef = useRef(null);
+
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
   const elapsedRef = useRef(null);
 
   const MAX_TIME = 90;
@@ -930,6 +933,7 @@ export default function DataModelingQuiz() {
     setTotalElapsed(0);
     setScreen("quiz");
     startTimer();
+    startNewAttempt(qs.map(q => q.id));
   };
 
   const handleAnswer = (selectedIdx, confidence, timedOut) => {
@@ -947,6 +951,13 @@ export default function DataModelingQuiz() {
       correctAnswer: q.options[q.correctIndex],
       timedOut
     }]);
+    persistAnswer(q.id, {
+      selectedIndex: selectedIdx,
+      correctIndex: q.correctIndex,
+      isCorrect,
+      confidence: confidence || null,
+      timedOut: timedOut || false,
+    });
 
     const nextIdx = currentIndex + 1;
     if (nextIdx < quizQuestions.length) {
@@ -961,6 +972,9 @@ export default function DataModelingQuiz() {
       startTimer();
     } else {
       stopTimer();
+      const allAnswers = [...answers, { correct: isCorrect }];
+      const correctCount = allAnswers.filter(a => a.correct).length;
+      completeQuiz({ correct: correctCount, total: allAnswers.length }, totalElapsed);
       setScreen("results");
     }
   };

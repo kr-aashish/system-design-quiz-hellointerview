@@ -37,6 +37,7 @@
 // ========================
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQuizProgress } from './useQuizProgress';
 import {
   Clock,
   ChevronRight,
@@ -773,7 +774,7 @@ function LandingScreen({ onStart }) {
   );
 }
 
-function QuizScreen({ questions, onFinish }) {
+function QuizScreen({ questions, onFinish, onPersistAnswer }) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState({});
   const [selectedOption, setSelectedOption] = useState(null);
@@ -821,20 +822,39 @@ function QuizScreen({ questions, onFinish }) {
       ...prev,
       [q.id]: { selected: -1, confidence: "Timeout", correct: false },
     }));
+    if (onPersistAnswer) {
+      onPersistAnswer(q.id, {
+        selectedIndex: -1,
+        correctIndex: q.correctIndex,
+        isCorrect: false,
+        confidence: null,
+        timedOut: true,
+      });
+    }
   };
 
   const handleSubmit = () => {
     if (selectedOption === null || confidence === null) return;
     setSubmitted(true);
     setTimerActive(false);
+    const isCorrect = selectedOption === q.correctIndex;
     setAnswers((prev) => ({
       ...prev,
       [q.id]: {
         selected: selectedOption,
         confidence,
-        correct: selectedOption === q.correctIndex,
+        correct: isCorrect,
       },
     }));
+    if (onPersistAnswer) {
+      onPersistAnswer(q.id, {
+        selectedIndex: selectedOption,
+        correctIndex: q.correctIndex,
+        isCorrect,
+        confidence,
+        timedOut: false,
+      });
+    }
   };
 
   const handleNext = () => {
@@ -1197,12 +1217,14 @@ function ResultsScreen({ questions, answers, flagged, totalElapsed, onRetryMisse
 
 // --- MAIN APP ---
 
-export default function ManagingLongRunningTasksQuiz() {
+export default function ManagingLongRunningTasksQuiz({ quizSlug = 'patterns-long-running-tasks' }) {
   const [screen, setScreen] = useState("landing");
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [finalAnswers, setFinalAnswers] = useState({});
   const [finalFlagged, setFinalFlagged] = useState(new Set());
   const [finalElapsed, setFinalElapsed] = useState(0);
+
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
 
   const startQuiz = (mode) => {
     let qs;
@@ -1213,12 +1235,15 @@ export default function ManagingLongRunningTasksQuiz() {
     }
     setQuizQuestions(qs);
     setScreen("quiz");
+    startNewAttempt(qs.map(q => q.id));
   };
 
   const finishQuiz = (answers, flagged, elapsed) => {
     setFinalAnswers(answers);
     setFinalFlagged(flagged);
     setFinalElapsed(elapsed);
+    const correctCount = Object.values(answers).filter(a => a.correct).length;
+    completeQuiz({ correct: correctCount, total: Object.keys(answers).length }, elapsed);
     setScreen("results");
   };
 
@@ -1239,7 +1264,7 @@ export default function ManagingLongRunningTasksQuiz() {
   };
 
   if (screen === "landing") return <LandingScreen onStart={startQuiz} />;
-  if (screen === "quiz") return <QuizScreen questions={quizQuestions} onFinish={finishQuiz} />;
+  if (screen === "quiz") return <QuizScreen questions={quizQuestions} onFinish={finishQuiz} onPersistAnswer={persistAnswer} />;
   if (screen === "results")
     return (
       <ResultsScreen

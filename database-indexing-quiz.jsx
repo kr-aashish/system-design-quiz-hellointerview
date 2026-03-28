@@ -46,6 +46,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { ChevronRight, Clock, Flag, SkipForward, Check, X, AlertTriangle, Award, RotateCcw, BookOpen, Brain, Zap, ChevronDown, ChevronUp, Star } from "lucide-react";
+import { useQuizProgress } from "./useQuizProgress";
 
 const QUESTIONS = [
   // q1 — B-Tree: structure & disk I/O
@@ -1106,7 +1107,7 @@ function ResultsScreen({ answers, questions, flagged, totalTime, onRetryMissed, 
   );
 }
 
-export default function DatabaseIndexingQuiz() {
+export default function DatabaseIndexingQuiz({ quizSlug = 'core-concepts-db-indexing' }) {
   const [screen, setScreen] = useState("landing");
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -1115,6 +1116,8 @@ export default function DatabaseIndexingQuiz() {
   const [flagged, setFlagged] = useState(new Set());
   const [timeLeft, setTimeLeft] = useState(90);
   const [totalElapsed, setTotalElapsed] = useState(0);
+
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
 
   const MAX_TIME = 90;
 
@@ -1129,6 +1132,7 @@ export default function DatabaseIndexingQuiz() {
     setTimeLeft(MAX_TIME);
     setTotalElapsed(0);
     setScreen("quiz");
+    startNewAttempt(qs.map(idx => QUESTIONS[idx].id));
   }, []);
 
   const startRetry = useCallback((indices) => {
@@ -1158,8 +1162,18 @@ export default function DatabaseIndexingQuiz() {
   const currentQ = screen === "quiz" && currentIdx < quizQuestions.length ? QUESTIONS[quizQuestions[currentIdx]] : null;
 
   const handleAnswer = useCallback((selected, confidence, timedOut) => {
-    const newAnswers = [...answers, { qIdx: quizQuestions[currentIdx], selected: selected ?? -1, confidence: confidence || "Guessing", timedOut: !!timedOut }];
+    const qIdx = quizQuestions[currentIdx];
+    const q = QUESTIONS[qIdx];
+    const isCorrect = !timedOut && selected === q.correct;
+    const newAnswers = [...answers, { qIdx, selected: selected ?? -1, confidence: confidence || "Guessing", timedOut: !!timedOut }];
     setAnswers(newAnswers);
+    persistAnswer(q.id, {
+      selectedIndex: selected ?? -1,
+      correctIndex: q.correct,
+      isCorrect,
+      confidence: confidence || null,
+      timedOut: !!timedOut,
+    });
 
     if (currentIdx + 1 < quizQuestions.length) {
       setCurrentIdx(currentIdx + 1);
@@ -1171,9 +1185,11 @@ export default function DatabaseIndexingQuiz() {
       setTimeLeft(MAX_TIME);
     } else {
       setAnswers(newAnswers);
+      const correctCount = newAnswers.filter(a => a.selected === QUESTIONS[a.qIdx].correct && !a.timedOut).length;
+      completeQuiz({ correct: correctCount, total: newAnswers.length }, totalElapsed);
       setScreen("results");
     }
-  }, [answers, currentIdx, quizQuestions, skipped]);
+  }, [answers, currentIdx, quizQuestions, skipped, persistAnswer, completeQuiz, totalElapsed]);
 
   const handleSkip = useCallback(() => {
     setSkipped(prev => [...prev, quizQuestions[currentIdx]]);

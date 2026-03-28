@@ -55,6 +55,7 @@
 // ========================
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQuizProgress } from './useQuizProgress';
 import {
   Clock,
   ChevronRight,
@@ -760,7 +761,7 @@ function shuffleArray(arr) {
   return a;
 }
 
-export default function CachingQuiz() {
+export default function CachingQuiz({ quizSlug = 'core-concepts-caching' }) {
   const [screen, setScreen] = useState("landing");
   const [mode, setMode] = useState("shuffled");
   const [questions, setQuestions] = useState([]);
@@ -776,6 +777,8 @@ export default function CachingQuiz() {
   const [totalElapsed, setTotalElapsed] = useState(0);
   const [showingSkipped, setShowingSkipped] = useState(false);
   const timerRef = useRef(null);
+
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
   const elapsedRef = useRef(null);
 
   const startQuiz = useCallback(
@@ -839,6 +842,16 @@ export default function CachingQuiz() {
                 timedOut: true,
               },
             }));
+            const q = questions[currentIndex];
+            if (q) {
+              persistAnswer(q.id, {
+                selectedIndex: selectedOption,
+                correctIndex: q.correctIndex,
+                isCorrect: selectedOption === q.correctIndex,
+                confidence: null,
+                timedOut: true,
+              });
+            }
             return 0;
           }
           return t - 1;
@@ -887,16 +900,24 @@ export default function CachingQuiz() {
     setTimerActive(false);
     setSubmitted(true);
     const q = questions[currentIndex];
+    const isCorrect = selectedOption === q.correctIndex;
     setAnswers((prev) => ({
       ...prev,
       [q.id]: {
         selected: selectedOption,
         confidence,
-        correct: selectedOption === q.correctIndex,
+        correct: isCorrect,
         timedOut: false,
       },
     }));
-  }, [selectedOption, confidence, questions, currentIndex]);
+    persistAnswer(q.id, {
+      selectedIndex: selectedOption,
+      correctIndex: q.correctIndex,
+      isCorrect,
+      confidence,
+      timedOut: false,
+    });
+  }, [selectedOption, confidence, questions, currentIndex, persistAnswer]);
 
   const handleNext = useCallback(() => {
     if (currentIndex < questions.length - 1) {
@@ -921,6 +942,8 @@ export default function CachingQuiz() {
       setShowingSkipped(true);
     } else {
       clearInterval(elapsedRef.current);
+      const correctCount = Object.values(answers).filter(a => a.correct).length;
+      completeQuiz({ correct: correctCount, total: Object.keys(answers).length }, elapsedTime);
       setScreen("results");
     }
   }, [currentIndex, questions, skipped, showingSkipped]);

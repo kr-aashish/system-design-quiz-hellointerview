@@ -49,6 +49,7 @@
 // ========================
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQuizProgress } from './useQuizProgress';
 import {
   Clock,
   ChevronRight,
@@ -779,7 +780,7 @@ function getSubtopicStats(answers) {
   return stats;
 }
 
-export default function LargeBlobsQuiz() {
+export default function LargeBlobsQuiz({ quizSlug = 'patterns-large-blobs' }) {
   const [screen, setScreen] = useState("landing");
   const [mode, setMode] = useState("shuffled");
   const [questions, setQuestions] = useState([]);
@@ -795,6 +796,8 @@ export default function LargeBlobsQuiz() {
   const [totalTime, setTotalTime] = useState(0);
   const [resultsTab, setResultsTab] = useState("overview");
   const timerRef = useRef(null);
+
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
   const totalTimerRef = useRef(null);
 
   const startQuiz = (chosenMode) => {
@@ -821,6 +824,7 @@ export default function LargeBlobsQuiz() {
     setTimedOut(false);
     setTotalTime(0);
     setScreen("quiz");
+    startNewAttempt(qs.map(q => q.id));
   };
 
   const startRetry = (questionList) => {
@@ -848,16 +852,26 @@ export default function LargeBlobsQuiz() {
           clearInterval(timerRef.current);
           setTimedOut(true);
           setSubmitted(true);
+          const tq = questions[currentIdx];
           setAnswers((prev) => [
             ...prev,
             {
-              question: questions[currentIdx],
+              question: tq,
               selected: null,
               confidence: null,
               correct: false,
               timedOut: true,
             },
           ]);
+          if (tq) {
+            persistAnswer(tq.id, {
+              selectedIndex: null,
+              correctIndex: tq.correctIndex,
+              isCorrect: false,
+              confidence: null,
+              timedOut: true,
+            });
+          }
           return 0;
         }
         return t - 1;
@@ -888,7 +902,14 @@ export default function LargeBlobsQuiz() {
       ...prev,
       { question: q, selected: selectedOption, confidence, correct, timedOut: false },
     ]);
-  }, [selectedOption, confidence, currentIdx, questions]);
+    persistAnswer(q.id, {
+      selectedIndex: selectedOption,
+      correctIndex: q.correctIndex,
+      isCorrect: correct,
+      confidence,
+      timedOut: false,
+    });
+  }, [selectedOption, confidence, currentIdx, questions, persistAnswer]);
 
   const handleNext = () => {
     if (currentIdx < questions.length - 1) {
@@ -910,6 +931,8 @@ export default function LargeBlobsQuiz() {
       setTimer(90);
     } else {
       clearInterval(totalTimerRef.current);
+      const correctCount = answers.filter(a => a.correct).length;
+      completeQuiz({ correct: correctCount, total: answers.length }, totalTime);
       setScreen("results");
     }
   };
@@ -936,6 +959,8 @@ export default function LargeBlobsQuiz() {
       setTimer(90);
     } else {
       clearInterval(totalTimerRef.current);
+      const correctCount = answers.filter(a => a.correct).length;
+      completeQuiz({ correct: correctCount, total: answers.length }, totalTime);
       setScreen("results");
     }
   };

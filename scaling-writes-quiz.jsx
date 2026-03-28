@@ -44,6 +44,7 @@
 // ========================
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQuizProgress } from './useQuizProgress';
 import { Clock, ChevronRight, Flag, SkipForward, RotateCcw, CheckCircle, XCircle, AlertTriangle, Award, BarChart3, Brain, Zap, ArrowRight, Home, ChevronDown, ChevronUp } from "lucide-react";
 
 const QUESTIONS = [
@@ -580,7 +581,7 @@ function getGrade(pct) {
   return { label: "Needs deep review", desc: "Revisit the fundamentals", color: "text-red-400", bg: "bg-red-500/20" };
 }
 
-export default function ScalingWritesQuiz() {
+export default function ScalingWritesQuiz({ quizSlug = 'patterns-scaling-writes' }) {
   const [screen, setScreen] = useState("landing");
   const [mode, setMode] = useState("shuffled");
   const [questionOrder, setQuestionOrder] = useState([]);
@@ -598,6 +599,8 @@ export default function ScalingWritesQuiz() {
   const [showExplanation, setShowExplanation] = useState(false);
   const [retryMode, setRetryMode] = useState(null);
   const timerRef = useRef(null);
+
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
   const [expandedResults, setExpandedResults] = useState({});
 
   const currentQuestion = questionOrder[currentIdx] ? QUESTIONS.find(q => q.id === questionOrder[currentIdx]) : null;
@@ -613,7 +616,17 @@ export default function ScalingWritesQuiz() {
             clearInterval(timerRef.current);
             setTimedOut(true);
             setShowExplanation(true);
-            setAnswers(a => ({ ...a, [questionId]: { selected: -1, confidence: "timeout", correct: false } }));
+            const qId = questions[currentIndex]?.id;
+            setAnswers(a => ({ ...a, [qId]: { selected: -1, confidence: "timeout", correct: false } }));
+            if (questions[currentIndex]) {
+              persistAnswer(qId, {
+                selectedIndex: -1,
+                correctIndex: questions[currentIndex].correctIndex,
+                isCorrect: false,
+                confidence: null,
+                timedOut: true,
+              });
+            }
             return 0;
           }
           return prev - 1;
@@ -675,6 +688,7 @@ export default function ScalingWritesQuiz() {
     setRetryMode(null);
     setExpandedResults({});
     setScreen("quiz");
+    startNewAttempt(order);
   }
 
   function handleSubmit() {
@@ -684,6 +698,13 @@ export default function ScalingWritesQuiz() {
     setAnswers(a => ({ ...a, [currentQuestion.id]: { selected: selectedOption, confidence, correct: isCorrect } }));
     setSubmitted(true);
     setShowExplanation(true);
+    persistAnswer(currentQuestion.id, {
+      selectedIndex: selectedOption,
+      correctIndex: currentQuestion.correctIndex,
+      isCorrect,
+      confidence,
+      timedOut: false,
+    });
   }
 
   function handleSkip() {
@@ -727,7 +748,10 @@ export default function ScalingWritesQuiz() {
   }
 
   function finishQuiz() {
-    setTotalTime(Math.floor((Date.now() - startTime) / 1000));
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    setTotalTime(elapsed);
+    const correctCount = Object.values(answers).filter(a => a.correct).length;
+    completeQuiz({ correct: correctCount, total: Object.keys(answers).length }, elapsed);
     setScreen("results");
   }
 

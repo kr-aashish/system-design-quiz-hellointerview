@@ -50,6 +50,7 @@
 // ========================
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQuizProgress } from './useQuizProgress';
 import { Clock, Flag, SkipForward, ChevronRight, ChevronLeft, RotateCcw, CheckCircle, XCircle, AlertTriangle, Award, Brain, Target, Zap, BarChart3, BookOpen } from "lucide-react";
 
 const QUESTIONS = [
@@ -1032,7 +1033,7 @@ function ResultsScreen({ answers, questions, flaggedIds, totalElapsed, onRetryMi
   );
 }
 
-export default function ScalingReadsQuiz() {
+export default function ScalingReadsQuiz({ quizSlug = 'patterns-scaling-reads' }) {
   const [screen, setScreen] = useState("landing");
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -1042,6 +1043,8 @@ export default function ScalingReadsQuiz() {
   const [timeLeft, setTimeLeft] = useState(90);
   const [totalElapsed, setTotalElapsed] = useState(0);
   const timerRef = useRef(null);
+
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
   const elapsedRef = useRef(null);
 
   const MAX_TIME = 90;
@@ -1073,13 +1076,14 @@ export default function ScalingReadsQuiz() {
     setTotalElapsed(0);
     setScreen("quiz");
     startTimer();
+    startNewAttempt(qs.map(q => q.id));
   };
 
   const handleAnswer = (selectedIdx, confidence, timedOut) => {
     stopTimer();
     const q = quizQuestions[currentIndex];
     const isCorrect = !timedOut && selectedIdx === q.correctIndex;
-    setAnswers(prev => [...prev, {
+    const answerData = {
       id: q.id,
       subtopic: q.subtopic,
       question: q.question,
@@ -1089,14 +1093,21 @@ export default function ScalingReadsQuiz() {
       explanation: q.explanation,
       correctAnswer: q.options[q.correctIndex],
       timedOut
-    }]);
+    };
+    setAnswers(prev => [...prev, answerData]);
+    persistAnswer(q.id, {
+      selectedIndex: selectedIdx,
+      correctIndex: q.correctIndex,
+      isCorrect,
+      confidence: confidence || null,
+      timedOut: timedOut || false,
+    });
 
     const nextIdx = currentIndex + 1;
     if (nextIdx < quizQuestions.length) {
       setCurrentIndex(nextIdx);
       startTimer();
     } else if (skippedIndices.length > 0) {
-      // move skipped to end
       const skippedQs = skippedIndices.map(i => quizQuestions[i]);
       setQuizQuestions(prev => [...prev.filter((_, i) => !skippedIndices.includes(i)), ...skippedQs]);
       setCurrentIndex(nextIdx - skippedIndices.length);
@@ -1104,6 +1115,9 @@ export default function ScalingReadsQuiz() {
       startTimer();
     } else {
       stopTimer();
+      const allAnswers = [...answers, answerData];
+      const correctCount = allAnswers.filter(a => a.correct).length;
+      completeQuiz({ correct: correctCount, total: allAnswers.length }, totalElapsed);
       setScreen("results");
     }
   };

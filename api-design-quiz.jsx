@@ -52,7 +52,8 @@
 // ========================
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Clock, ChevronRight, Flag, SkipForward, RotateCcw, CheckCircle, XCircle, AlertTriangle, Award, BookOpen, Zap, ArrowLeft, Shuffle, List, Brain } from "lucide-react";
+import { useQuizProgress } from './useQuizProgress';
+import { Clock, ChevronRight, Flag, SkipForward, RotateCcw, CheckCircle, XCircle, AlertTriangle, Award, BookOpen, Zap, ArrowLeft, Shuffle, List, Brain, Play } from "lucide-react";
 
 const QUESTIONS = [
   {
@@ -721,7 +722,7 @@ function shuffleArray(arr) {
   return a;
 }
 
-function LandingScreen({ onStart }) {
+function LandingScreen({ onStart, onResume, resumeData }) {
   const [mode, setMode] = useState("shuffled");
   const totalTime = Math.ceil((QUESTIONS.length * 75) / 60);
 
@@ -795,11 +796,20 @@ function LandingScreen({ onStart }) {
           </p>
         </div>
 
+        {onResume && resumeData && (
+          <button
+            onClick={onResume}
+            className="w-full py-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-lg transition-all mb-3 flex items-center justify-center gap-2"
+          >
+            <Play size={18} />
+            Resume Quiz ({resumeData.answeredCount}/{QUESTIONS.length} answered)
+          </button>
+        )}
         <button
           onClick={() => onStart(mode)}
           className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold text-lg hover:from-blue-500 hover:to-purple-500 transition-all"
         >
-          Start Quiz
+          {onResume ? 'Start New Quiz' : 'Start Quiz'}
         </button>
       </div>
     </div>
@@ -1168,7 +1178,7 @@ function ResultsScreen({ answers, questions, totalTime, onRetryMissed, onRetryWe
   );
 }
 
-export default function APIDesignQuiz() {
+export default function APIDesignQuiz({ quizSlug = 'api-design' }) {
   const [screen, setScreen] = useState("landing");
   const [questionOrder, setQuestionOrder] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -1182,6 +1192,8 @@ export default function APIDesignQuiz() {
   const [totalElapsed, setTotalElapsed] = useState(0);
   const timerRef = useRef(null);
   const elapsedRef = useRef(null);
+
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
 
   const activeQuestions = questionOrder.map(i => QUESTIONS[i]);
 
@@ -1212,6 +1224,18 @@ export default function APIDesignQuiz() {
       setSubmitted(true);
       if (selectedOption === null) setSelectedOption(-1);
       if (confidence === null) setConfidence(0);
+      // Persist timed-out answer
+      const qIdx = questionOrder[currentIdx];
+      if (qIdx !== undefined) {
+        const q = QUESTIONS[qIdx];
+        persistAnswer(q.id, {
+          selectedIndex: -1,
+          correctIndex: q.correct,
+          isCorrect: false,
+          confidence: null,
+          timedOut: true,
+        });
+      }
     }
   }, [timeLeft, submitted, screen]);
 
@@ -1236,6 +1260,49 @@ export default function APIDesignQuiz() {
     setScreen("quiz");
     startTimer();
     startElapsed();
+    startNewAttempt(order.map(i => QUESTIONS[i].id));
+  }
+
+  function handleResume() {
+    const data = resumeAttempt();
+    if (!data) return;
+    const order = data.questionOrder;
+    let qOrder;
+    if (order && order.length > 0) {
+      qOrder = order.map(id => QUESTIONS.findIndex(q => q.id === id)).filter(i => i >= 0);
+    } else {
+      qOrder = QUESTIONS.map((_, i) => i);
+    }
+    // Restore answers from saved data
+    const restoredAnswers = [];
+    const questionResults = data.questionResults || {};
+    for (const idx of qOrder) {
+      const qId = QUESTIONS[idx].id;
+      if (questionResults[qId]) {
+        restoredAnswers.push({
+          questionIdx: idx,
+          selected: questionResults[qId].selectedIndex ?? -1,
+          correct: questionResults[qId].isCorrect,
+          confidence: questionResults[qId].confidence,
+          flagged: false,
+          timedOut: questionResults[qId].timedOut || false,
+        });
+      } else {
+        break;
+      }
+    }
+    setQuestionOrder(qOrder);
+    setAnswers(restoredAnswers);
+    setCurrentIdx(restoredAnswers.length);
+    setSelectedOption(null);
+    setConfidence(null);
+    setSubmitted(false);
+    setFlaggedSet(new Set());
+    setSkippedQueue([]);
+    setTotalElapsed(0);
+    setScreen("quiz");
+    startTimer();
+    startElapsed();
   }
 
   function handleAnswer() {
@@ -1247,7 +1314,8 @@ export default function APIDesignQuiz() {
     }
     // Move to next
     const qIdx = questionOrder[currentIdx];
-    const isCorrect = selectedOption === QUESTIONS[qIdx].correct;
+    const q = QUESTIONS[qIdx];
+    const isCorrect = selectedOption === q.correct;
     const newAnswer = {
       questionIdx: qIdx,
       selected: selectedOption,
@@ -1258,6 +1326,15 @@ export default function APIDesignQuiz() {
     };
     const newAnswers = [...answers, newAnswer];
     setAnswers(newAnswers);
+
+    // Persist answer
+    persistAnswer(q.id, {
+      selectedIndex: selectedOption,
+      correctIndex: q.correct,
+      isCorrect,
+      confidence,
+      timedOut: timeLeft === 0 && selectedOption === -1,
+    });
 
     if (currentIdx + 1 < questionOrder.length) {
       setCurrentIdx(currentIdx + 1);
@@ -1279,14 +1356,26 @@ export default function APIDesignQuiz() {
       // Done
       clearInterval(timerRef.current);
       clearInterval(elapsedRef.current);
+      const correctCount = newAnswers.filter(a => a.correct).length;
+      completeQuiz({ correct: correctCount, total: newAnswers.length }, totalElapsed);
       setScreen("results");
     }
   }
 
   function handleSkip() {
     const qIdx = questionOrder[currentIdx];
+    const q = QUESTIONS[qIdx];
     setSkippedQueue(prev => [...prev, qIdx]);
     clearInterval(timerRef.current);
+
+    // Persist skip as an answer
+    persistAnswer(q.id, {
+      selectedIndex: -1,
+      correctIndex: q.correct,
+      isCorrect: false,
+      skipped: true,
+      timedOut: false,
+    });
 
     if (currentIdx + 1 < questionOrder.length) {
       setCurrentIdx(currentIdx + 1);
@@ -1337,7 +1426,7 @@ export default function APIDesignQuiz() {
   }
 
   if (screen === "landing") {
-    return <LandingScreen onStart={(mode) => startQuiz(mode)} />;
+    return <LandingScreen onStart={(mode) => startQuiz(mode)} onResume={isResuming ? handleResume : null} resumeData={resumeData} />;
   }
 
   if (screen === "results") {

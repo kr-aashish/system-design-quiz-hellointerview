@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Clock, CheckCircle, XCircle, ChevronRight, RotateCcw, Award, AlertTriangle, Zap, Brain, Target, Trophy, Timer, ArrowRight, BarChart3 } from "lucide-react";
+import { useQuizProgress } from './useQuizProgress';
+import { Clock, CheckCircle, XCircle, ChevronRight, RotateCcw, Award, AlertTriangle, Zap, Brain, Target, Trophy, Timer, ArrowRight, BarChart3, Play } from "lucide-react";
 
 const QUIZ_DATA = {
   title: "Real-time Updates: System Design Deep Dive",
@@ -364,7 +365,7 @@ function getGrade(pct) {
   return GRADES.find(g => pct >= g.min);
 }
 
-function LandingScreen({ onStart }) {
+function LandingScreen({ onStart, onResume, resumeData }) {
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
@@ -406,11 +407,20 @@ function LandingScreen({ onStart }) {
             </div>
           </div>
         </div>
+        {onResume && resumeData && (
+          <button
+            onClick={onResume}
+            className="w-full py-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-lg transition-all duration-200 flex items-center justify-center gap-2 group mb-3"
+          >
+            <Play size={20} />
+            Resume Quiz ({resumeData.answeredCount}/{QUIZ_DATA.questions.length} answered)
+          </button>
+        )}
         <button
           onClick={onStart}
           className="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-lg transition-all duration-200 flex items-center justify-center gap-2 group"
         >
-          Start Quiz
+          {onResume ? 'Start New Quiz' : 'Start Quiz'}
           <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
@@ -688,7 +698,7 @@ function ResultsScreen({ score, total, answers, questions, onRestart }) {
   );
 }
 
-export default function RealTimeUpdatesQuiz() {
+export default function RealTimeUpdatesQuiz({ quizSlug = 'patterns-real-time-updates' }) {
   const [screen, setScreen] = useState("landing");
   const [currentQ, setCurrentQ] = useState(0);
   const [score, setScore] = useState(0);
@@ -697,8 +707,11 @@ export default function RealTimeUpdatesQuiz() {
   const [showFeedback, setShowFeedback] = useState(false);
   const [timer, setTimer] = useState(90);
   const timerRef = useRef(null);
+  const startTimeRef = useRef(null);
 
   const questions = QUIZ_DATA.questions;
+
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, questions.length);
 
   const startTimer = useCallback(() => {
     setTimer(90);
@@ -729,16 +742,52 @@ export default function RealTimeUpdatesQuiz() {
     setAnswers([]);
     setSelectedAnswer(null);
     setShowFeedback(false);
+    startTimeRef.current = Date.now();
     startTimer();
+    startNewAttempt(questions.map(q => q.id));
   };
+
+  const handleResume = useCallback(() => {
+    const data = resumeAttempt();
+    if (!data) return;
+    // Restore answers from saved data
+    const restoredAnswers = [];
+    let restoredScore = 0;
+    const questionResults = data.questionResults || {};
+    for (let i = 0; i < questions.length; i++) {
+      const qId = questions[i].id;
+      if (questionResults[qId]) {
+        restoredAnswers.push(questionResults[qId].selectedIndex ?? -1);
+        if (questionResults[qId].isCorrect) restoredScore++;
+      } else {
+        break;
+      }
+    }
+    setAnswers(restoredAnswers);
+    setScore(restoredScore);
+    setCurrentQ(restoredAnswers.length);
+    setSelectedAnswer(null);
+    setShowFeedback(false);
+    startTimeRef.current = Date.now();
+    setScreen("quiz");
+    startTimer();
+  }, [resumeAttempt, questions, startTimer]);
 
   const handleAnswer = (idx) => {
     setSelectedAnswer(idx);
     setShowFeedback(true);
     stopTimer();
-    const isCorrect = idx === questions[currentQ].correct;
+    const q = questions[currentQ];
+    const isCorrect = idx === q.correct;
     if (isCorrect) setScore(s => s + 1);
     setAnswers(prev => [...prev, idx]);
+    persistAnswer(q.id, {
+      selectedIndex: idx,
+      correctIndex: q.correct,
+      isCorrect,
+      confidence: null,
+      timedOut: false,
+    });
   };
 
   const handleSkip = () => {
@@ -746,7 +795,31 @@ export default function RealTimeUpdatesQuiz() {
     setShowFeedback(true);
     stopTimer();
     setAnswers(prev => [...prev, -1]);
+    const q = questions[currentQ];
+    persistAnswer(q.id, {
+      selectedIndex: -1,
+      correctIndex: q.correct,
+      isCorrect: false,
+      skipped: true,
+      timedOut: false,
+    });
   };
+
+  // Handle timeout — persist timed-out answers
+  useEffect(() => {
+    if (timer === 0 && !showFeedback && screen === "quiz") {
+      setSelectedAnswer(-1);
+      setShowFeedback(true);
+      setAnswers(prev => [...prev, -1]);
+      const q = questions[currentQ];
+      persistAnswer(q.id, {
+        selectedIndex: -1,
+        correctIndex: q.correct,
+        isCorrect: false,
+        timedOut: true,
+      });
+    }
+  }, [timer, showFeedback, screen]);
 
   const handleNext = () => {
     if (currentQ < questions.length - 1) {
@@ -755,13 +828,15 @@ export default function RealTimeUpdatesQuiz() {
       setShowFeedback(false);
       startTimer();
     } else {
+      const elapsed = Math.round((Date.now() - (startTimeRef.current || Date.now())) / 1000);
+      completeQuiz({ correct: score, total: questions.length }, elapsed);
       setScreen("results");
       stopTimer();
     }
   };
 
   if (screen === "landing") {
-    return <LandingScreen onStart={handleStart} />;
+    return <LandingScreen onStart={handleStart} onResume={isResuming ? handleResume : null} resumeData={resumeData} />;
   }
 
   if (screen === "results") {

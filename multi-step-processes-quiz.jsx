@@ -38,6 +38,7 @@
 // ========================
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useQuizProgress } from './useQuizProgress';
 import {
   Clock,
   ChevronRight,
@@ -1090,7 +1091,7 @@ function getSubtopicBreakdown() {
   return SUBTOPIC_ORDER.map((s) => ({ name: s, count: counts[s] || 0 }));
 }
 
-export default function MultiStepProcessesQuiz() {
+export default function MultiStepProcessesQuiz({ quizSlug = 'patterns-multi-step-processes' }) {
   const [screen, setScreen] = useState("landing");
   const [mode, setMode] = useState("shuffled");
   const [questions, setQuestions] = useState([]);
@@ -1107,6 +1108,8 @@ export default function MultiStepProcessesQuiz() {
   const [totalTimerActive, setTotalTimerActive] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
   const [retryMode, setRetryMode] = useState(null);
+
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
 
   const currentQuestion = questions[currentIndex];
   const totalQuestions = questions.length;
@@ -1128,6 +1131,14 @@ export default function MultiStepProcessesQuiz() {
           timedOut: true,
         },
       }));
+      // Persist timed-out answer
+      persistAnswer(currentQuestion.id, {
+        selectedIndex: null,
+        correctIndex: currentQuestion.correctIndex,
+        isCorrect: false,
+        confidence: null,
+        timedOut: true,
+      });
     }
     return () => clearInterval(interval);
   }, [timerActive, timer, currentQuestion]);
@@ -1179,6 +1190,7 @@ export default function MultiStepProcessesQuiz() {
     setTotalTimerActive(true);
     setTimedOut(false);
     setRetryMode(null);
+    startNewAttempt(ordered.map(q => q.id));
   }
 
   function startRetry(questionSubset, retryLabel) {
@@ -1198,6 +1210,46 @@ export default function MultiStepProcessesQuiz() {
     setTotalTime(0);
     setTotalTimerActive(true);
     setTimedOut(false);
+    startNewAttempt(ordered.map(q => q.id));
+  }
+
+  function handleResume() {
+    const data = resumeAttempt();
+    if (!data) return;
+    const order = data.questionOrder || [];
+    let qs;
+    if (order.length > 0) {
+      qs = order.map(id => QUESTIONS.find(q => q.id === id)).filter(Boolean);
+    } else {
+      qs = [...QUESTIONS];
+    }
+    // Restore answers from saved data
+    const restoredAnswers = {};
+    const questionResults = data.questionResults || {};
+    for (const [qid, r] of Object.entries(questionResults)) {
+      restoredAnswers[qid] = {
+        selected: r.selectedIndex,
+        confidence: r.confidence,
+        correct: r.isCorrect,
+        timedOut: r.timedOut || false,
+      };
+    }
+    setQuestions(qs);
+    const firstUnanswered = qs.findIndex(q => !questionResults[q.id]);
+    setCurrentIndex(firstUnanswered >= 0 ? firstUnanswered : qs.length - 1);
+    setAnswers(restoredAnswers);
+    setSelectedOption(null);
+    setConfidence(null);
+    setSubmitted(false);
+    setFlagged({});
+    setSkipped([]);
+    setTimer(90);
+    setTimerActive(true);
+    setTotalTime(0);
+    setTotalTimerActive(true);
+    setTimedOut(false);
+    setRetryMode(null);
+    setScreen("quiz");
   }
 
   function handleSubmit() {
@@ -1209,6 +1261,14 @@ export default function MultiStepProcessesQuiz() {
     }));
     setSubmitted(true);
     setTimerActive(false);
+    // Persist answer
+    persistAnswer(currentQuestion.id, {
+      selectedIndex: selectedOption,
+      correctIndex: currentQuestion.correctIndex,
+      isCorrect: correct,
+      confidence,
+      timedOut: false,
+    });
   }
 
   function handleSkip() {
@@ -1254,6 +1314,9 @@ export default function MultiStepProcessesQuiz() {
     setScreen("results");
     setTotalTimerActive(false);
     setTimerActive(false);
+    // Persist completion
+    const correctCount = Object.values(answers).filter((a) => a.correct).length;
+    completeQuiz({ correct: correctCount, total: Object.keys(answers).length }, totalTime);
   }
 
   function toggleFlag() {
@@ -1304,20 +1367,30 @@ export default function MultiStepProcessesQuiz() {
             </div>
           </div>
 
+          {isResuming && resumeData && (
+            <button
+              onClick={handleResume}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-semibold transition-colors mb-3 w-full"
+            >
+              <Play size={18} />
+              Resume Quiz ({resumeData.answeredCount}/{QUESTIONS.length} answered)
+            </button>
+          )}
+
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => startQuiz("shuffled")}
               className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold transition-colors"
             >
               <Shuffle size={18} />
-              Shuffled (Recommended)
+              {isResuming ? 'New Shuffled' : 'Shuffled (Recommended)'}
             </button>
             <button
               onClick={() => startQuiz("section")}
               className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-xl font-semibold transition-colors border border-gray-700"
             >
               <List size={18} />
-              Section Order
+              {isResuming ? 'New Section' : 'Section Order'}
             </button>
           </div>
         </div>

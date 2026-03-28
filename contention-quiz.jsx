@@ -35,6 +35,7 @@
 // ========================
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQuizProgress } from './useQuizProgress';
 import {
   Clock,
   ChevronRight,
@@ -727,7 +728,7 @@ function getGrade(pct) {
   return { label: "Needs deep review — revisit the fundamentals", color: "text-red-400", bg: "bg-red-500/20" };
 }
 
-export default function ContentionQuiz() {
+export default function ContentionQuiz({ quizSlug = 'patterns-dealing-with-contention' }) {
   const [screen, setScreen] = useState("landing");
   const [mode, setMode] = useState("shuffled");
   const [questions, setQuestions] = useState([]);
@@ -743,6 +744,8 @@ export default function ContentionQuiz() {
   const [totalStartTime, setTotalStartTime] = useState(null);
   const [totalElapsed, setTotalElapsed] = useState(0);
   const timerRef = useRef(null);
+
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
 
   const currentQuestion = questions[currentIdx];
 
@@ -770,9 +773,47 @@ export default function ContentionQuiz() {
       setTotalStartTime(Date.now());
       setTotalElapsed(0);
       setScreen("quiz");
+      startNewAttempt(qs.map(q => q.id));
     },
-    []
+    [startNewAttempt]
   );
+
+  const handleResume = useCallback(() => {
+    const data = resumeAttempt();
+    if (!data) return;
+    const order = data.questionOrder;
+    let qs;
+    if (order && order.length > 0) {
+      qs = order.map(id => QUESTIONS.find(q => q.id === id)).filter(Boolean);
+    } else {
+      qs = [...QUESTIONS];
+    }
+    // Restore answers from saved data
+    const restoredAnswers = {};
+    for (const [qid, r] of Object.entries(data.questionResults)) {
+      restoredAnswers[qid] = {
+        selected: r.selectedIndex,
+        confidence: r.confidence,
+        correct: r.isCorrect,
+        timedOut: r.timedOut || false,
+      };
+    }
+    setQuestions(qs);
+    // Find first unanswered question
+    const firstUnanswered = qs.findIndex(q => !data.questionResults[q.id]);
+    setCurrentIdx(firstUnanswered >= 0 ? firstUnanswered : qs.length - 1);
+    setSelectedOption(null);
+    setConfidence(null);
+    setSubmitted(false);
+    setAnswers(restoredAnswers);
+    setSkipped([]);
+    setFlagged(new Set());
+    setTimer(TIMER_SECONDS);
+    setTimedOut(false);
+    setTotalStartTime(Date.now());
+    setTotalElapsed(0);
+    setScreen("quiz");
+  }, [resumeAttempt]);
 
   useEffect(() => {
     if (screen !== "quiz" || submitted) return;
@@ -799,15 +840,23 @@ export default function ContentionQuiz() {
     if (selectedOption === null || confidence === null) return;
     clearInterval(timerRef.current);
     setSubmitted(true);
+    const isCorrect = selectedOption === currentQuestion.correctIndex;
     setAnswers((prev) => ({
       ...prev,
       [currentQuestion.id]: {
         selected: selectedOption,
         confidence,
-        correct: selectedOption === currentQuestion.correctIndex,
+        correct: isCorrect,
         timedOut: false,
       },
     }));
+    persistAnswer(currentQuestion.id, {
+      selectedIndex: selectedOption,
+      correctIndex: currentQuestion.correctIndex,
+      isCorrect,
+      confidence,
+      timedOut: false,
+    });
   };
 
   const handleNext = () => {
@@ -829,7 +878,10 @@ export default function ContentionQuiz() {
       setTimedOut(false);
       setTimer(TIMER_SECONDS);
     } else {
-      setTotalElapsed(Math.round((Date.now() - totalStartTime) / 1000));
+      const elapsed = Math.round((Date.now() - totalStartTime) / 1000);
+      setTotalElapsed(elapsed);
+      const correctCount = Object.values(answers).filter(a => a.correct).length;
+      completeQuiz({ correct: correctCount, total: Object.keys(answers).length }, elapsed);
       setScreen("results");
     }
   };
@@ -905,6 +957,13 @@ export default function ContentionQuiz() {
           timedOut: true,
         },
       }));
+      persistAnswer(currentQuestion.id, {
+        selectedIndex: selectedOption,
+        correctIndex: currentQuestion.correctIndex,
+        isCorrect: false,
+        confidence: null,
+        timedOut: true,
+      });
     }
   }, [timedOut]);
 
@@ -971,6 +1030,22 @@ export default function ContentionQuiz() {
               ))}
             </div>
           </div>
+          {isResuming && resumeData && (
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-amber-400 font-medium text-sm">In-progress attempt found</p>
+                  <p className="text-slate-400 text-xs mt-1">{resumeData.answeredCount}/{QUESTIONS.length} questions answered</p>
+                </div>
+                <button
+                  onClick={handleResume}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 font-medium text-sm border border-amber-500/30 transition-colors"
+                >
+                  <RotateCcw size={14} /> Resume
+                </button>
+              </div>
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => {
@@ -988,7 +1063,7 @@ export default function ContentionQuiz() {
               }}
               className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 transition-colors text-white font-medium"
             >
-              <Shuffle size={18} /> Shuffled (Recommended)
+              <Shuffle size={18} /> {isResuming ? 'Start Fresh' : 'Shuffled (Recommended)'}
             </button>
           </div>
         </div>
@@ -1219,7 +1294,10 @@ export default function ContentionQuiz() {
 
   // --- QUIZ SCREEN ---
   if (!currentQuestion) {
-    setTotalElapsed(Math.round((Date.now() - totalStartTime) / 1000));
+    const elapsed = Math.round((Date.now() - totalStartTime) / 1000);
+    setTotalElapsed(elapsed);
+    const correctCount = Object.values(answers).filter(a => a.correct).length;
+    completeQuiz({ correct: correctCount, total: Object.keys(answers).length }, elapsed);
     setScreen("results");
     return null;
   }

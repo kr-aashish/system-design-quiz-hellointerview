@@ -34,6 +34,7 @@
 // ========================
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQuizProgress } from './useQuizProgress';
 import { Clock, CheckCircle, XCircle, ChevronRight, RotateCcw, Award, AlertTriangle, Zap, Brain, Target, Trophy, Timer, ArrowRight, BarChart3 } from "lucide-react";
 
 const QUIZ_DATA = {
@@ -993,7 +994,7 @@ function ResultsScreen({ score, total, answers, questions, onRestart }) {
   );
 }
 
-export default function NetworkingEssentialsQuiz() {
+export default function NetworkingEssentialsQuiz({ quizSlug = 'core-concepts-networking-essentials' }) {
   const [screen, setScreen] = useState("landing");
   const [currentQ, setCurrentQ] = useState(0);
   const [score, setScore] = useState(0);
@@ -1002,6 +1003,8 @@ export default function NetworkingEssentialsQuiz() {
   const [showFeedback, setShowFeedback] = useState(false);
   const [timer, setTimer] = useState(90);
   const timerRef = useRef(null);
+
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
 
   const questions = QUIZ_DATA.questions;
 
@@ -1035,15 +1038,24 @@ export default function NetworkingEssentialsQuiz() {
     setSelectedAnswer(null);
     setShowFeedback(false);
     startTimer();
+    startNewAttempt(questions.map(q => q.id));
   };
 
   const handleAnswer = (idx) => {
     setSelectedAnswer(idx);
     setShowFeedback(true);
     stopTimer();
-    const isCorrect = idx === questions[currentQ].correct;
+    const q = questions[currentQ];
+    const isCorrect = idx === q.correct;
     if (isCorrect) setScore(s => s + 1);
     setAnswers(prev => [...prev, idx]);
+    persistAnswer(q.id, {
+      selectedIndex: idx,
+      correctIndex: q.correct,
+      isCorrect,
+      confidence: null,
+      timedOut: false,
+    });
   };
 
   const handleSkip = () => {
@@ -1051,6 +1063,14 @@ export default function NetworkingEssentialsQuiz() {
     setShowFeedback(true);
     stopTimer();
     setAnswers(prev => [...prev, -1]);
+    const q = questions[currentQ];
+    persistAnswer(q.id, {
+      selectedIndex: -1,
+      correctIndex: q.correct,
+      isCorrect: false,
+      confidence: null,
+      timedOut: true,
+    });
   };
 
   const handleNext = () => {
@@ -1060,6 +1080,7 @@ export default function NetworkingEssentialsQuiz() {
       setShowFeedback(false);
       startTimer();
     } else {
+      completeQuiz({ correct: score, total: questions.length }, 0);
       setScreen("results");
       stopTimer();
     }
