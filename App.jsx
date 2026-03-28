@@ -12,6 +12,9 @@ import ScalingWritesQuiz from './scaling-writes-quiz';
 import LongRunningTasksQuiz from './managing-long-running-tasks-quiz';
 import DataModelingQuiz from './data-modeling-quiz';
 import NetworkingEssentialsQuiz from './networking-essentials-quiz';
+import ApiDesignQuiz from './api-design-quiz';
+import CachingQuiz from './caching-quiz';
+import DatabaseIndexingQuiz from './database-indexing-quiz';
 
 // Map output file names to imported components
 const componentsMap = {
@@ -24,6 +27,9 @@ const componentsMap = {
   'scaling-writes-quiz.jsx': ScalingWritesQuiz,
   'data-modeling-quiz.jsx': DataModelingQuiz,
   'networking-essentials-quiz.jsx': NetworkingEssentialsQuiz,
+  'api-design-quiz.jsx': ApiDesignQuiz,
+  'caching-quiz.jsx': CachingQuiz,
+  'database-indexing-quiz.jsx': DatabaseIndexingQuiz,
 };
 
 function Index() {

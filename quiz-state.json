@@ -90,7 +90,7 @@
       "slug": "core-concepts-api-design",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "api-design-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -110,7 +110,7 @@
       "slug": "core-concepts-db-indexing",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "database-indexing-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -120,7 +120,7 @@
       "slug": "core-concepts-caching",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "caching-quiz.jsx",
       "retryCount": 0
     },
     {
