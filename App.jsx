@@ -254,13 +254,14 @@ function Index() {
         <ProgressStats summaries={summaries} quizTopics={quizState.topics} />
         
         <div className="space-y-4 bg-[#232a3b] p-6 rounded-xl border border-[#2d3748] shadow-2xl">
-          {Object.entries(topicsByCategory).map(([category, items]) => (
+          {Object.entries(topicsByCategory).map(([category, items], index, array) => (
             <CategorySection 
               key={category} 
               category={category} 
               items={items} 
               summaries={summaries}
               onClearQuiz={handleClearQuiz}
+              defaultOpen={index < array.length - 2}
             />
           ))}
         </div>
@@ -277,8 +278,8 @@ function Index() {
   );
 }
 
-function CategorySection({ category, items, summaries, onClearQuiz }) {
-  const [isOpen, setIsOpen] = useState(true);
+function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen = true }) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
     <div className="mb-2">
