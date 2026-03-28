@@ -714,8 +714,22 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
   const [totalTimerActive, setTotalTimerActive] = useState(false);
   const timerRef = useRef(null);
 
-  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUIZ_DATA.questions.length);
+  const {
+    saveAnswer: persistAnswer,
+    completeQuiz,
+    resumeData,
+    startNewAttempt,
+    saveQuestionOrder: persistQuestionOrder,
+    resumeAttempt,
+    isResuming,
+  } = useQuizProgress(quizSlug, QUIZ_DATA.questions.length);
   const totalTimerRef = useRef(null);
+
+  const detectMode = useCallback((questionSet) => {
+    const sectionOrder = groupByCategory(questionSet).map((question) => question.id);
+    const currentOrder = questionSet.map((question) => question.id);
+    return sectionOrder.every((id, idx) => id === currentOrder[idx]) ? "ordered" : "shuffled";
+  }, []);
 
 
 
@@ -737,8 +751,51 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
     return () => clearInterval(totalTimerRef.current);
   }, [totalTimerActive]);
 
+  const handleResume = useCallback(() => {
+    if (!resumeData) return;
+
+    const restoredQuestions =
+      resumeData.questionOrder && resumeData.questionOrder.length > 0
+        ? resumeData.questionOrder
+            .map((id) => QUIZ_DATA.questions.find((question) => question.id === id))
+            .filter(Boolean)
+        : [...QUIZ_DATA.questions];
+
+    if (restoredQuestions.length === 0) return;
+
+    const restoredAnswers = {};
+    Object.entries(resumeData.questionResults).forEach(([questionId, result]) => {
+      restoredAnswers[questionId] = {
+        selected: result.selectedIndex ?? -1,
+        confidence: result.timedOut ? "timeout" : result.confidence,
+        correct: !!result.isCorrect,
+        timedOut: !!result.timedOut,
+      };
+    });
+
+    const nextIndex = restoredQuestions.findIndex((question) => !resumeData.questionResults[question.id]);
+
+    setMode(detectMode(restoredQuestions));
+    setQuestions(restoredQuestions);
+    setCurrentIdx(nextIndex === -1 ? Math.max(restoredQuestions.length - 1, 0) : nextIndex);
+    setSelected(null);
+    setConfidence(null);
+    setConfirmed(false);
+    setAnswers(restoredAnswers);
+    setFlagged(new Set());
+    setSkipped([]);
+    setTimer(TIMER_SECONDS);
+    setTimerActive(true);
+    setTotalTime(0);
+    setTotalTimerActive(true);
+    setScreen("quiz");
+    resumeAttempt();
+  }, [resumeData, resumeAttempt, detectMode]);
+
   const startQuiz = useCallback((questionSet, quizMode) => {
     const qs = quizMode === "shuffled" ? shuffleArray(questionSet) : groupByCategory(questionSet);
+    startNewAttempt(qs.map((question) => question.id));
+    setMode(quizMode);
     setQuestions(qs);
     setCurrentIdx(0);
     setAnswers({});
@@ -752,16 +809,22 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
     setTotalTime(0);
     setTotalTimerActive(true);
     setScreen("quiz");
-  }, []);
+  }, [startNewAttempt]);
 
   const handleTimeout = useCallback(() => {
     setTimerActive(false);
     const q = questions[currentIdx];
     if (q && !confirmed) {
+      persistAnswer(q.id, {
+        selectedIndex: null,
+        correctIndex: q.correct,
+        isCorrect: false,
+        timedOut: true,
+      });
       setAnswers((prev) => ({ ...prev, [q.id]: { selected: -1, confidence: "timeout", correct: false, timedOut: true } }));
       setConfirmed(true);
     }
-  }, [questions, currentIdx, confirmed]);
+  }, [questions, currentIdx, confirmed, persistAnswer]);
 
   const handleSelect = useCallback((idx) => {
     if (!confirmed) setSelected(idx);
@@ -771,10 +834,16 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
     if (selected === null || confidence === null) return;
     const q = questions[currentIdx];
     const correct = selected === q.correct;
+    persistAnswer(q.id, {
+      selectedIndex: selected,
+      correctIndex: q.correct,
+      isCorrect: correct,
+      confidence,
+    });
     setAnswers((prev) => ({ ...prev, [q.id]: { selected, confidence, correct, timedOut: false } }));
     setConfirmed(true);
     setTimerActive(false);
-  }, [selected, confidence, questions, currentIdx]);
+  }, [selected, confidence, questions, currentIdx, persistAnswer]);
 
   const handleNext = useCallback(() => {
     const nextIdx = currentIdx + 1;
@@ -786,18 +855,20 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
       setTimer(TIMER_SECONDS);
       setTimerActive(true);
     } else {
+      const correctCount = Object.values(answers).filter((answer) => answer.correct).length;
       setTimerActive(false);
       setTotalTimerActive(false);
+      completeQuiz({ correct: correctCount, total: questions.length }, totalTime);
       setScreen("results");
     }
-  }, [currentIdx, questions, answers]);
+  }, [currentIdx, questions.length, answers, totalTime, completeQuiz]);
 
   const handleSkip = useCallback(() => {
     const q = questions[currentIdx];
     setSkipped((prev) => [...prev, q]);
-    const remaining = questions.filter((_, i) => i !== currentIdx && !answers[questions[i]?.id] && !skipped.includes(questions[i]));
     // Move current question to end
     const newQuestions = [...questions.slice(0, currentIdx), ...questions.slice(currentIdx + 1), q];
+    persistQuestionOrder(newQuestions.map((question) => question.id));
     setQuestions(newQuestions);
     setSelected(null);
     setConfidence(null);
@@ -807,7 +878,7 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
     if (currentIdx >= newQuestions.length) {
       setCurrentIdx(newQuestions.length - 1);
     }
-  }, [currentIdx, questions, answers, skipped]);
+  }, [currentIdx, questions, persistQuestionOrder]);
 
   const handleFlag = useCallback(() => {
     const q = questions[currentIdx];
@@ -904,6 +975,15 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
               Shuffled (Recommended)
             </button>
           </div>
+
+          {isResuming && resumeData && (
+            <button
+              onClick={handleResume}
+              className="mt-3 w-full py-3 px-4 rounded-lg bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-800/50 font-medium transition-colors text-sm flex items-center justify-center gap-2"
+            >
+              <RotateCcw className="w-4 h-4" /> Resume Quiz ({resumeData.answeredCount}/{resumeData.questionOrder?.length || QUIZ_DATA.questions.length})
+            </button>
+          )}
         </div>
       </div>
     );

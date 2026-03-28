@@ -60,6 +60,7 @@
 // ========================
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useQuizProgress } from "./useQuizProgress";
 import {
   Clock,
   ChevronRight,
@@ -1370,8 +1371,36 @@ export default function BigDataStructuresQuiz({ quizSlug = 'advanced-data-struct
   const [totalTime, setTotalTime] = useState(0);
   const [totalTimerActive, setTotalTimerActive] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
+  const {
+    saveAnswer: persistAnswer,
+    completeQuiz,
+    resumeData,
+    startNewAttempt,
+    saveQuestionOrder: persistQuestionOrder,
+    resumeAttempt,
+    isResuming,
+  } = useQuizProgress(quizSlug, QUESTIONS.length);
 
   const currentQ = questions[currentIdx];
+
+  const orderQuestions = useCallback(
+    (questionSet, selectedMode) =>
+      selectedMode === "section"
+        ? [...questionSet].sort(
+            (a, b) => SUBTOPIC_ORDER.indexOf(a.subtopic) - SUBTOPIC_ORDER.indexOf(b.subtopic)
+          )
+        : shuffleArray(questionSet),
+    []
+  );
+
+  const detectMode = useCallback(
+    (questionSet) => {
+      const sectionOrder = orderQuestions(questionSet, "section").map((q) => q.id);
+      const currentOrder = questionSet.map((q) => q.id);
+      return sectionOrder.every((id, idx) => id === currentOrder[idx]) ? "section" : "shuffled";
+    },
+    [orderQuestions]
+  );
 
   // Per-question timer
   useEffect(() => {
@@ -1387,13 +1416,19 @@ export default function BigDataStructuresQuiz({ quizSlug = 'advanced-data-struct
       setTimedOut(true);
       setSubmitted(true);
       if (currentQ) {
+        persistAnswer(currentQ.id, {
+          selectedIndex: null,
+          correctIndex: currentQ.correctIndex,
+          isCorrect: false,
+          timedOut: true,
+        });
         setAnswers((prev) => ({
           ...prev,
           [currentQ.id]: { selected: -1, confidence: "Guessing", correct: false, timedOut: true },
         }));
       }
     }
-  }, [timer, timerActive, currentQ]);
+  }, [timer, timerActive, currentQ, persistAnswer]);
 
   // Total elapsed timer
   useEffect(() => {
@@ -1401,6 +1436,48 @@ export default function BigDataStructuresQuiz({ quizSlug = 'advanced-data-struct
     const id = setInterval(() => setTotalTime((t) => t + 1), 1000);
     return () => clearInterval(id);
   }, [totalTimerActive]);
+
+  const handleResume = useCallback(() => {
+    if (!resumeData) return;
+
+    const restoredQuestions =
+      resumeData.questionOrder && resumeData.questionOrder.length > 0
+        ? resumeData.questionOrder
+            .map((id) => QUESTIONS.find((question) => question.id === id))
+            .filter(Boolean)
+        : [...QUESTIONS];
+
+    if (restoredQuestions.length === 0) return;
+
+    const restoredAnswers = {};
+    Object.entries(resumeData.questionResults).forEach(([questionId, result]) => {
+      restoredAnswers[questionId] = {
+        selected: result.selectedIndex ?? -1,
+        confidence: result.timedOut ? "Guessing" : result.confidence,
+        correct: !!result.isCorrect,
+        timedOut: !!result.timedOut,
+      };
+    });
+
+    const nextIndex = restoredQuestions.findIndex((question) => !resumeData.questionResults[question.id]);
+
+    setMode(detectMode(restoredQuestions));
+    setQuestions(restoredQuestions);
+    setCurrentIdx(nextIndex === -1 ? Math.max(restoredQuestions.length - 1, 0) : nextIndex);
+    setAnswers(restoredAnswers);
+    setSelectedOption(null);
+    setConfidence(null);
+    setSubmitted(false);
+    setFlagged(new Set());
+    setSkipped([]);
+    setTimer(90);
+    setTimerActive(true);
+    setTotalTime(0);
+    setTotalTimerActive(true);
+    setTimedOut(false);
+    setScreen("quiz");
+    resumeAttempt();
+  }, [resumeData, resumeAttempt, detectMode]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -1421,12 +1498,8 @@ export default function BigDataStructuresQuiz({ quizSlug = 'advanced-data-struct
 
   const startQuiz = useCallback(
     (questionSet) => {
-      const ordered =
-        mode === "section"
-          ? [...questionSet].sort(
-              (a, b) => SUBTOPIC_ORDER.indexOf(a.subtopic) - SUBTOPIC_ORDER.indexOf(b.subtopic)
-            )
-          : shuffleArray(questionSet);
+      const ordered = orderQuestions(questionSet, mode);
+      startNewAttempt(ordered.map((question) => question.id));
       setQuestions(ordered);
       setCurrentIdx(0);
       setAnswers({});
@@ -1442,19 +1515,25 @@ export default function BigDataStructuresQuiz({ quizSlug = 'advanced-data-struct
       setTimedOut(false);
       setScreen("quiz");
     },
-    [mode]
+    [mode, orderQuestions, startNewAttempt]
   );
 
   const submitAnswer = useCallback(() => {
     if (!currentQ || selectedOption === null || confidence === null) return;
     const correct = selectedOption === currentQ.correctIndex;
+    persistAnswer(currentQ.id, {
+      selectedIndex: selectedOption,
+      correctIndex: currentQ.correctIndex,
+      isCorrect: correct,
+      confidence,
+    });
     setAnswers((prev) => ({
       ...prev,
       [currentQ.id]: { selected: selectedOption, confidence, correct, timedOut: false },
     }));
     setSubmitted(true);
     setTimerActive(false);
-  }, [currentQ, selectedOption, confidence]);
+  }, [currentQ, selectedOption, confidence, persistAnswer]);
 
   const nextQuestion = useCallback(() => {
     if (currentIdx < questions.length - 1) {
@@ -1466,31 +1545,41 @@ export default function BigDataStructuresQuiz({ quizSlug = 'advanced-data-struct
       setTimerActive(true);
       setTimedOut(false);
     } else {
-      // Check for skipped questions
-      const unanswered = questions.filter((q) => !answers[q.id] && q.id !== currentQ?.id);
-      if (unanswered.length > 0) {
-        const remaining = [...unanswered];
-        setQuestions(remaining);
-        setCurrentIdx(0);
-        setSelectedOption(null);
-        setConfidence(null);
-        setSubmitted(false);
-        setTimer(90);
-        setTimerActive(true);
-        setTimedOut(false);
-      } else {
-        setTotalTimerActive(false);
-        setTimerActive(false);
-        setScreen("results");
-      }
+      const correctCount = Object.values(answers).filter((answer) => answer.correct).length;
+      setTotalTimerActive(false);
+      setTimerActive(false);
+      completeQuiz({ correct: correctCount, total: questions.length }, totalTime);
+      setScreen("results");
     }
-  }, [currentIdx, questions, answers, currentQ]);
+  }, [currentIdx, questions.length, answers, totalTime, completeQuiz]);
 
   const skipQuestion = useCallback(() => {
     if (!currentQ) return;
     setSkipped((prev) => [...prev, currentQ.id]);
-    nextQuestion();
-  }, [currentQ, nextQuestion]);
+
+    if (currentIdx < questions.length - 1) {
+      const reorderedQuestions = [
+        ...questions.slice(0, currentIdx),
+        ...questions.slice(currentIdx + 1),
+        currentQ,
+      ];
+      persistQuestionOrder(reorderedQuestions.map((question) => question.id));
+      setQuestions(reorderedQuestions);
+      setSelectedOption(null);
+      setConfidence(null);
+      setSubmitted(false);
+      setTimer(90);
+      setTimerActive(true);
+      setTimedOut(false);
+      return;
+    }
+
+    const correctCount = Object.values(answers).filter((answer) => answer.correct).length;
+    setTotalTimerActive(false);
+    setTimerActive(false);
+    completeQuiz({ correct: correctCount, total: questions.length }, totalTime);
+    setScreen("results");
+  }, [currentQ, currentIdx, questions, answers, totalTime, completeQuiz, persistQuestionOrder]);
 
   const toggleFlag = useCallback(() => {
     if (!currentQ) return;
@@ -1642,6 +1731,15 @@ export default function BigDataStructuresQuiz({ quizSlug = 'advanced-data-struct
           >
             Start Quiz
           </button>
+
+          {isResuming && resumeData && (
+            <button
+              onClick={handleResume}
+              className="w-full mt-3 py-3 rounded-lg bg-emerald-900/40 border border-emerald-700 text-emerald-300 hover:bg-emerald-900/60 font-semibold transition-all flex items-center justify-center gap-2"
+            >
+              <RotateCcw className="w-4 h-4" /> Resume Quiz ({resumeData.answeredCount}/{resumeData.questionOrder?.length || QUESTIONS.length})
+            </button>
+          )}
         </div>
       </div>
     );

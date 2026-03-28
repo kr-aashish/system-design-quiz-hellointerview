@@ -635,7 +635,7 @@ function getGrade(pct) {
   return { label: "Needs deep review — revisit the fundamentals", color: "text-red-400", bg: "bg-red-500/20" };
 }
 
-function LandingScreen({ onStart }) {
+function LandingScreen({ onStart, onResume, resumeData }) {
   const [mode, setMode] = useState("shuffled");
   const totalTime = Math.round((QUESTIONS.length * 75) / 60);
 
@@ -704,6 +704,15 @@ function LandingScreen({ onStart }) {
       >
         Start Quiz <ArrowRight size={20} />
       </button>
+
+      {onResume && resumeData && (
+        <button
+          onClick={onResume}
+          className="w-full mt-3 py-3 bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-700/50 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+        >
+          <RotateCcw size={18} /> Resume Quiz ({resumeData.answeredCount}/{resumeData.questionOrder?.length || QUESTIONS.length})
+        </button>
+      )}
     </div>
   );
 }
@@ -715,8 +724,6 @@ function QuestionScreen({ question, index, total, onAnswer, onSkip, onFlag, isFl
   const [timeLeft, setTimeLeft] = useState(90);
   const [timedOut, setTimedOut] = useState(false);
   const timerRef = useRef(null);
-
-  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
 
   useEffect(() => {
     setSelected(null);
@@ -1106,9 +1113,17 @@ export default function ConsistentHashingQuiz({ quizSlug = 'core-concepts-consis
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [flagged, setFlagged] = useState(new Set());
-  const [skipped, setSkipped] = useState([]);
   const [startTime, setStartTime] = useState(null);
   const [totalTime, setTotalTime] = useState(0);
+  const {
+    saveAnswer: persistAnswer,
+    completeQuiz,
+    resumeData,
+    startNewAttempt,
+    saveQuestionOrder: persistQuestionOrder,
+    resumeAttempt,
+    isResuming,
+  } = useQuizProgress(quizSlug, QUESTIONS.length);
 
   const startQuiz = (mode, customQuestions) => {
     let order;
@@ -1119,44 +1134,95 @@ export default function ConsistentHashingQuiz({ quizSlug = 'core-concepts-consis
     } else {
       order = QUESTIONS.map((_, i) => i);
     }
+    startNewAttempt(order.map((index) => QUESTIONS[index].id));
     setQuestionOrder(order);
     setCurrentIdx(0);
     setAnswers([]);
     setFlagged(new Set());
-    setSkipped([]);
     setStartTime(Date.now());
+    setTotalTime(0);
     setScreen("quiz");
   };
 
+  const handleResume = useCallback(() => {
+    if (!resumeData) return;
+
+    const restoredOrder =
+      resumeData.questionOrder && resumeData.questionOrder.length > 0
+        ? resumeData.questionOrder
+            .map((id) => QUESTIONS.findIndex((question) => question.id === id))
+            .filter((index) => index >= 0)
+        : QUESTIONS.map((_, index) => index);
+
+    if (restoredOrder.length === 0) return;
+
+    const restoredAnswers = restoredOrder
+      .filter((index) => resumeData.questionResults[QUESTIONS[index].id])
+      .map((index) => {
+        const result = resumeData.questionResults[QUESTIONS[index].id];
+        return {
+          qIdx: index,
+          selected: result.timedOut ? -1 : result.selectedIndex,
+          confidence: result.confidence || "Guessing",
+          timedOut: !!result.timedOut,
+        };
+      });
+
+    const nextIndex = restoredOrder.findIndex((index) => !resumeData.questionResults[QUESTIONS[index].id]);
+
+    setQuestionOrder(restoredOrder);
+    setCurrentIdx(nextIndex === -1 ? Math.max(restoredOrder.length - 1, 0) : nextIndex);
+    setAnswers(restoredAnswers);
+    setFlagged(new Set());
+    setStartTime(Date.now());
+    setTotalTime(0);
+    setScreen("quiz");
+    resumeAttempt();
+  }, [resumeData, resumeAttempt]);
+
   const handleAnswer = (selected, confidence, timedOut) => {
     const qIdx = questionOrder[currentIdx];
-    setAnswers((prev) => [...prev, { qIdx, selected: timedOut && selected === null ? -1 : selected, confidence: confidence || "Guessing", timedOut }]);
+    const normalizedSelected = timedOut ? -1 : selected;
+    const answer = { qIdx, selected: normalizedSelected, confidence: confidence || "Guessing", timedOut };
+    const nextAnswers = [...answers, answer];
+    const question = QUESTIONS[qIdx];
+
+    persistAnswer(question.id, {
+      selectedIndex: timedOut ? null : normalizedSelected,
+      correctIndex: question.correct,
+      isCorrect: !timedOut && normalizedSelected === question.correct,
+      confidence: timedOut ? null : confidence || "Guessing",
+      timedOut,
+    });
+
+    setAnswers(nextAnswers);
 
     if (currentIdx < questionOrder.length - 1) {
       setCurrentIdx((i) => i + 1);
-    } else if (skipped.length > 0) {
-      setQuestionOrder((prev) => [...prev, ...skipped]);
-      setSkipped([]);
-      setCurrentIdx((i) => i + 1);
     } else {
-      setTotalTime(Math.round((Date.now() - startTime) / 1000));
+      const elapsed = Math.round((Date.now() - startTime) / 1000);
+      const correctCount = nextAnswers.filter((item) => item.selected === QUESTIONS[item.qIdx].correct).length;
+      setTotalTime(elapsed);
+      completeQuiz({ correct: correctCount, total: questionOrder.length }, elapsed);
       setScreen("results");
     }
   };
 
   const handleSkip = () => {
-    setSkipped((prev) => [...prev, questionOrder[currentIdx]]);
     if (currentIdx < questionOrder.length - 1) {
-      setCurrentIdx((i) => i + 1);
-    } else if (skipped.length > 0) {
-      const remaining = [...skipped, questionOrder[currentIdx]];
-      setQuestionOrder((prev) => [...prev, ...remaining]);
-      setSkipped([]);
-      setCurrentIdx((i) => i + 1);
+      const reordered = [
+        ...questionOrder.slice(0, currentIdx),
+        ...questionOrder.slice(currentIdx + 1),
+        questionOrder[currentIdx],
+      ];
+      persistQuestionOrder(reordered.map((index) => QUESTIONS[index].id));
+      setQuestionOrder(reordered);
     } else {
-      setQuestionOrder((prev) => [...prev, questionOrder[currentIdx]]);
-      setSkipped([]);
-      setCurrentIdx((i) => i + 1);
+      const elapsed = Math.round((Date.now() - startTime) / 1000);
+      const correctCount = answers.filter((item) => item.selected === QUESTIONS[item.qIdx].correct).length;
+      setTotalTime(elapsed);
+      completeQuiz({ correct: correctCount, total: questionOrder.length }, elapsed);
+      setScreen("results");
     }
   };
 
@@ -1195,7 +1261,7 @@ export default function ConsistentHashingQuiz({ quizSlug = 'core-concepts-consis
   if (screen === "landing") {
     return (
       <div className="min-h-screen bg-gray-900 py-12">
-        <LandingScreen onStart={startQuiz} />
+        <LandingScreen onStart={startQuiz} onResume={isResuming ? handleResume : null} resumeData={resumeData} />
       </div>
     );
   }

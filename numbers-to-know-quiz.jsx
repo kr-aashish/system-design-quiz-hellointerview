@@ -42,6 +42,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Clock, ChevronRight, Flag, SkipForward, RotateCcw, CheckCircle, XCircle, AlertTriangle, Award, Brain, Zap, BarChart3, BookOpen, Shuffle, List, ArrowLeft } from "lucide-react";
+import { useQuizProgress } from "./useQuizProgress";
 
 const QUESTIONS = [
   // q1 - Modern Hardware Limits
@@ -649,6 +650,20 @@ export default function NumbersToKnowQuiz({ quizSlug = 'core-concepts-numbers-to
   const [totalElapsed, setTotalElapsed] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
   const [retryIds, setRetryIds] = useState(null);
+  const {
+    saveAnswer: persistAnswer,
+    completeQuiz,
+    resumeData,
+    startNewAttempt,
+    resumeAttempt,
+    isResuming,
+  } = useQuizProgress(quizSlug, QUESTIONS.length);
+
+  const detectMode = useCallback((questionSet) => {
+    const sectionOrder = groupBySubtopic(questionSet).map((q) => q.id);
+    const currentOrder = questionSet.map((q) => q.id);
+    return sectionOrder.every((id, idx) => id === currentOrder[idx]) ? "section" : "shuffled";
+  }, []);
 
   const startQuiz = useCallback((selectedMode, retryQuestionIds) => {
     let qs = retryQuestionIds
@@ -659,6 +674,8 @@ export default function NumbersToKnowQuiz({ quizSlug = 'core-concepts-numbers-to
     } else {
       qs = groupBySubtopic(qs);
     }
+    startNewAttempt(qs.map((q) => q.id));
+    setMode(selectedMode);
     setOrderedQuestions(qs);
     setCurrentIndex(0);
     setSelectedOption(null);
@@ -673,7 +690,54 @@ export default function NumbersToKnowQuiz({ quizSlug = 'core-concepts-numbers-to
     setShowExplanation(false);
     setScreen("quiz");
     setRetryIds(retryQuestionIds || null);
-  }, []);
+  }, [startNewAttempt]);
+
+  const handleResume = useCallback(() => {
+    if (!resumeData) return;
+
+    const restoredQuestions =
+      resumeData.questionOrder && resumeData.questionOrder.length > 0
+        ? resumeData.questionOrder
+            .map((id) => QUESTIONS.find((question) => question.id === id))
+            .filter(Boolean)
+        : [...QUESTIONS];
+
+    if (restoredQuestions.length === 0) return;
+
+    const restoredAnswers = {};
+    const restoredSkips = [];
+
+    Object.entries(resumeData.questionResults).forEach(([questionId, result]) => {
+      if (result.skipped) {
+        restoredSkips.push(questionId);
+        return;
+      }
+
+      restoredAnswers[questionId] = {
+        selected: result.selectedIndex ?? -1,
+        confidence: result.timedOut ? "timeout" : result.confidence,
+        correct: !!result.isCorrect,
+        timedOut: !!result.timedOut,
+      };
+    });
+
+    setMode(detectMode(restoredQuestions));
+    setOrderedQuestions(restoredQuestions);
+    setCurrentIndex(Math.min(resumeData.answeredCount, restoredQuestions.length - 1));
+    setSelectedOption(null);
+    setConfidence(null);
+    setSubmitted(false);
+    setAnswers(restoredAnswers);
+    setFlagged(new Set());
+    setSkipped(restoredSkips);
+    setTimer(TIMER_DURATION);
+    setTimerActive(true);
+    setTotalElapsed(0);
+    setShowExplanation(false);
+    setScreen("quiz");
+    setRetryIds(null);
+    resumeAttempt();
+  }, [resumeData, resumeAttempt, detectMode]);
 
   useEffect(() => {
     let interval;
@@ -710,6 +774,8 @@ export default function NumbersToKnowQuiz({ quizSlug = 'core-concepts-numbers-to
   const handleSubmit = useCallback((timeout) => {
     const qId = orderedQuestions[currentIndex]?.id;
     if (!qId) return;
+    const currentQuestion = orderedQuestions[currentIndex];
+    const isCorrect = !timeout && selectedOption === currentQuestion.correct;
     setSubmitted(true);
     setTimerActive(false);
     setShowExplanation(true);
@@ -718,11 +784,19 @@ export default function NumbersToKnowQuiz({ quizSlug = 'core-concepts-numbers-to
       [qId]: {
         selected: timeout ? -1 : selectedOption,
         confidence: timeout ? "timeout" : confidence,
-        correct: !timeout && selectedOption === orderedQuestions[currentIndex].correct,
+        correct: isCorrect,
         timedOut: timeout
       }
     }));
-  }, [currentIndex, orderedQuestions, selectedOption, confidence]);
+
+    persistAnswer(qId, {
+      selectedIndex: timeout ? null : selectedOption,
+      correctIndex: currentQuestion.correct,
+      isCorrect,
+      confidence: timeout ? null : confidence,
+      timedOut: timeout,
+    });
+  }, [currentIndex, orderedQuestions, selectedOption, confidence, persistAnswer]);
 
   const handleNext = useCallback(() => {
     if (currentIndex < orderedQuestions.length - 1) {
@@ -735,16 +809,29 @@ export default function NumbersToKnowQuiz({ quizSlug = 'core-concepts-numbers-to
       setTimerActive(true);
     } else {
       setTimerActive(false);
+      completeQuiz(
+        {
+          correct: Object.values(answers).filter((answer) => answer.correct).length,
+          total: orderedQuestions.length,
+        },
+        totalElapsed
+      );
       setScreen("results");
     }
-  }, [currentIndex, orderedQuestions.length]);
+  }, [currentIndex, orderedQuestions.length, orderedQuestions.length, answers, completeQuiz, totalElapsed]);
 
   const handleSkip = useCallback(() => {
     const qId = currentQuestion?.id;
     if (!qId) return;
     setSkipped(prev => [...prev, qId]);
+    persistAnswer(qId, {
+      selectedIndex: null,
+      correctIndex: currentQuestion.correct,
+      isCorrect: false,
+      skipped: true,
+    });
     handleNext();
-  }, [currentQuestion, handleNext]);
+  }, [currentQuestion, handleNext, persistAnswer]);
 
   const handleFlag = useCallback(() => {
     const qId = currentQuestion?.id;
@@ -858,6 +945,15 @@ export default function NumbersToKnowQuiz({ quizSlug = 'core-concepts-numbers-to
               <Shuffle size={18} /> Shuffled (Recommended)
             </button>
           </div>
+
+          {isResuming && resumeData && (
+            <button
+              onClick={handleResume}
+              className="mt-3 w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-300 font-medium transition-colors border border-emerald-800/50"
+            >
+              <RotateCcw size={18} /> Resume Quiz ({resumeData.answeredCount}/{resumeData.questionOrder?.length || QUESTIONS.length})
+            </button>
+          )}
         </div>
       </div>
     );

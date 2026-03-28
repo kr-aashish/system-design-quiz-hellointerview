@@ -889,13 +889,30 @@ export default function VectorDatabaseQuiz({ quizSlug = 'advanced-vector-databas
   const [expandedTiers, setExpandedTiers] = useState({ Heavy: true, Medium: false, Thin: false, "Thin (Clustered)": false, Bridge: false });
   const timerRef = useRef(null);
 
-  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
+  const {
+    saveAnswer: persistAnswer,
+    completeQuiz,
+    resumeData,
+    startNewAttempt,
+    saveQuestionOrder: persistQuestionOrder,
+    resumeAttempt,
+    isResuming,
+  } = useQuizProgress(quizSlug, QUESTIONS.length);
   const totalTimerRef = useRef(null);
 
   const currentQ = questions[currentIdx];
 
+  const detectMode = useCallback((questionSet) => {
+    const naturalOrder = QUESTIONS.filter((question) =>
+      questionSet.some((candidate) => candidate.id === question.id)
+    ).map((question) => question.id);
+    const currentOrder = questionSet.map((question) => question.id);
+    return naturalOrder.every((id, idx) => id === currentOrder[idx]) ? "section" : "shuffled";
+  }, []);
+
   const startQuiz = (selectedMode) => {
     const ordered = selectedMode === "shuffled" ? shuffle(QUESTIONS) : [...QUESTIONS];
+    startNewAttempt(ordered.map((question) => question.id));
     setQuestions(ordered);
     setMode(selectedMode);
     setCurrentIdx(0);
@@ -912,6 +929,48 @@ export default function VectorDatabaseQuiz({ quizSlug = 'advanced-vector-databas
     setScreen("quiz");
   };
 
+  const handleResume = useCallback(() => {
+    if (!resumeData) return;
+
+    const restoredQuestions =
+      resumeData.questionOrder && resumeData.questionOrder.length > 0
+        ? resumeData.questionOrder
+            .map((id) => QUESTIONS.find((question) => question.id === id))
+            .filter(Boolean)
+        : [...QUESTIONS];
+
+    if (restoredQuestions.length === 0) return;
+
+    const restoredAnswers = {};
+    Object.entries(resumeData.questionResults).forEach(([questionId, result]) => {
+      restoredAnswers[questionId] = {
+        selected: result.selectedIndex ?? -1,
+        confidence: result.timedOut ? null : result.confidence,
+        correct: !!result.isCorrect,
+        timedOut: !!result.timedOut,
+      };
+    });
+
+    const nextIndex = restoredQuestions.findIndex((question) => !resumeData.questionResults[question.id]);
+
+    setQuestions(restoredQuestions);
+    setMode(detectMode(restoredQuestions));
+    setCurrentIdx(nextIndex === -1 ? Math.max(restoredQuestions.length - 1, 0) : nextIndex);
+    setAnswers(restoredAnswers);
+    setSelectedOption(null);
+    setConfidence(null);
+    setSubmitted(false);
+    setFlagged({});
+    setSkipped([]);
+    setTimer(90);
+    setTimedOut(false);
+    setTotalTime(0);
+    setShowExplanation(false);
+    setResultTab("overview");
+    setScreen("quiz");
+    resumeAttempt();
+  }, [resumeData, resumeAttempt, detectMode]);
+
   useEffect(() => {
     if (screen === "quiz" && !submitted && !timedOut) {
       timerRef.current = setInterval(() => {
@@ -920,6 +979,12 @@ export default function VectorDatabaseQuiz({ quizSlug = 'advanced-vector-databas
             clearInterval(timerRef.current);
             setTimedOut(true);
             setShowExplanation(true);
+            persistAnswer(currentQ.id, {
+              selectedIndex: null,
+              correctIndex: currentQ.correct,
+              isCorrect: false,
+              timedOut: true,
+            });
             setAnswers((prev) => ({
               ...prev,
               [currentQ.id]: { selected: -1, confidence: null, correct: false, timedOut: true },
@@ -931,7 +996,7 @@ export default function VectorDatabaseQuiz({ quizSlug = 'advanced-vector-databas
       }, 1000);
     }
     return () => clearInterval(timerRef.current);
-  }, [screen, currentIdx, submitted, timedOut]);
+  }, [screen, currentIdx, submitted, timedOut, currentQ, persistAnswer]);
 
   useEffect(() => {
     if (screen === "quiz") {
@@ -962,30 +1027,31 @@ export default function VectorDatabaseQuiz({ quizSlug = 'advanced-vector-databas
     if (selectedOption === null || confidence === null) return;
     clearInterval(timerRef.current);
     const isCorrect = selectedOption === currentQ.correct;
+    persistAnswer(currentQ.id, {
+      selectedIndex: selectedOption,
+      correctIndex: currentQ.correct,
+      isCorrect,
+      confidence,
+    });
     setAnswers((prev) => ({
       ...prev,
       [currentQ.id]: { selected: selectedOption, confidence, correct: isCorrect, timedOut: false },
     }));
     setSubmitted(true);
     setShowExplanation(true);
-  }, [selectedOption, confidence, currentQ]);
+  }, [selectedOption, confidence, currentQ, persistAnswer]);
 
   const handleNext = () => {
     const nextIdx = currentIdx + 1;
     if (nextIdx >= questions.length) {
-      if (skipped.length > 0) {
-        const skippedQs = skipped.filter((qId) => !answers[qId]);
-        if (skippedQs.length > 0) {
-          const remaining = questions.filter((q) => skippedQs.includes(q.id));
-          const answered = questions.filter((q) => !skippedQs.includes(q.id));
-          setQuestions([...answered, ...remaining]);
-          setCurrentIdx(answered.length);
-          setSkipped([]);
-          resetQuestionState();
-          return;
-        }
-      }
       clearInterval(totalTimerRef.current);
+      completeQuiz(
+        {
+          correct: Object.values(answers).filter((answer) => answer.correct).length,
+          total: questions.length,
+        },
+        totalTime
+      );
       setScreen("results");
       return;
     }
@@ -1004,7 +1070,27 @@ export default function VectorDatabaseQuiz({ quizSlug = 'advanced-vector-databas
 
   const handleSkip = () => {
     setSkipped((prev) => [...prev, currentQ.id]);
-    handleNext();
+    if (currentIdx < questions.length - 1) {
+      const reorderedQuestions = [
+        ...questions.slice(0, currentIdx),
+        ...questions.slice(currentIdx + 1),
+        currentQ,
+      ];
+      persistQuestionOrder(reorderedQuestions.map((question) => question.id));
+      setQuestions(reorderedQuestions);
+      resetQuestionState();
+      return;
+    }
+
+    clearInterval(totalTimerRef.current);
+    completeQuiz(
+      {
+        correct: Object.values(answers).filter((answer) => answer.correct).length,
+        total: questions.length,
+      },
+      totalTime
+    );
+    setScreen("results");
   };
 
   const toggleFlag = () => {
@@ -1047,7 +1133,9 @@ export default function VectorDatabaseQuiz({ quizSlug = 'advanced-vector-databas
   const retryMissed = () => {
     const missed = getIncorrect().map((q) => q.id);
     const qs = shuffle(QUESTIONS.filter((q) => missed.includes(q.id)));
+    startNewAttempt(qs.map((question) => question.id));
     setQuestions(qs);
+    setMode("shuffled");
     setCurrentIdx(0);
     setAnswers({});
     setSelectedOption(null);
@@ -1069,7 +1157,9 @@ export default function VectorDatabaseQuiz({ quizSlug = 'advanced-vector-databas
       .map(([k]) => k);
     const qs = shuffle(QUESTIONS.filter((q) => weakSTs.includes(q.subtopic)));
     if (qs.length === 0) return;
+    startNewAttempt(qs.map((question) => question.id));
     setQuestions(qs);
+    setMode("shuffled");
     setCurrentIdx(0);
     setAnswers({});
     setSelectedOption(null);
@@ -1145,6 +1235,15 @@ export default function VectorDatabaseQuiz({ quizSlug = 'advanced-vector-databas
               Shuffled (Recommended)
             </button>
           </div>
+
+          {isResuming && resumeData && (
+            <button
+              onClick={handleResume}
+              className="mt-3 w-full py-3 rounded-xl bg-emerald-900/40 border border-emerald-700/50 text-emerald-300 font-medium hover:bg-emerald-900/60 transition-colors flex items-center justify-center gap-2"
+            >
+              <RotateCcw size={16} /> Resume Quiz ({resumeData.answeredCount}/{resumeData.questionOrder?.length || QUESTIONS.length})
+            </button>
+          )}
         </div>
       </div>
     );

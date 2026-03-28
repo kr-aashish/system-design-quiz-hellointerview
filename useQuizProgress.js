@@ -96,6 +96,16 @@ export function useQuizProgress(quizSlug, totalQuestions) {
   }, [quizSlug, attemptId]);
 
   /**
+   * Persist the current question order for resume support after skip/reorder flows.
+   */
+  const persistQuestionOrder = useCallback((questionIds) => {
+    const id = attemptId;
+    if (!id || !questionIds || questionIds.length === 0) return;
+
+    saveQuestionOrder(quizSlug, id, questionIds);
+  }, [quizSlug, attemptId]);
+
+  /**
    * Mark the quiz as complete.
    * 
    * @param {{ correct: number, total: number }} score - Final score
@@ -114,6 +124,7 @@ export function useQuizProgress(quizSlug, totalQuestions) {
     completeQuiz,
     resumeData,
     startNewAttempt,
+    saveQuestionOrder: persistQuestionOrder,
     resumeAttempt,
     isResuming,
   };
