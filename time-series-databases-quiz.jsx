@@ -714,7 +714,7 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
   const [totalTimerActive, setTotalTimerActive] = useState(false);
   const timerRef = useRef(null);
 
-  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUIZ_DATA.questions.length);
   const totalTimerRef = useRef(null);
 
 

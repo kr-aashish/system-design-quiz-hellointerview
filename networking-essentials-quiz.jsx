@@ -1004,7 +1004,7 @@ export default function NetworkingEssentialsQuiz({ quizSlug = 'core-concepts-net
   const [timer, setTimer] = useState(90);
   const timerRef = useRef(null);
 
-  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUESTIONS.length);
+  const { attemptId, saveAnswer: persistAnswer, completeQuiz, resumeData, startNewAttempt, resumeAttempt, isResuming } = useQuizProgress(quizSlug, QUIZ_DATA.questions.length);
 
   const questions = QUIZ_DATA.questions;
 
