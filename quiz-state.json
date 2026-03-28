@@ -78,9 +78,9 @@
       "name": "Networking Essentials",
       "path": "/learn/system-design/core-concepts/networking-essentials",
       "slug": "core-concepts-networking-essentials",
-      "status": "pending",
-      "lastAttempt": null,
-      "outputFile": null,
+      "status": "completed",
+      "lastAttempt": "2026-03-28T00:00:00Z",
+      "outputFile": "networking-essentials-quiz.jsx",
       "retryCount": 0
     },
     {
