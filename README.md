@@ -5,6 +5,7 @@ A collection of interactive system design quizzes built with React and Vite.
 ## Available Quizzes
 - Contention Quiz
 - Handling Large Blobs Quiz
+- Managing Long-Running Tasks Quiz
 - Multi-Step Processes Quiz
 - Real-Time Updates Quiz
 - Scaling Reads Quiz

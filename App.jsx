@@ -5,10 +5,12 @@ import MultiStepQuiz from './multi-step-processes-quiz';
 import RealTimeUpdatesQuiz from './real-time-updates-quiz';
 import ScalingReadsQuiz from './scaling-reads-quiz';
 import ScalingWritesQuiz from './scaling-writes-quiz';
+import LongRunningTasksQuiz from './managing-long-running-tasks-quiz';
 
 const QUIZZES = [
   { path: '/contention', title: 'Contention Quiz', component: ContentionQuiz },
-  { path: '/large-blobs', title: 'Large Blobs Quiz', component: LargeBlobsQuiz },
+  { path: '/large-blobs', title: 'Handling Large Blobs Quiz', component: LargeBlobsQuiz },
+  { path: '/managing-long-running-tasks', title: 'Managing Long-Running Tasks Quiz', component: LongRunningTasksQuiz },
   { path: '/multi-step', title: 'Multi-Step Processes Quiz', component: MultiStepQuiz },
   { path: '/real-time-updates', title: 'Real-Time Updates Quiz', component: RealTimeUpdatesQuiz },
   { path: '/scaling-reads', title: 'Scaling Reads Quiz', component: ScalingReadsQuiz },
