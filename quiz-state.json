@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "lastUpdated": null,
-  "lastProcessedLink": null,
+  "lastUpdated": "2026-04-27T00:00:00Z",
+  "lastProcessedLink": "/learn/system-design/in-a-hurry/key-technologies",
   "topics": [
     {
       "category": "Patterns",
@@ -200,7 +200,7 @@
       "slug": "key-tech-redis",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "redis-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -300,7 +300,7 @@
       "slug": "in-a-hurry-how-to-prepare",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "how-to-prepare-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -320,7 +320,7 @@
       "slug": "in-a-hurry-core-concepts",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "core-concepts-overview-quiz.jsx",
       "retryCount": 0
     },
     {
@@ -328,9 +328,9 @@
       "name": "Key Technologies",
       "path": "/learn/system-design/in-a-hurry/key-technologies",
       "slug": "in-a-hurry-key-technologies",
-      "status": "pending",
-      "lastAttempt": null,
-      "outputFile": null,
+      "status": "completed",
+      "lastAttempt": "2026-04-27T00:00:00Z",
+      "outputFile": "key-technologies-quiz.jsx",
       "retryCount": 0
     },
     {

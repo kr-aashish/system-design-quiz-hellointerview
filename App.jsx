@@ -23,6 +23,10 @@ import ConsistentHashingQuiz from './consistent-hashing-quiz';
 import NumbersToKnowQuiz from './numbers-to-know-quiz';
 import TimeSeriesDatabasesQuiz from './time-series-databases-quiz';
 import VectorDatabaseQuiz from './vector-database-quiz';
+import RedisQuiz from './redis-quiz';
+import KeyTechnologiesQuiz from './key-technologies-quiz';
+import HowToPrepareQuiz from './how-to-prepare-quiz';
+import CoreConceptsOverviewQuiz from './core-concepts-overview-quiz';
 
 // Map output file names to imported components
 const componentsMap = {
@@ -45,6 +49,10 @@ const componentsMap = {
   'numbers-to-know-quiz.jsx': NumbersToKnowQuiz,
   'time-series-databases-quiz.jsx': TimeSeriesDatabasesQuiz,
   'vector-database-quiz.jsx': VectorDatabaseQuiz,
+  'redis-quiz.jsx': RedisQuiz,
+  'key-technologies-quiz.jsx': KeyTechnologiesQuiz,
+  'how-to-prepare-quiz.jsx': HowToPrepareQuiz,
+  'core-concepts-overview-quiz.jsx': CoreConceptsOverviewQuiz,
 };
 
 function timeAgo(isoStr) {
