@@ -328,7 +328,7 @@ export default function HowToPrepareQuiz({ quizSlug = 'in-a-hurry-how-to-prepare
       setSkipped([]);
       setFlagged(new Set());
       setTimer(getTimerDuration(qs[0]));
-      setTimerActive(true);
+      setTimerActive(false);
       setTotalElapsed(0);
       setShowingSkipped(false);
       setScreen("quiz");
@@ -347,7 +347,7 @@ export default function HowToPrepareQuiz({ quizSlug = 'in-a-hurry-how-to-prepare
     setSkipped([]);
     setFlagged(new Set());
     setTimer(getTimerDuration(qs[0]));
-    setTimerActive(true);
+    setTimerActive(false);
     setTotalElapsed(0);
     setShowingSkipped(false);
     setScreen("quiz");
@@ -355,6 +355,7 @@ export default function HowToPrepareQuiz({ quizSlug = 'in-a-hurry-how-to-prepare
 
   useEffect(() => {
     if (timerActive && screen === "quiz" && !submitted) {
+      return;
       timerRef.current = setInterval(() => {
         setTimer((t) => {
           if (t <= 1) {
@@ -382,7 +383,7 @@ export default function HowToPrepareQuiz({ quizSlug = 'in-a-hurry-how-to-prepare
             }
             return 0;
           }
-          return t - 1;
+          return t;
         });
       }, 1000);
     }
@@ -447,7 +448,7 @@ export default function HowToPrepareQuiz({ quizSlug = 'in-a-hurry-how-to-prepare
       setConfidence(null);
       setSubmitted(false);
       setTimer(getTimerDuration(nextQ));
-      setTimerActive(true);
+      setTimerActive(false);
     } else if (skipped.length > 0 && !showingSkipped) {
       const skippedQs = skipped.map((id) => QUESTIONS.find((q) => q.id === id));
       setQuestions(skippedQs);
@@ -457,7 +458,7 @@ export default function HowToPrepareQuiz({ quizSlug = 'in-a-hurry-how-to-prepare
       setConfidence(null);
       setSubmitted(false);
       setTimer(getTimerDuration(skippedQs[0]));
-      setTimerActive(true);
+      setTimerActive(false);
       setShowingSkipped(true);
     } else {
       clearInterval(elapsedRef.current);
@@ -479,7 +480,7 @@ export default function HowToPrepareQuiz({ quizSlug = 'in-a-hurry-how-to-prepare
       setConfidence(null);
       setSubmitted(false);
       setTimer(getTimerDuration(nextQ));
-      setTimerActive(true);
+      setTimerActive(false);
     } else {
       const skippedQs = newSkipped.map((id) => QUESTIONS.find((qq) => qq.id === id));
       if (skippedQs.length === 0) return;
@@ -490,7 +491,7 @@ export default function HowToPrepareQuiz({ quizSlug = 'in-a-hurry-how-to-prepare
       setConfidence(null);
       setSubmitted(false);
       setTimer(getTimerDuration(skippedQs[0]));
-      setTimerActive(true);
+      setTimerActive(false);
       setShowingSkipped(true);
     }
   }, [currentIndex, questions, skipped]);
@@ -544,9 +545,6 @@ export default function HowToPrepareQuiz({ quizSlug = 'in-a-hurry-how-to-prepare
             </span>
             <span className="flex items-center gap-1">
               <Clock size={14} /> ~{totalMin} min
-            </span>
-            <span className="flex items-center gap-1">
-              <Timer size={14} /> Per-tier timer
             </span>
           </div>
 

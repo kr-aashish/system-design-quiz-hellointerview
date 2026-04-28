@@ -884,8 +884,8 @@ function QuestionScreen({ question, index, total, onAnswer, onSkip, onFlag, isFl
           <div className="space-y-4 mb-6 animate-fadeIn">
             <div className={`p-4 rounded-lg border ${selected === question.correct && !timedOut ? "bg-green-500/10 border-green-500/30" : "bg-red-500/10 border-red-500/30"}`}>
               <div className="flex items-center gap-2 mb-2">
-                {selected === question.correct && !timedOut ? <Check className="w-5 h-5 text-green-400" /> : timedOut ? <Clock className="w-5 h-5 text-red-400" /> : <X className="w-5 h-5 text-red-400" />}
-                <span className="font-semibold text-sm">{timedOut ? "Time's Up!" : selected === question.correct ? "Correct!" : "Incorrect"}</span>
+                {selected === question.correct && !timedOut ? <Check className="w-5 h-5 text-green-400" /> : <X className="w-5 h-5 text-red-400" />}
+                <span className="font-semibold text-sm">{selected === question.correct && !timedOut ? "Correct!" : "Incorrect"}</span>
               </div>
               <p className="text-sm text-gray-300 leading-relaxed">{question.explanation}</p>
             </div>
@@ -1152,7 +1152,7 @@ export default function DatabaseIndexingQuiz({ quizSlug = 'core-concepts-db-inde
     const interval = setInterval(() => {
       setTimeLeft(t => {
         if (t <= 0) return 0;
-        return t - 1;
+        return t;
       });
       setTotalElapsed(t => t + 1);
     }, 1000);

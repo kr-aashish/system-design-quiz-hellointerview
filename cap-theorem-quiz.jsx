@@ -645,13 +645,15 @@ export default function CAPTheoremQuiz() {
   useEffect(() => {
     if (quizState !== "quiz") return;
 
+    return;
+
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           handleNextQuestion();
           return 90;
         }
-        return prev - 1;
+        return prev;
       });
     }, 1000);
 

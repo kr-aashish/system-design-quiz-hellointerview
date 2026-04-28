@@ -1117,7 +1117,7 @@ export default function MultiStepProcessesQuiz({ quizSlug = 'patterns-multi-step
   useEffect(() => {
     let interval;
     if (timerActive && timer > 0) {
-      interval = setInterval(() => setTimer((t) => t - 1), 1000);
+      interval = setInterval(() => setTimer((t) => t), 1000);
     } else if (timerActive && timer === 0) {
       setTimerActive(false);
       setTimedOut(true);
@@ -1185,7 +1185,7 @@ export default function MultiStepProcessesQuiz({ quizSlug = 'patterns-multi-step
     setFlagged({});
     setSkipped([]);
     setTimer(90);
-    setTimerActive(true);
+    setTimerActive(false);
     setTotalTime(0);
     setTotalTimerActive(true);
     setTimedOut(false);
@@ -1206,7 +1206,7 @@ export default function MultiStepProcessesQuiz({ quizSlug = 'patterns-multi-step
     setFlagged({});
     setSkipped([]);
     setTimer(90);
-    setTimerActive(true);
+    setTimerActive(false);
     setTotalTime(0);
     setTotalTimerActive(true);
     setTimedOut(false);
@@ -1244,7 +1244,7 @@ export default function MultiStepProcessesQuiz({ quizSlug = 'patterns-multi-step
     setFlagged({});
     setSkipped([]);
     setTimer(90);
-    setTimerActive(true);
+    setTimerActive(false);
     setTotalTime(0);
     setTotalTimerActive(true);
     setTimedOut(false);
@@ -1288,7 +1288,7 @@ export default function MultiStepProcessesQuiz({ quizSlug = 'patterns-multi-step
       setConfidence(null);
       setSubmitted(false);
       setTimer(90);
-      setTimerActive(true);
+      setTimerActive(false);
       setTimedOut(false);
     } else if (skipped.length > 0) {
       const remaining = skipped.filter((q) => !answers[q.id]);
@@ -1300,7 +1300,7 @@ export default function MultiStepProcessesQuiz({ quizSlug = 'patterns-multi-step
         setConfidence(null);
         setSubmitted(false);
         setTimer(90);
-        setTimerActive(true);
+        setTimerActive(false);
         setTimedOut(false);
       } else {
         finishQuiz();
@@ -1561,13 +1561,6 @@ export default function MultiStepProcessesQuiz({ quizSlug = 'patterns-multi-step
           {/* Feedback (post-submit) */}
           {submitted && (
             <div className="space-y-4 mt-4">
-              {timedOut && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
-                  <AlertTriangle size={16} className="text-red-400" />
-                  <span className="text-sm text-red-300">Time expired — marked as incorrect.</span>
-                </div>
-              )}
-
               <div className="p-4 rounded-xl bg-gray-900 border border-gray-700">
                 <div className="flex items-center gap-2 mb-2">
                   <BookOpen size={16} className="text-indigo-400" />

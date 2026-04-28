@@ -1200,13 +1200,14 @@ export default function APIDesignQuiz({ quizSlug = 'api-design' }) {
   const startTimer = useCallback(() => {
     clearInterval(timerRef.current);
     setTimeLeft(90);
+    return;
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
           return 0;
         }
-        return prev - 1;
+        return prev;
       });
     }, 1000);
   }, []);

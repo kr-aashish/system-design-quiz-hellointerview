@@ -817,6 +817,7 @@ export default function ContentionQuiz({ quizSlug = 'patterns-dealing-with-conte
 
   useEffect(() => {
     if (screen !== "quiz" || submitted) return;
+    return;
     timerRef.current = setInterval(() => {
       setTimer((t) => {
         if (t <= 1) {
@@ -825,7 +826,7 @@ export default function ContentionQuiz({ quizSlug = 'patterns-dealing-with-conte
           setSubmitted(true);
           return 0;
         }
-        return t - 1;
+        return t;
       });
     }, 1000);
     return () => clearInterval(timerRef.current);
@@ -1005,9 +1006,6 @@ export default function ContentionQuiz({ quizSlug = 'patterns-dealing-with-conte
             </span>
             <span className="flex items-center gap-1">
               <Clock size={14} /> ~{totalTime} min
-            </span>
-            <span className="flex items-center gap-1">
-              <Timer size={14} /> 90s per question
             </span>
           </div>
           <div className="bg-slate-900 rounded-xl border border-slate-800 p-5 mb-8">
@@ -1466,11 +1464,6 @@ export default function ContentionQuiz({ quizSlug = 'patterns-dealing-with-conte
         {/* Feedback */}
         {submitted && (
           <div className="space-y-4 mb-8">
-            {timedOut && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-                <Clock size={16} /> Time expired — marked as incorrect.
-              </div>
-            )}
             {!timedOut && isCorrect && (
               <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm">
                 <CheckCircle2 size={16} /> Correct!

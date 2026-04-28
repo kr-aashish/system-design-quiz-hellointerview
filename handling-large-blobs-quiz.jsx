@@ -846,6 +846,7 @@ export default function LargeBlobsQuiz({ quizSlug = 'patterns-large-blobs' }) {
   // Per-question timer
   useEffect(() => {
     if (screen !== "quiz" || submitted) return;
+    return;
     timerRef.current = setInterval(() => {
       setTimer((t) => {
         if (t <= 1) {
@@ -874,7 +875,7 @@ export default function LargeBlobsQuiz({ quizSlug = 'patterns-large-blobs' }) {
           }
           return 0;
         }
-        return t - 1;
+        return t;
       });
     }, 1000);
     return () => clearInterval(timerRef.current);
@@ -1261,15 +1262,6 @@ export default function LargeBlobsQuiz({ quizSlug = 'patterns-large-blobs' }) {
             {/* Explanation (post-submit) */}
             {(submitted || timedOut) && (
               <div className="space-y-4 mb-6">
-                {timedOut && !answers[answers.length - 1]?.selected && answers[answers.length - 1]?.selected !== 0 && (
-                  <div className="bg-red-950/30 border border-red-800/50 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-red-400 font-medium text-sm mb-1">
-                      <Clock size={14} /> Time's Up!
-                    </div>
-                    <p className="text-sm text-gray-400">This question was marked as incorrect.</p>
-                  </div>
-                )}
-
                 <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
                   <div className="flex items-center gap-2 text-blue-400 font-medium text-sm mb-2">
                     <BookOpen size={14} /> Explanation

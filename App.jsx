@@ -27,6 +27,7 @@ import RedisQuiz from './redis-quiz';
 import KeyTechnologiesQuiz from './key-technologies-quiz';
 import HowToPrepareQuiz from './how-to-prepare-quiz';
 import CoreConceptsOverviewQuiz from './core-concepts-overview-quiz';
+import InAHurryIntroductionQuiz from './in-a-hurry-introduction-quiz';
 
 // Map output file names to imported components
 const componentsMap = {
@@ -53,6 +54,7 @@ const componentsMap = {
   'key-technologies-quiz.jsx': KeyTechnologiesQuiz,
   'how-to-prepare-quiz.jsx': HowToPrepareQuiz,
   'core-concepts-overview-quiz.jsx': CoreConceptsOverviewQuiz,
+  'in-a-hurry-introduction-quiz.jsx': InAHurryIntroductionQuiz,
 };
 
 function timeAgo(isoStr) {

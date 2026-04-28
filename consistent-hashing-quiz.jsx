@@ -735,6 +735,7 @@ function QuestionScreen({ question, index, total, onAnswer, onSkip, onFlag, isFl
 
   useEffect(() => {
     if (submitted || timedOut) return;
+    return;
     timerRef.current = setInterval(() => {
       setTimeLeft((t) => {
         if (t <= 1) {
@@ -743,7 +744,7 @@ function QuestionScreen({ question, index, total, onAnswer, onSkip, onFlag, isFl
           setSubmitted(true);
           return 0;
         }
-        return t - 1;
+        return t;
       });
     }, 1000);
     return () => clearInterval(timerRef.current);
@@ -889,13 +890,6 @@ function QuestionScreen({ question, index, total, onAnswer, onSkip, onFlag, isFl
 
       {submitted && (
         <div className="mt-6 space-y-4">
-          {timedOut && selected === null && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
-              <AlertTriangle size={16} className="text-red-400" />
-              <span className="text-red-300 text-sm">Time's up! No answer submitted.</span>
-            </div>
-          )}
-
           <div className="p-4 rounded-lg bg-gray-800/60 border border-gray-700/50">
             <div className="flex items-center gap-2 mb-2">
               <BookOpen size={16} className="text-indigo-400" />

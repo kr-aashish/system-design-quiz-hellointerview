@@ -1472,13 +1472,14 @@ export default function KeyTechnologiesQuiz({ quizSlug = 'in-a-hurry-key-technol
     const initialTime = tierTimer(difficulty);
     setTimer(initialTime);
     if (timerRef.current) clearInterval(timerRef.current);
+    return;
     timerRef.current = setInterval(() => {
       setTimer(prev => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
           return 0;
         }
-        return prev - 1;
+        return prev;
       });
     }, 1000);
   }, []);

@@ -1405,7 +1405,7 @@ export default function BigDataStructuresQuiz({ quizSlug = 'advanced-data-struct
   // Per-question timer
   useEffect(() => {
     if (!timerActive || timer <= 0) return;
-    const id = setInterval(() => setTimer((t) => t - 1), 1000);
+    const id = setInterval(() => setTimer((t) => t), 1000);
     return () => clearInterval(id);
   }, [timerActive, timer]);
 
@@ -1471,7 +1471,7 @@ export default function BigDataStructuresQuiz({ quizSlug = 'advanced-data-struct
     setFlagged(new Set());
     setSkipped([]);
     setTimer(90);
-    setTimerActive(true);
+    setTimerActive(false);
     setTotalTime(0);
     setTotalTimerActive(true);
     setTimedOut(false);
@@ -1509,7 +1509,7 @@ export default function BigDataStructuresQuiz({ quizSlug = 'advanced-data-struct
       setFlagged(new Set());
       setSkipped([]);
       setTimer(90);
-      setTimerActive(true);
+      setTimerActive(false);
       setTotalTime(0);
       setTotalTimerActive(true);
       setTimedOut(false);
@@ -1542,7 +1542,7 @@ export default function BigDataStructuresQuiz({ quizSlug = 'advanced-data-struct
       setConfidence(null);
       setSubmitted(false);
       setTimer(90);
-      setTimerActive(true);
+      setTimerActive(false);
       setTimedOut(false);
     } else {
       const correctCount = Object.values(answers).filter((answer) => answer.correct).length;
@@ -1569,7 +1569,7 @@ export default function BigDataStructuresQuiz({ quizSlug = 'advanced-data-struct
       setConfidence(null);
       setSubmitted(false);
       setTimer(90);
-      setTimerActive(true);
+      setTimerActive(false);
       setTimedOut(false);
       return;
     }
@@ -1904,15 +1904,6 @@ export default function BigDataStructuresQuiz({ quizSlug = 'advanced-data-struct
           {/* Explanation (after submit or timeout) */}
           {submitted && (
             <div className="space-y-4">
-              {timedOut && (
-                <div className="p-4 rounded-lg bg-red-900/20 border border-red-800">
-                  <div className="flex items-center gap-2 text-red-400 font-semibold mb-1">
-                    <AlertTriangle className="w-5 h-5" /> Time's Up!
-                  </div>
-                  <p className="text-sm text-red-300">This question was auto-marked as incorrect.</p>
-                </div>
-              )}
-
               <div className="p-4 rounded-lg bg-gray-900 border border-gray-800">
                 <div className="flex items-center gap-2 text-gray-300 font-semibold mb-2">
                   <Brain className="w-5 h-5" /> Explanation

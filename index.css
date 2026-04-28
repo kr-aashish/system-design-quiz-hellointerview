@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* Hide legacy per-question countdown UI while keeping normal quiz progress visible. */
+  div:has(> svg.lucide-timer),
+  span:has(> svg.lucide-timer),
+  p:has(> svg.lucide-timer),
+  div.font-mono:has(> svg.lucide-clock),
+  span.font-mono:has(> svg.lucide-clock),
+  div:has(> svg.lucide-clock):has(span.font-mono),
+  span:has(> svg.lucide-clock):has(span.font-mono),
+  div:has(> div.duration-1000),
+  div:has(> div.ease-linear) {
+    display: none !important;
+  }
+}

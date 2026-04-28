@@ -610,6 +610,7 @@ export default function ScalingWritesQuiz({ quizSlug = 'patterns-scaling-writes'
   useEffect(() => {
     if (screen === "quiz" && currentQuestion && !submitted && !timedOut) {
       const questionId = currentQuestion.id;
+      return;
       timerRef.current = setInterval(() => {
         setTimer(prev => {
           if (prev <= 1) {
@@ -629,7 +630,7 @@ export default function ScalingWritesQuiz({ quizSlug = 'patterns-scaling-writes'
             }
             return 0;
           }
-          return prev - 1;
+          return prev;
         });
       }, 1000);
     }
@@ -1165,12 +1166,6 @@ export default function ScalingWritesQuiz({ quizSlug = 'patterns-scaling-writes'
         {/* Explanation */}
         {showExplanation && (
           <div className="space-y-3 animate-in">
-            {timedOut && !submitted && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                <div className="text-xs font-semibold text-red-400 mb-1 flex items-center gap-1"><Clock size={12} /> Time's up!</div>
-                <div className="text-xs text-gray-400">This question has been marked as incorrect.</div>
-              </div>
-            )}
             <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
               <div className="text-xs font-semibold text-gray-400 mb-2">Explanation</div>
               <p className="text-sm text-gray-300 leading-relaxed">{currentQuestion.explanation}</p>

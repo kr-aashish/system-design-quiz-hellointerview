@@ -736,7 +736,8 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
   // Timer logic
   useEffect(() => {
     if (timerActive && timer > 0) {
-      timerRef.current = setTimeout(() => setTimer((t) => t - 1), 1000);
+      return;
+      timerRef.current = setTimeout(() => setTimer((t) => t), 1000);
     } else if (timerActive && timer === 0) {
       handleTimeout();
     }
@@ -785,7 +786,7 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
     setFlagged(new Set());
     setSkipped([]);
     setTimer(TIMER_SECONDS);
-    setTimerActive(true);
+    setTimerActive(false);
     setTotalTime(0);
     setTotalTimerActive(true);
     setScreen("quiz");
@@ -805,7 +806,7 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
     setConfidence(null);
     setConfirmed(false);
     setTimer(TIMER_SECONDS);
-    setTimerActive(true);
+    setTimerActive(false);
     setTotalTime(0);
     setTotalTimerActive(true);
     setScreen("quiz");
@@ -853,7 +854,7 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
       setConfidence(null);
       setConfirmed(false);
       setTimer(TIMER_SECONDS);
-      setTimerActive(true);
+      setTimerActive(false);
     } else {
       const correctCount = Object.values(answers).filter((answer) => answer.correct).length;
       setTimerActive(false);
@@ -874,7 +875,7 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
     setConfidence(null);
     setConfirmed(false);
     setTimer(TIMER_SECONDS);
-    setTimerActive(true);
+    setTimerActive(false);
     if (currentIdx >= newQuestions.length) {
       setCurrentIdx(newQuestions.length - 1);
     }
@@ -1117,15 +1118,6 @@ export default function TimeSeriesDatabasesQuiz({ quizSlug = 'advanced-time-seri
           {/* Feedback */}
           {(confirmed || isTimedOut) && (
             <div className="mt-6 space-y-4">
-              {isTimedOut && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-red-400 font-medium text-sm mb-1">
-                    <Clock className="w-4 h-4" /> Time's up!
-                  </div>
-                  <p className="text-gray-400 text-sm">This question was marked as incorrect due to timeout.</p>
-                </div>
-              )}
-
               <div className={`rounded-lg p-4 border ${answer?.correct ? "bg-emerald-500/5 border-emerald-500/20" : "bg-red-500/5 border-red-500/20"}`}>
                 <div className="flex items-center gap-2 mb-2">
                   {answer?.correct ? <CheckCircle className="w-4 h-4 text-emerald-400" /> : <XCircle className="w-4 h-4 text-red-400" />}

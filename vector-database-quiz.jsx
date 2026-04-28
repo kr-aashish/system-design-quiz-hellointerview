@@ -973,6 +973,7 @@ export default function VectorDatabaseQuiz({ quizSlug = 'advanced-vector-databas
 
   useEffect(() => {
     if (screen === "quiz" && !submitted && !timedOut) {
+      return;
       timerRef.current = setInterval(() => {
         setTimer((t) => {
           if (t <= 1) {
@@ -991,7 +992,7 @@ export default function VectorDatabaseQuiz({ quizSlug = 'advanced-vector-databas
             }));
             return 0;
           }
-          return t - 1;
+          return t;
         });
       }, 1000);
     }
@@ -1365,8 +1366,6 @@ export default function VectorDatabaseQuiz({ quizSlug = 'advanced-vector-databas
                 <div className="flex items-center gap-2 mb-2">
                   {answers[currentQ.id]?.correct ? (
                     <><CheckCircle size={18} className="text-emerald-400" /><span className="font-semibold text-emerald-400">Correct!</span></>
-                  ) : answers[currentQ.id]?.timedOut ? (
-                    <><Clock size={18} className="text-red-400" /><span className="font-semibold text-red-400">Time's up!</span></>
                   ) : (
                     <><XCircle size={18} className="text-red-400" /><span className="font-semibold text-red-400">Incorrect</span></>
                   )}

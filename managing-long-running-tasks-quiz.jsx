@@ -799,7 +799,7 @@ function QuizScreen({ questions, onFinish, onPersistAnswer }) {
 
   useEffect(() => {
     setTimer(90);
-    setTimerActive(true);
+    setTimerActive(false);
     setSelectedOption(null);
     setConfidence(null);
     setSubmitted(false);
@@ -811,7 +811,8 @@ function QuizScreen({ questions, onFinish, onPersistAnswer }) {
       handleTimeout();
       return;
     }
-    timerRef.current = setTimeout(() => setTimer((t) => t - 1), 1000);
+    return;
+    timerRef.current = setTimeout(() => setTimer((t) => t), 1000);
     return () => clearTimeout(timerRef.current);
   }, [timer, timerActive, submitted]);
 

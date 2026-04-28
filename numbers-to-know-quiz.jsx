@@ -685,7 +685,7 @@ export default function NumbersToKnowQuiz({ quizSlug = 'core-concepts-numbers-to
     setFlagged(new Set());
     setSkipped([]);
     setTimer(TIMER_DURATION);
-    setTimerActive(true);
+    setTimerActive(false);
     setTotalElapsed(0);
     setShowExplanation(false);
     setScreen("quiz");
@@ -731,7 +731,7 @@ export default function NumbersToKnowQuiz({ quizSlug = 'core-concepts-numbers-to
     setFlagged(new Set());
     setSkipped(restoredSkips);
     setTimer(TIMER_DURATION);
-    setTimerActive(true);
+    setTimerActive(false);
     setTotalElapsed(0);
     setShowExplanation(false);
     setScreen("quiz");
@@ -743,7 +743,7 @@ export default function NumbersToKnowQuiz({ quizSlug = 'core-concepts-numbers-to
     let interval;
     if (timerActive && timer > 0 && !submitted) {
       interval = setInterval(() => {
-        setTimer(t => t - 1);
+        setTimer(t => t);
         setTotalElapsed(t => t + 1);
       }, 1000);
     } else if (timer === 0 && !submitted) {
@@ -806,7 +806,7 @@ export default function NumbersToKnowQuiz({ quizSlug = 'core-concepts-numbers-to
       setSubmitted(false);
       setShowExplanation(false);
       setTimer(TIMER_DURATION);
-      setTimerActive(true);
+      setTimerActive(false);
     } else {
       setTimerActive(false);
       completeQuiz(

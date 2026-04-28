@@ -866,6 +866,7 @@ export default function ShardingQuiz({ quizSlug }) {
     setTimeRemaining(90);
     setIsTimeUp(false);
     clearInterval(timerRef.current);
+    return;
     timerRef.current = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
@@ -874,7 +875,7 @@ export default function ShardingQuiz({ quizSlug }) {
           handleAutoSubmit();
           return 0;
         }
-        return prev - 1;
+        return prev;
       });
     }, 1000);
     return () => clearInterval(timerRef.current);

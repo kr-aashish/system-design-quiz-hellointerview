@@ -715,7 +715,7 @@ function QuestionScreen({ question, questionIndex, totalQuestions, onAnswer, onS
               <div className="flex items-center gap-2 mb-2">
                 {isCorrect && !timedOut ? <CheckCircle className="w-5 h-5 text-emerald-400" /> : <XCircle className="w-5 h-5 text-red-400" />}
                 <span className={`font-semibold text-sm ${isCorrect && !timedOut ? "text-emerald-400" : "text-red-400"}`}>
-                  {timedOut ? "Time's Up!" : isCorrect ? "Correct!" : "Incorrect"}
+                  {isCorrect && !timedOut ? "Correct!" : "Incorrect"}
                 </span>
               </div>
               <p className="text-sm text-gray-300 leading-relaxed">{question.explanation}</p>
@@ -910,7 +910,8 @@ export default function DataModelingQuiz({ quizSlug = 'core-concepts-data-modeli
     clearInterval(timerRef.current);
     clearInterval(elapsedRef.current);
     setTimeLeft(MAX_TIME);
-    timerRef.current = setInterval(() => setTimeLeft(t => Math.max(0, t - 1)), 1000);
+    return;
+    timerRef.current = setInterval(() => setTimeLeft(t => t), 1000);
     elapsedRef.current = setInterval(() => setTotalElapsed(t => t + 1), 1000);
   }, []);
 

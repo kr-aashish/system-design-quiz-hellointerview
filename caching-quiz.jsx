@@ -799,7 +799,7 @@ export default function CachingQuiz({ quizSlug = 'core-concepts-caching' }) {
       setSkipped([]);
       setFlagged(new Set());
       setTimer(TIMER_DURATION);
-      setTimerActive(true);
+      setTimerActive(false);
       setTotalElapsed(0);
       setShowingSkipped(false);
       setScreen("quiz");
@@ -818,7 +818,7 @@ export default function CachingQuiz({ quizSlug = 'core-concepts-caching' }) {
     setSkipped([]);
     setFlagged(new Set());
     setTimer(TIMER_DURATION);
-    setTimerActive(true);
+    setTimerActive(false);
     setTotalElapsed(0);
     setShowingSkipped(false);
     setScreen("quiz");
@@ -826,6 +826,7 @@ export default function CachingQuiz({ quizSlug = 'core-concepts-caching' }) {
 
   useEffect(() => {
     if (timerActive && screen === "quiz" && !submitted) {
+      return;
       timerRef.current = setInterval(() => {
         setTimer((t) => {
           if (t <= 1) {
@@ -854,7 +855,7 @@ export default function CachingQuiz({ quizSlug = 'core-concepts-caching' }) {
             }
             return 0;
           }
-          return t - 1;
+          return t;
         });
       }, 1000);
     }
@@ -926,7 +927,7 @@ export default function CachingQuiz({ quizSlug = 'core-concepts-caching' }) {
       setConfidence(null);
       setSubmitted(false);
       setTimer(TIMER_DURATION);
-      setTimerActive(true);
+      setTimerActive(false);
     } else if (skipped.length > 0 && !showingSkipped) {
       const skippedQs = skipped.map((id) =>
         QUESTIONS.find((q) => q.id === id)
@@ -938,7 +939,7 @@ export default function CachingQuiz({ quizSlug = 'core-concepts-caching' }) {
       setConfidence(null);
       setSubmitted(false);
       setTimer(TIMER_DURATION);
-      setTimerActive(true);
+      setTimerActive(false);
       setShowingSkipped(true);
     } else {
       clearInterval(elapsedRef.current);
@@ -957,7 +958,7 @@ export default function CachingQuiz({ quizSlug = 'core-concepts-caching' }) {
       setConfidence(null);
       setSubmitted(false);
       setTimer(TIMER_DURATION);
-      setTimerActive(true);
+      setTimerActive(false);
     } else if (skipped.length > 0 || true) {
       const allSkipped = [...skipped, q.id];
       const skippedQs = allSkipped.map((id) =>
@@ -970,7 +971,7 @@ export default function CachingQuiz({ quizSlug = 'core-concepts-caching' }) {
       setConfidence(null);
       setSubmitted(false);
       setTimer(TIMER_DURATION);
-      setTimerActive(true);
+      setTimerActive(false);
       setShowingSkipped(true);
     }
   }, [currentIndex, questions, skipped]);
@@ -1020,9 +1021,6 @@ export default function CachingQuiz({ quizSlug = 'core-concepts-caching' }) {
             <span className="flex items-center gap-1">
               <Clock size={14} /> ~{Math.round((QUESTIONS.length * 75) / 60)}{" "}
               min
-            </span>
-            <span className="flex items-center gap-1">
-              <Timer size={14} /> 90s per question
             </span>
           </div>
 

@@ -1398,7 +1398,7 @@ export default function RedisQuiz({ quizSlug = "key-tech-redis" }) {
       setSkipped([]);
       setFlagged(new Set());
       setTimer(tierTimerFor(qs[0]));
-      setTimerActive(true);
+      setTimerActive(false);
       setTotalElapsed(0);
       setShowingSkipped(false);
       setScreen("quiz");
@@ -1417,7 +1417,7 @@ export default function RedisQuiz({ quizSlug = "key-tech-redis" }) {
     setSkipped([]);
     setFlagged(new Set());
     setTimer(tierTimerFor(qs[0]));
-    setTimerActive(true);
+    setTimerActive(false);
     setTotalElapsed(0);
     setShowingSkipped(false);
     setScreen("quiz");
@@ -1425,6 +1425,7 @@ export default function RedisQuiz({ quizSlug = "key-tech-redis" }) {
 
   useEffect(() => {
     if (timerActive && screen === "quiz" && !submitted) {
+      return;
       timerRef.current = setInterval(() => {
         setTimer((t) => {
           if (t <= 1) {
@@ -1452,7 +1453,7 @@ export default function RedisQuiz({ quizSlug = "key-tech-redis" }) {
             }
             return 0;
           }
-          return t - 1;
+          return t;
         });
       }, 1000);
     }
@@ -1510,7 +1511,7 @@ export default function RedisQuiz({ quizSlug = "key-tech-redis" }) {
       setConfidence(null);
       setSubmitted(false);
       setTimer(tierTimerFor(nextQ));
-      setTimerActive(true);
+      setTimerActive(false);
     } else if (skipped.length > 0 && !showingSkipped) {
       const skippedQs = skipped.map((id) => QUESTIONS.find((q) => q.id === id));
       const ordered = ladderSort(skippedQs);
@@ -1521,7 +1522,7 @@ export default function RedisQuiz({ quizSlug = "key-tech-redis" }) {
       setConfidence(null);
       setSubmitted(false);
       setTimer(tierTimerFor(ordered[0]));
-      setTimerActive(true);
+      setTimerActive(false);
       setShowingSkipped(true);
     } else {
       clearInterval(elapsedRef.current);
@@ -1597,7 +1598,7 @@ export default function RedisQuiz({ quizSlug = "key-tech-redis" }) {
             </div>
 
             <div className="text-xs text-slate-500 leading-relaxed">
-              Per-tier timers: L1 60s · L2 90s · L3 90s · L4 120s · L5 150s. Results break down accuracy by tier so you can drill the level you missed.
+              Results break down accuracy by tier so you can drill the level you missed.
             </div>
           </div>
         </div>
