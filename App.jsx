@@ -227,6 +227,12 @@ function Index() {
     acc[topic.category].push(topic);
     return acc;
   }, {});
+  const categoryEntries = Object.entries(topicsByCategory);
+  const orderedCategoryEntries = [
+    ...categoryEntries.filter(([category]) => category === 'In a Hurry'),
+    ...categoryEntries.filter(([category]) => category !== 'In a Hurry' && category !== 'Advanced Topics'),
+    ...categoryEntries.filter(([category]) => category === 'Advanced Topics'),
+  ];
 
   const hasAnyProgress = Object.keys(summaries).length > 0;
 
@@ -264,14 +270,14 @@ function Index() {
         <ProgressStats summaries={summaries} quizTopics={quizState.topics} />
         
         <div className="space-y-4 bg-[#232a3b] p-6 rounded-xl border border-[#2d3748] shadow-2xl">
-          {Object.entries(topicsByCategory).map(([category, items], index, array) => (
+          {orderedCategoryEntries.map(([category, items]) => (
             <CategorySection 
               key={category} 
               category={category} 
               items={items} 
               summaries={summaries}
               onClearQuiz={handleClearQuiz}
-              defaultOpen={index < array.length - 2}
+              defaultOpen
             />
           ))}
         </div>
