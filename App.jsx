@@ -26,6 +26,7 @@ import VectorDatabaseQuiz from './vector-database-quiz';
 import RedisQuiz from './redis-quiz';
 import KeyTechnologiesQuiz from './key-technologies-quiz';
 import HowToPrepareQuiz from './how-to-prepare-quiz';
+import DeliveryFrameworkQuiz from './delivery-framework-quiz';
 import CoreConceptsOverviewQuiz from './core-concepts-overview-quiz';
 import InAHurryIntroductionQuiz from './in-a-hurry-introduction-quiz';
 
@@ -53,6 +54,7 @@ const componentsMap = {
   'redis-quiz.jsx': RedisQuiz,
   'key-technologies-quiz.jsx': KeyTechnologiesQuiz,
   'how-to-prepare-quiz.jsx': HowToPrepareQuiz,
+  'delivery-framework-quiz.jsx': DeliveryFrameworkQuiz,
   'core-concepts-overview-quiz.jsx': CoreConceptsOverviewQuiz,
   'in-a-hurry-introduction-quiz.jsx': InAHurryIntroductionQuiz,
 };

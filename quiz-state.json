@@ -310,7 +310,7 @@
       "slug": "in-a-hurry-delivery",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "delivery-framework-quiz.jsx",
       "retryCount": 0
     },
     {
