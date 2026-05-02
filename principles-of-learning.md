@@ -273,6 +273,7 @@ When future system design content is provided and quizzes are generated from it,
 14. **Handwriting/Drawing prompt:** Where appropriate, does the quiz say "sketch this on paper before answering"?
 15. **Anki-suitable isolated facts:** Are atomic facts (e.g. "what is the read latency of Cassandra typically?") split out for Anki?
 16. **Lifestyle hooks:** Long sessions should include break/walk reminders.
+17. **Hard distractors (discrimination quality):** For every MCQ, the three wrong options must be length-matched to the correct option (within ~15% character count), share its vocabulary register and clause structure, and each represent a *real misconception* a moderately-prepared SDE2 candidate would seriously consider — not strawmen, off-topic asides, or absurd claims. A learner must not be able to pick the correct answer by spotting which option is the longest, the most hedged, or the only one using precise terminology. The correct answer's position (`correctIndex`) must vary across the file so position itself is never a tell. Full authoring procedure and acid tests are in `quiz-generation-methodology.md` Section 0.6.
 
 ---
 

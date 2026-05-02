@@ -74,6 +74,82 @@ Before you author any question, ask: **"Could a learner answer this correctly by
 
 ---
 
+## 0.6 The Hard-Distractors Rule (second-most important rule — read carefully)
+
+A question is only as good as its hardest distractor. If the correct answer is obviously the longest, the most detailed, or the only one that uses precise vocabulary, the learner is pattern-matching on the *shape* of the option — not reasoning about the concept. That defeats the entire purpose of the quiz. **Every wrong option must be plausible enough that a moderately-prepared SDE2 candidate would seriously consider it.**
+
+This rule binds at every tier (L1 through L5) and applies to every MCQ in every quiz, including any retroactive edits to existing quizzes.
+
+### What "extremely difficult to discriminate" means
+
+The three wrong options must each:
+
+1. **Be roughly the same length as the correct option** — within ~15% character count. Never let the correct answer be the visibly-longest one. If the correct answer needs a long explanation, the distractors need comparably long ones (with parallel sentence structure: same number of clauses, same level of qualification, same use of "because"/"so that" subordinations).
+2. **Use the same vocabulary register** — same level of precision, same technical terms, same hedge-words ("typically," "generally," "in most cases"). If the correct option says "the system favors availability over consistency under partition," a distractor should not say "it picks A." Both must operate at the same level of formality.
+3. **Be substantively wrong, not obviously wrong.** A wrong option should be wrong because of a *subtle conceptual error* — wrong direction of a trade-off, wrong layer in the stack, right mechanism but wrong failure mode it addresses, correct concept but wrong scenario it applies to, an alternative the learner might actually pick if they half-understood the concept. Never make a distractor wrong by being absurd, off-topic, or using a name the learner has clearly never heard of.
+4. **Reflect the most common real misconceptions a learner brings to this concept.** Three excellent sources of distractor material: (a) the Anti-Pattern Identification candidates from Section 6, (b) the "wrong answers tempting because…" insights you already write for L5 explanations, and (c) commonly-confused adjacent concepts (e.g. when the answer is *optimistic concurrency*, distractors should reflect *pessimistic locking*, *serializable isolation*, and *snapshot isolation* — not "the database doesn't support this").
+
+### Forbidden distractor patterns
+
+If your distractor matches any of these, rewrite it.
+
+- **Length-tell:** the correct option is noticeably longer/shorter than the others.
+- **Vocabulary-tell:** only the correct option uses the precise term; distractors are vague.
+- **Confidence-tell:** only the correct option uses hedge-words like "typically" or "in most cases"; distractors make absolute claims (or vice versa).
+- **Sentence-structure-tell:** only the correct option has the "because/so that/which means" reasoning structure; distractors are flat assertions.
+- **Strawman:** the distractor is so wrong that no SDE2 candidate would pick it (e.g. "Add more components.", "Write more code.", "Hire more engineers.").
+- **Off-topic:** the distractor talks about a different layer/system entirely (e.g. correct answer is about cache invalidation, distractor is about TCP retries).
+- **Negation-trick:** the distractor is the correct answer with one word flipped to a negation. (Use *substantive inversions* — different mechanism producing a different outcome — not lexical flips.)
+- **Implausible attribution:** the distractor blames a cause the learner has no reason to even consider in the scenario.
+
+### Authoring procedure for distractors
+
+After writing the correct option:
+
+1. **Write a one-line "why this is right" gloss** in your scratchpad (not in the file). Identify the *single conceptual move* that makes it correct.
+2. **Generate three "near-miss" alternatives** by perturbing that one move:
+   - Distractor A: same mechanism, wrong direction of trade-off.
+   - Distractor B: adjacent mechanism that solves a *similar but different* problem.
+   - Distractor C: the answer a candidate would give who has read about the topic but never applied it (surface-true but missing the operational nuance).
+3. **Length-match each distractor to the correct option.** Pad with parallel qualifications ("…, particularly when X holds") or trim, until they are within ~15% characters and have a comparable clause count. Read them out loud — they should *sound the same shape*.
+4. **Vocabulary-match.** If the correct option says "linearizability," a distractor should say "serializability" or "sequential consistency" — not "strong consistency stuff." Distractors should be wrong *despite* using precise language.
+5. **Run the discrimination check (below).**
+
+### The discrimination check (acid test for options)
+
+Cover the explanation. Read only the question and the four options. Ask:
+
+- **The length test:** could a learner pick the correct answer just by spotting the longest, most detailed, or most-hedged option? If yes, fix the lengths.
+- **The vocabulary test:** could a learner pick the correct answer just by spotting the only option that uses the right technical term? If yes, push the term into the distractors too (used in a wrong-but-plausible way).
+- **The "would I pick this wrong one?" test:** for each distractor, can you write a one-sentence reason a real SDE2 candidate would seriously consider picking it? If you can't, the distractor is a strawman — rewrite it.
+- **The "swap test":** if you rearranged the options so the correct answer were in position A, B, C, or D at random, would the question still be discriminating? (This is also why you should vary `correctIndex` across the file — never let the correct position become predictable.)
+
+### Worked example — making distractors hard
+
+**❌ Weak distractors (length-tell, strawman, off-topic):**
+> The candidate's design uses a single Postgres instance for a feature that will see 100K writes/sec at peak. What's the correct critique?
+> A. They should add more servers.
+> B. They picked the wrong color database.
+> C. **A single Postgres node won't sustain 100K writes/sec without partitioning the write load — they need to either shard by a high-cardinality key, move the hot path to an append-only store, or front the writes with a queue that batches into Postgres at a sustainable rate.**
+> D. Postgres is bad.
+
+The correct answer is obviously C — it's the only one that's a real engineering response.
+
+**✅ Hard distractors (length-matched, plausible, all in the same vocabulary register):**
+> The candidate's design uses a single Postgres instance for a feature that will see 100K writes/sec at peak. What's the correct critique?
+> A. A single Postgres node won't sustain 100K writes/sec on commodity hardware — they should switch the storage engine to a write-optimized LSM-tree backend like ScyllaDB and keep the same single-node topology to avoid distributed-systems complexity.
+> B. A single Postgres node won't sustain 100K writes/sec under sustained load — they should add a read replica and route the heaviest writes (audit logs, event streams) to the replica to free capacity on the primary.
+> C. **A single Postgres node won't sustain 100K writes/sec without partitioning the write load — they need to either shard by a high-cardinality key, move the hot path to an append-only store, or front the writes with a queue that batches into Postgres at a sustainable rate.**
+> D. A single Postgres node will sustain 100K writes/sec only if the rows are small and uncontended — the correct fix is to enable synchronous_commit=off and increase wal_buffers, which raises sustained throughput by 5-10× before any topology change is needed.
+
+Each wrong option now reflects a real misconception (A: storage-engine-swap fixes throughput; B: read replicas absorb writes; D: tuning alone scales by an order of magnitude). A learner who has read about Postgres but doesn't deeply understand horizontal scaling could plausibly pick any of them.
+
+### When the correct answer is genuinely short
+
+Some correct answers are inherently terse (e.g. "Use a CRDT.") — that's fine. In those cases, **make the distractors short too**, and rely on conceptual subtlety rather than length parity. The principle is *parity*, not "always make everything long."
+
+---
+
 ## 1. The 4-step generation pipeline
 
 ### Step 1 — Decompose
@@ -189,6 +265,8 @@ The file must be plug-compatible with `App.jsx`'s `componentsMap` — register t
 ```
 
 **Existing engine compat note.** The engine reads `subtopic` for grouping in Sequential mode. Keep using it. `part` is additive; the new Ladder mode (Section 7) sorts by `part` then `difficulty`.
+
+**Distractors are first-class — see Section 0.6.** When writing the `options` array, do not treat the three wrong options as filler. Every distractor must be length-matched (within ~15% character count of the correct option), share its vocabulary register, and reflect a real misconception a moderately-prepared SDE2 candidate could plausibly pick. Run the discrimination check from Section 0.6 on every MCQ before moving on. Also vary `correctIndex` across the file — never let the correct answer's position become predictable.
 
 ---
 
@@ -313,6 +391,8 @@ Given source content + this methodology + `principles-of-learning.md`:
 ## 11. Output checklist (the agent's pre-flight before declaring done)
 
 - [ ] **Anti-Recall acid test passed** (Section 0.5): for every question, confirm a learner could NOT answer it correctly by memorizing only the article's structure. If yes, the question fails and must be rewritten.
+- [ ] **Hard-Distractors discrimination check passed** (Section 0.6): for every MCQ, the four options are length-matched (within ~15%), share vocabulary register, and each distractor reflects a real misconception a moderately-prepared SDE2 candidate could plausibly pick. No length-tell, no vocabulary-tell, no strawmen.
+- [ ] **`correctIndex` is varied across the file** — the correct answer's position is roughly evenly distributed across 0/1/2/3, never settling into a predictable pattern.
 - [ ] All Parts identified and confirmed.
 - [ ] Concept Inventory produced and confirmed (no concept missing).
 - [ ] Every concept has ≥1 question.
