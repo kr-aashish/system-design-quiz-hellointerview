@@ -28,10 +28,10 @@ export const QUESTIONS = [
     "style": "Scenario-based reasoning",
     "question": "You're designing a SaaS platform for project management where data integrity is critical: users must exist before creating tasks, tasks must reference valid project IDs, and deleting a user should handle their tasks appropriately. You're choosing between PostgreSQL with foreign keys and MongoDB with embedded documents. Why is PostgreSQL the better choice despite MongoDB's flexibility?",
     "options": [
-      "PostgreSQL scales better than MongoDB for any workload",
+      "MongoDB's denormalized model fits this workload because embedding tasks inside the user document gives you atomic single-document updates, and PostgreSQL's foreign keys add cross-table contention on every task creation that hurts throughput at moderate scale",
       "PostgreSQL enforces referential integrity at the database level, preventing orphaned records; MongoDB embeds documents but risks inconsistency when relationships change, requiring application logic to maintain integrity",
-      "MongoDB doesn't support transactions, while PostgreSQL does",
-      "Foreign keys automatically delete related records, eliminating the need for application logic"
+      "PostgreSQL's foreign key constraints are checked deferred at commit time, so they catch invalid references but only after the row is already written, while MongoDB's schema validation rejects bad references synchronously on insert and is therefore a stricter integrity guarantee",
+      "Both databases enforce relationships equivalently — PostgreSQL via foreign keys and MongoDB via $lookup index validation — so the real differentiator here is PostgreSQL's transaction isolation level, which prevents the lost-update anomaly when two users edit the same task concurrently"
     ],
     "correctIndex": 1,
     "explanation": "The article emphasizes: 'Relational databases provide referential integrity via foreign keys, ensuring relationships remain valid.' With MongoDB's embedded model, if you embed user data in tasks and the user updates their name, you must update every task document — creating consistency risk. PostgreSQL's foreign key constraints prevent orphaned records at the DB level. This is the fundamental advantage of relational schemas: structural guarantees. Option C is outdated (MongoDB now supports ACID transactions). Option D is wrong — foreign keys can be configured for different behaviors (restrict, cascade, set null), not automatic deletion.",
@@ -44,10 +44,10 @@ export const QUESTIONS = [
     "style": "Anti-pattern identification",
     "question": "During a system design interview, a candidate says: 'I'll use PostgreSQL for user accounts and MongoDB for everything else because SQL is too rigid for fast-moving features.' What's the critical flaw in this reasoning?",
     "options": [
-      "This is actually the right approach — polyglot persistence is always superior",
+      "The split is reasonable but the boundary is wrong — accounts belong in MongoDB because user documents naturally vary by signup method (OAuth vs email/password vs SSO add different fields), and MongoDB's schemaless storage handles that cleanly while PostgreSQL would need sparse columns or an EAV table",
       "The belief that SQL is 'rigid' is outdated; PostgreSQL supports JSON columns, schema evolution, and flexible queries while maintaining integrity. The real rigidity lies in MongoDB's lack of JOIN support when data relationships exist",
-      "PostgreSQL cannot handle schema changes, so MongoDB is necessary",
-      "You should never mix databases in a single system"
+      "The framing assumes feature velocity and schema rigidity are correlated, but in practice MongoDB's lack of database-level constraints forces application code to defensively re-check every relationship on every write — which slows feature delivery more than schema migrations ever would on a modern PostgreSQL setup",
+      "Polyglot persistence is correct in principle but the threshold is wrong — splitting databases is only justified when one workload is at least 10x the QPS of another, otherwise the operational cost of running two systems eclipses any performance gain you'd get from specialization"
     ],
     "correctIndex": 1,
     "explanation": "The article states: 'Scalability concerns about SQL are often exaggerated.' A major misconception is that SQL is 'rigid.' Modern PostgreSQL offers JSON/JSONB columns for semi-structured data and supports ALTER TABLE for schema evolution. The rigidity risk is actually the opposite: MongoDB's document model discourages JOINs, forcing denormalization and embedding — which creates consistency problems. Polyglot persistence should be driven by access patterns and scalability needs, not by a misconception that SQL is inflexible. Using 'everything else MongoDB' is lazy design.",
@@ -60,10 +60,10 @@ export const QUESTIONS = [
     "style": "Failure analysis",
     "question": "A team reports that complex JOINs between 5 tables (users, orders, order_items, products, categories) are causing their 50,000 QPS read workload to degrade. They consider switching to MongoDB to 'avoid joins.' What's wrong with this solution?",
     "options": [
-      "Joins are the primary cause of database slowness; MongoDB avoids this by embedding documents",
+      "JOINs themselves are fine, but at 50,000 QPS the issue is connection-pool exhaustion: each multi-table query holds a connection longer, so concurrency suffers. MongoDB's connection-per-document model handles this concurrency profile better, which is why switching does help at this specific QPS threshold",
       "The problem isn't JOINs themselves — it's that they're not optimized. Indexes on foreign keys, query optimization (EXPLAIN ANALYZE), and possibly denormalization or caching are the real solutions. Switching to MongoDB just replaces the join problem with an embedding/consistency problem",
-      "PostgreSQL doesn't support joins efficiently, while MongoDB does",
-      "Five-table joins are impossible in any SQL database"
+      "The 5-table JOIN is hitting PostgreSQL's planner cost limit, where the optimizer gives up on enumerating join orders and falls back to a worst-case nested-loop plan. MongoDB sidesteps this because $lookup is implemented as a direct hash join with no planner cost analysis stage",
+      "JOIN cost grows superlinearly with table count beyond roughly 4 tables because the optimizer's search space explodes; the senior fix is to refactor toward fewer tables (denormalize categories into products), not switch databases — the database isn't wrong, the schema shape is"
     ],
     "correctIndex": 1,
     "explanation": "The article warns against blaming JOINs indiscriminately: 'Complex joins can be performance traps at scale' — but the solution isn't to abandon the relational model. Slow JOINs usually indicate missing indexes on foreign key columns or poorly written queries. The real solutions are: (1) index foreign keys, (2) use EXPLAIN to identify bottlenecks, (3) denormalize or cache specific aggregations if joins are legitimately slow. Switching to MongoDB trades a solved problem (indexable joins) for unsolved problems (embedding consistency, lack of aggregation power). This is a classic case of choosing the wrong tool to avoid fixing the underlying issue.",
@@ -76,10 +76,10 @@ export const QUESTIONS = [
     "style": "Gotcha question",
     "question": "You're designing a marketplace where users set their email as a unique identifier for login. Your schema has: `CREATE TABLE users (email VARCHAR(255) PRIMARY KEY, ...);` After 6 months, you realize users want to change their email. What's the technical problem with this design?",
     "options": [
-      "PostgreSQL doesn't allow primary key changes",
+      "VARCHAR primary keys force PostgreSQL to use string comparison on every JOIN, which is roughly 4-8x slower than integer comparison; at marketplace scale, this translates to measurable latency increases on order lookups and is the real reason email-as-PK is discouraged",
       "Changing an email that's a primary key requires updating all foreign key references in related tables, and if any orders or transactions reference this email, you risk breaking referential integrity constraints",
-      "This design is actually fine — email is a perfectly valid primary key",
-      "You'd have to drop and recreate the table to change the primary key"
+      "Email-as-primary-key bloats the B-tree index because each entry stores up to 255 bytes instead of the 8 bytes a BIGINT would use, increasing the index footprint by ~30x and pushing more pages out of the buffer cache for read-heavy workloads",
+      "Email values aren't guaranteed unique across providers due to plus-addressing (`user+tag@gmail.com` vs `user@gmail.com`), so the UNIQUE constraint silently allows duplicates that the application treats as the same identity"
     ],
     "correctIndex": 1,
     "explanation": "The article explicitly states: 'Use system-generated primary keys, not business data.' Email is business data that users expect to change. If email is the primary key and a user changes it, every foreign key reference in orders, reviews, favorites tables must also update. This violates the principle that primary keys should be immutable. A better design is a system-generated user_id as the primary key, with email as a UNIQUE but changeable column. This is a common real-world gotcha that reveals whether you understand the semantic difference between identity and attributes.",
@@ -92,10 +92,10 @@ export const QUESTIONS = [
     "style": "Scenario-based trade-offs",
     "question": "You're building a Twitter-like system where every feed query requires joining tweets, users, and counts (retweets, likes, replies). You denormalize by storing denormalized tweet records with embedded user names and total counts. A user changes their name. What's the operational cost of your denormalization decision?",
     "options": [
-      "No cost — denormalized data stays consistent automatically",
+      "Denormalized name fields can be kept consistent via a database trigger that fires on user-table updates, so the cost is one extra trigger execution per name change — the writes themselves stay localized to the user record and the index propagates the change lazily",
       "You must update every tweet in the database containing that user's old name. With 100 million tweets, this could be millions of updates. Denormalization accepts this write complexity to speed up feed reads",
-      "You should immediately revert to a normalized schema",
-      "The denormalized data becomes permanently stale"
+      "The cost is index bloat — every tweet now carries a denormalized user-name string, so the per-row footprint grows from ~50 bytes to ~150 bytes. With 100M tweets that's ~10GB of additional index pressure, which slows feed scans by pushing data out of the buffer cache",
+      "The cost is consistency divergence — different replicas may reflect the new name at different times, and a user reading their own profile may see stale tweets attributed to their old name even after the user table has been fully updated, until replication lag closes"
     ],
     "correctIndex": 1,
     "explanation": "The article states: 'Denormalization creates consistency problems.' When you embed user.name in each tweet, changing the user's name requires updating N tweet rows. This is a classic denormalization trade-off: faster reads (no join needed) at the cost of slower, more complex writes (cascading updates). For a name change (rare), this is acceptable. But for frequently-changing fields (like follower count), denormalization becomes untenable. The key insight: denormalize fields that change infrequently, or use a different strategy (caching, materialized views).",
@@ -108,10 +108,10 @@ export const QUESTIONS = [
     "style": "Decision framework",
     "question": "Your analytics dashboard queries product popularity (sales count per category) millions of times per day, but product metadata (name, category, price) changes only during daily inventory updates. Your two options are: (1) normalize (join products and sales every query) or (2) denormalize (update materialized aggregate tables during inventory updates). Which is better and why?",
     "options": [
-      "Normalization — always normalize to avoid consistency issues",
+      "Normalization — the join cost is fixed and predictable, while denormalized aggregate tables drift over the course of the day as products are sold, producing slightly stale popularity numbers that erode dashboard accuracy in ways analysts will notice and complain about",
       "Denormalization — materialized aggregate tables serve pre-computed results at query time, eliminating joins. The cost (updating aggregates during inventory updates) is acceptable because updates happen once daily, while reads happen millions of times",
-      "You should use a NoSQL database to avoid this trade-off",
-      "Both are equally valid with no trade-off difference"
+      "Normalization with a covering index on (category_id, product_id, sale_count) — modern query optimizers can answer the popularity query directly from the index without touching the heap, which performs better than a materialized table that has to be kept in sync",
+      "Denormalization is right but the implementation should use database triggers rather than batch jobs — triggers keep the aggregate table consistent on every sale, so dashboard freshness is real-time rather than 24 hours behind, with the same per-query read cost"
     ],
     "correctIndex": 1,
     "explanation": "The article identifies this exact pattern: 'Denormalization is appropriate for analytics and event logs where reads vastly outnumber writes.' With millions of read queries against one daily update cycle, materialized views (pre-computed aggregations) are ideal. The cost is incurred once daily, while the benefit accrues millions of times. This is a clear win for denormalization because the read/write ratio is extreme and the update is batched (not real-time). Caching is an alternative but materialized views are persistent and reliable.",

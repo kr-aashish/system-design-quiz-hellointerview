@@ -7,6 +7,7 @@
 
 const STORAGE_KEY = 'sd-quiz-progress';
 const SCHEMA_VERSION = 1;
+export const PROGRESS_CHANGED_EVENT = 'sd-quiz-progress-changed';
 
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -27,12 +28,33 @@ function getStore() {
   }
 }
 
-function saveStore(store) {
+function emitProgressChanged(store, source = 'local') {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(PROGRESS_CHANGED_EVENT, {
+    detail: { store, source },
+  }));
+}
+
+function saveStore(store, options = {}) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    if (options.emit !== false) {
+      emitProgressChanged(store, options.source);
+    }
   } catch (e) {
     console.warn('[QuizProgress] Failed to save to localStorage:', e);
   }
+}
+
+function normalizeProgressStore(progress) {
+  if (!progress || typeof progress !== 'object') {
+    return { version: SCHEMA_VERSION, quizzes: {} };
+  }
+
+  return {
+    version: SCHEMA_VERSION,
+    quizzes: progress.quizzes && typeof progress.quizzes === 'object' ? progress.quizzes : {},
+  };
 }
 
 // ─── Public API ───
@@ -40,6 +62,13 @@ function saveStore(store) {
 /** Get full progress state */
 export function getProgress() {
   return getStore();
+}
+
+/** Replace the full local progress state, used by cloud restore/import flows. */
+export function replaceProgress(progress, options = {}) {
+  const normalized = normalizeProgressStore(progress);
+  saveStore(normalized, { source: options.source || 'replace', emit: options.emit });
+  return normalized;
 }
 
 /** Get progress for a single quiz */

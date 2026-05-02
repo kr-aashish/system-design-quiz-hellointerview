@@ -117,10 +117,10 @@ export const QUESTIONS = [
     "l5Pattern": null,
     "question": "A team lead drops a single sentence on the table: 'we need to design something that handles photo uploads from millions of users.' No further constraints, no test cases, no expected output. Compared to a coding-style interview (which gives precise inputs and a single expected output), what is it about *this* prompt that makes it characteristically a system-design interview rather than a coding interview?",
     "options": [
-      "Photos require image-processing libraries that are too complex for a coding interview, so the prompt has to be SD by elimination.",
+      "The prompt names a real product surface (photo uploads at scale) rather than an algorithmic abstraction, which signals the interviewer wants production-grade reasoning. Coding interviews tend to use abstract domains (arrays, graphs) precisely because abstraction strips away production concerns; the concrete domain here is the marker that operational concerns are in scope.",
       "The prompt is intentionally under-specified at a high level — the candidate's job is to break it into infrastructure pieces (storage, scaling, request flow), make trade-offs, and arrive at one of several valid answers. Coding problems by contrast have fixed inputs and a single correct output.",
-      "System-design problems always involve photos, video, or other media; the topic is the giveaway.",
-      "Coding interviews are easier; this prompt just looks harder, so it must be SD."
+      "The phrase 'millions of users' is the dispositive cue: any problem that explicitly names a scale figure is by convention a system-design problem, while coding interviews stay scale-agnostic. The candidate's job is therefore to translate the scale number into capacity calculations and pick components that absorb that load.",
+      "Coding interviews always provide failing test cases the candidate must make pass, while SD prompts omit test cases by design. Since this prompt has no input/output examples, it falls into the SD bucket by the absence-of-tests rule, and the candidate should immediately ask for sample request volumes to fill the gap."
     ],
     "correctIndex": 1,
     "explanation": "An SD interview is defined by what the prompt is asking the candidate to do: take an ambiguously-defined, high-level problem and decompose it into the infrastructure pieces needed to solve it. The signal is reasoning under ambiguity with multiple valid endpoints — not retrieving the right answer for a known input. The topic (photos, ride-sharing, anything) is incidental.",

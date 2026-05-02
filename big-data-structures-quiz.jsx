@@ -75,11 +75,11 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "Hash sets have O(n) lookup time for large datasets due to hash collisions. Bloom filters maintain O(1) lookups regardless of dataset size because they use multiple independent hash functions that distribute evenly."
+        "text": "Hash sets degrade to O(n) lookup time once the load factor crosses ~0.7 because chained collisions accumulate at popular buckets. Bloom filters maintain consistent k-hash lookups regardless of dataset size, and at 10B URLs the collision-induced tail latency on a hash set would dominate end-to-end crawler throughput well before the memory ceiling."
       },
       {
         "label": "C",
-        "text": "Hash sets can't be distributed across machines because they require consistent ordering. Bloom filters are inherently distributed because each bit is independent, so you can split the bit array across any number of nodes."
+        "text": "Hash sets cannot be partitioned cleanly across the crawler fleet because consistent-hashing rebalances would force key migration on every node addition, breaking deduplication during topology changes. Bloom filters sidestep this entirely since their bit array can be sharded by URL hash range with no migration cost, which is the decisive factor at 10B URL scale."
       },
       {
         "label": "D",

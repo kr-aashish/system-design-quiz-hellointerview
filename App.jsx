@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { HashRouter, Routes, Route, Link } from 'react-router-dom';
-import { ChevronDown, ChevronRight, CheckCircle2, LayoutGrid, BookOpen, ExternalLink, PlayCircle, Trash2, XCircle, RotateCcw, Clock, AlertTriangle } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle2, LayoutGrid, BookOpen, ExternalLink, PlayCircle, Trash2, XCircle, RotateCcw, Clock, AlertTriangle, Cloud, UploadCloud, DownloadCloud, RefreshCw } from 'lucide-react';
 import quizState from './quiz-state.json';
 import quizDataCatalog from './quiz-data.json';
-import { getQuizSummaries, clearQuizProgress, clearAllProgress } from './quizProgressStore';
+import { getQuizSummaries, clearQuizProgress, clearAllProgress, PROGRESS_CHANGED_EVENT } from './quizProgressStore';
+import { getCloudSyncConfig, hasCloudSyncConfig, pushProgressToCloud, pullProgressFromCloud, syncProgress } from './quizCloudSync';
 import QuizEngine from './QuizEngine';
 
 const quizDataBySlug = quizDataCatalog.quizzes || {};
@@ -138,6 +139,170 @@ function ProgressStats({ summaries, quizTopics }) {
   );
 }
 
+function getSyncStatusClass(tone) {
+  if (tone === 'success') return 'text-emerald-400';
+  if (tone === 'error') return 'text-red-400';
+  if (tone === 'working') return 'text-cyan-400';
+  return 'text-slate-400';
+}
+
+function CloudSyncPanel({ onPulled }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [autoSync, setAutoSync] = useState(false);
+  const [status, setStatus] = useState(null);
+  const [isBusy, setIsBusy] = useState(false);
+  const [timestamps, setTimestamps] = useState(() => getCloudSyncConfig());
+  const autoSyncTimerRef = useRef(null);
+
+  const isConfigured = hasCloudSyncConfig();
+
+  const showStatus = useCallback((text, tone = 'neutral') => {
+    setStatus({ text, tone });
+  }, []);
+
+  // Auto-push on progress change
+  useEffect(() => {
+    if (!autoSync || !isConfigured) return undefined;
+
+    const handleProgressChanged = () => {
+      window.clearTimeout(autoSyncTimerRef.current);
+      autoSyncTimerRef.current = window.setTimeout(async () => {
+        try {
+          const result = await pushProgressToCloud();
+          setTimestamps(result.timestamps);
+          showStatus('Auto-pushed progress to cloud.', 'success');
+        } catch (error) {
+          showStatus(`Auto-push failed: ${error.message}`, 'error');
+        }
+      }, 2000);
+    };
+
+    window.addEventListener(PROGRESS_CHANGED_EVENT, handleProgressChanged);
+    return () => {
+      window.removeEventListener(PROGRESS_CHANGED_EVENT, handleProgressChanged);
+      window.clearTimeout(autoSyncTimerRef.current);
+    };
+  }, [autoSync, isConfigured, showStatus]);
+
+  const handlePush = async () => {
+    setIsBusy(true);
+    showStatus('Pushing local progress to cloud...', 'working');
+    try {
+      const result = await pushProgressToCloud();
+      setTimestamps(result.timestamps);
+      showStatus('Pushed local progress to cloud.', 'success');
+    } catch (error) {
+      showStatus(error.message, 'error');
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const handlePull = async () => {
+    if (!window.confirm('Pull progress from cloud? This will replace the quiz progress currently saved in this browser.')) {
+      return;
+    }
+
+    setIsBusy(true);
+    showStatus('Pulling progress from cloud...', 'working');
+    try {
+      const result = await pullProgressFromCloud();
+      setTimestamps(result.timestamps);
+      onPulled();
+      showStatus('Pulled cloud progress into this browser.', 'success');
+    } catch (error) {
+      showStatus(error.message, 'error');
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const handleSync = async () => {
+    setIsBusy(true);
+    showStatus('Syncing local ↔ cloud (merging)...', 'working');
+    try {
+      const result = await syncProgress();
+      setTimestamps(result.timestamps);
+      onPulled(); // refresh the summaries since local was updated
+      showStatus('Sync complete — local and cloud are now merged.', 'success');
+    } catch (error) {
+      showStatus(error.message, 'error');
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  return (
+    <div className="mb-4">
+      <button
+        type="button"
+        onClick={() => setIsOpen(open => !open)}
+        className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg font-semibold transition-colors border border-slate-700 text-sm"
+      >
+        <Cloud size={15} className={isConfigured ? 'text-cyan-400' : 'text-slate-500'} />
+        Cloud Sync
+        {autoSync && (
+          <span className="text-[11px] font-medium text-slate-500">auto</span>
+        )}
+      </button>
+
+      {isOpen && (
+        <div className="mt-3 bg-[#232a3b] border border-[#2d3748] rounded-xl p-4 shadow-xl">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={handleSync}
+              disabled={isBusy}
+              className="inline-flex items-center gap-2 bg-purple-500/10 hover:bg-purple-500/20 disabled:opacity-50 text-purple-400 px-3 py-2 rounded-lg text-xs font-semibold border border-purple-500/20 transition-colors"
+            >
+              <RefreshCw className={`w-4 h-4 ${isBusy ? 'animate-spin' : ''}`} />
+              Sync
+            </button>
+            <button
+              type="button"
+              onClick={handlePull}
+              disabled={isBusy}
+              className="inline-flex items-center gap-2 bg-blue-500/10 hover:bg-blue-500/20 disabled:opacity-50 text-blue-400 px-3 py-2 rounded-lg text-xs font-semibold border border-blue-500/20 transition-colors"
+            >
+              <DownloadCloud className="w-4 h-4" />
+              Pull
+            </button>
+            <button
+              type="button"
+              onClick={handlePush}
+              disabled={isBusy}
+              className="inline-flex items-center gap-2 bg-teal-500/10 hover:bg-teal-500/20 disabled:opacity-50 text-teal-400 px-3 py-2 rounded-lg text-xs font-semibold border border-teal-500/20 transition-colors"
+            >
+              <UploadCloud className="w-4 h-4" />
+              Push
+            </button>
+            <label className="inline-flex items-center gap-2 text-xs text-slate-400">
+              <input
+                type="checkbox"
+                checked={autoSync}
+                onChange={(event) => setAutoSync(event.target.checked)}
+                className="w-4 h-4 rounded border-slate-600 bg-[#1c2331] text-cyan-500 focus:ring-cyan-500/40"
+              />
+              Auto-push after changes
+            </label>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500">
+            {timestamps.lastPushedAt && <span>Last push {timeAgo(timestamps.lastPushedAt)}</span>}
+            {timestamps.lastPulledAt && <span>Last pull {timeAgo(timestamps.lastPulledAt)}</span>}
+          </div>
+
+          {status && (
+            <p className={`mt-3 text-xs ${getSyncStatusClass(status.tone)}`}>
+              {status.text}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Index() {
   const [summaries, setSummaries] = useState({});
   const [confirmDialog, setConfirmDialog] = useState(null);
@@ -217,6 +382,8 @@ function Index() {
             </a>
           </div>
         </div>
+
+        <CloudSyncPanel onPulled={refreshSummaries} />
         
         <ProgressStats summaries={summaries} quizTopics={quizState.topics} />
         

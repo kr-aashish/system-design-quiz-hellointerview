@@ -212,7 +212,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Relational databases can't actually model many-to-many relationships well — graph DBs are required for any social graph"
+          "text": "Relational databases struggle with the deep multi-hop traversals (friends-of-friends-of-friends) that social graphs depend on; without a native graph traversal engine, every additional hop becomes another join, so for any non-trivial social product the candidate should default to Neo4j or a similar property-graph store rather than picking Postgres on instinct"
         },
         {
           "label": "B",
@@ -220,11 +220,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Relational databases don't scale to social-graph sizes, so the candidate has picked the wrong tool for the workload"
+          "text": "The reasoning ignores the write-amplification problem unique to social graphs: each new follow edge has to be persisted twice (forward and reverse) and a relational database serializes those writes through the same primary key index, so at follower-scale the relational choice becomes a throughput bottleneck before any consistency or modeling concerns even surface"
         },
         {
           "label": "D",
-          "text": "Senior interviewers expect candidates to use graph databases (Neo4j) for any system with relationships"
+          "text": "The candidate is collapsing two distinct decisions — data model (relational vs document vs graph) and consistency level (ACID vs eventual) — into a single shorthand, and senior interviewers read that as a signal the candidate hasn't separated the dimensions; the right move is to first declare the consistency requirements of each operation and then pick the storage primitive that satisfies them"
         }
       ],
       "correct": 1,
@@ -244,15 +244,15 @@ export const QUIZ_DATA = {
         },
         {
           "label": "B",
-          "text": "'I'm using DynamoDB because of its single-digit-ms read latency at scale and its built-in TTL feature, which lets me expire session data without a sweeper job'"
+          "text": "'I'm using DynamoDB because of its single-digit-ms read latency at scale and its built-in TTL feature, which lets me expire session data without a sweeper job, neither of which is something Postgres provides natively at the access patterns this workload needs'"
         },
         {
           "label": "C",
-          "text": "'DynamoDB's auto-scaling on partition keys matches our spiky write pattern from the IoT ingest path'"
+          "text": "'DynamoDB's auto-scaling on partition keys matches our spiky write pattern from the IoT ingest path, and the per-key throughput model lets me reason about hot-partition risk in concrete WCU numbers rather than the more diffuse capacity planning Postgres requires for similar bursts'"
         },
         {
           "label": "D",
-          "text": "'I'm familiar with DynamoDB's data modeling — single-table design with composite keys — so I can produce a working schema in the time we have'"
+          "text": "'I'm familiar with DynamoDB's data modeling — single-table design with composite keys — so I can produce a working schema in the time we have, which is a defensible reason to pick a tool given the time-boxed constraints of this design exercise'"
         }
       ],
       "correct": 0,
@@ -268,7 +268,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "The candidate forgot to mention CAP theorem trade-offs in the comparison"
+          "text": "The candidate forgot to anchor the comparison in CAP-theorem trade-offs — without explicitly placing each option on the consistency-availability axis the comparison is descriptive rather than analytical, which is what a senior interviewer wants. Adding the CAP framing would have rescued the 4 minutes by turning a feature-list comparison into a rigorous decision matrix tied to the system's tolerance for staleness"
         },
         {
           "label": "B",
@@ -276,11 +276,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "The comparison was correct but Postgres was the wrong conclusion — DynamoDB would have been the senior choice"
+          "text": "The comparison correctly weighed schema rigidity and ACID, but the candidate landed on the wrong conclusion — for any product with a high-write feed component the senior choice is DynamoDB, since Postgres's row-locking semantics under write contention surface as P99 latency spikes that aren't visible in a feature comparison and only show up under load testing the candidate hasn't done"
         },
         {
           "label": "D",
-          "text": "4 minutes is too short for a thorough SQL vs NoSQL comparison; senior candidates need 8–10 minutes minimum"
+          "text": "4 minutes is far too short to do a SQL-vs-NoSQL comparison justice — a senior candidate would budget 8–10 minutes to walk through ACID guarantees, write-path costs, indexing flexibility, and operational footprint, and the rushed 4-minute version reads as a memorized checklist rather than the deeper analysis the interviewer is probing for at the staff level"
         }
       ],
       "correct": 1,
@@ -328,15 +328,15 @@ export const QUIZ_DATA = {
         },
         {
           "label": "B",
-          "text": "Add a foreign key on `email` so the database knows it's unique"
+          "text": "Add a foreign key constraint on `email` referencing a `verified_emails` lookup table — the FK constraint forces the database to enforce uniqueness and the planner can use that uniqueness guarantee to short-circuit the scan once a single match is found"
         },
         {
           "label": "C",
-          "text": "Add a join to a secondary `email_lookup` table that mirrors the email column"
+          "text": "Materialize a covering view that includes only `(user_id, email)` — Postgres maintains it as a separate physical relation with its own page layout, so equality lookups skip the wide `users` row entirely and the planner reads roughly 8x less data per probe"
         },
         {
           "label": "D",
-          "text": "Convert the query to use prepared statements to reduce parsing overhead — that's the dominant cost"
+          "text": "Convert the query to a prepared statement and pin its plan in the planner cache — at 50M rows the per-call planning cost is the dominant component of the 800ms, since the executor still has to retrieve only one row once the plan has stabilized on a hash-based access path"
         }
       ],
       "correct": 0,
@@ -352,7 +352,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Joins are always bad — denormalize everything into one wide `feed_items` table with all data duplicated"
+          "text": "Joins at this width are always a sign of premature normalization on the read path — the senior move is to denormalize the entire feed_items shape (posts + author_name + media_url + like_count + comment_count) into one wide row per feed entry, accepting the duplication so that feed renders are a single sequential scan rather than a multi-table assembly"
         },
         {
           "label": "B",

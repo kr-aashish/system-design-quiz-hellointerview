@@ -57,9 +57,9 @@ export const QUESTIONS = [
     "question": "You're designing a photo storage service where users upload 20-50MB RAW images. A junior engineer suggests storing the images as BLOBs in PostgreSQL since 'it simplifies the architecture to one data store.' What is the most critical technical problem with this approach at scale?",
     "options": [
       "PostgreSQL BLOB storage will degrade query performance on the entire database because large binary objects bloat table sizes, increase WAL write amplification, and make VACUUM operations dramatically slower — affecting all queries, not just image-related ones.",
-      "PostgreSQL cannot store files larger than 1GB per row, so you'd need to implement application-level chunking that defeats the simplicity argument.",
-      "PostgreSQL replication lag will increase linearly with image count, eventually causing read replicas to fall so far behind that they become unusable for serving read traffic.",
-      "PostgreSQL doesn't support content-type headers on stored data, making it impossible to serve images with correct MIME types without an additional metadata table."
+      "PostgreSQL's TOAST mechanism inlines large values into the heap until they exceed 2KB, then transparently moves them to an out-of-line storage table — but the round-trip indirection adds significant latency to every BLOB read, making 20-50MB image fetches 5-10x slower than equivalent S3 GETs over the same network link.",
+      "PostgreSQL's MVCC model creates a new tuple version on every UPDATE, so any change to image metadata co-located on the row forces a full rewrite of the BLOB to a new heap page — write amplification on a 50MB row will saturate disk I/O and crater throughput for the entire connection pool.",
+      "PostgreSQL's shared_buffers cache is sized for working sets in the hundreds of MB to low GB range, and large BLOB reads will evict useful index and table pages, destroying cache hit rates for the OLTP workload that the database actually exists to serve."
     ],
     "correctIndex": 0,
     "explanation": "Storing large BLOBs in PostgreSQL kills performance across the entire database — not just for image queries. Large objects bloat table sizes, increase backup times, slow replication, and make VACUUM operations (critical for PostgreSQL health) dramatically slower. The 11 nines durability of object stores like S3 combined with unlimited capacity and per-object pricing makes them purpose-built for this. Option B is misleading — PostgreSQL's large object facility can handle files over 1GB. Option C overstates the replication impact mechanism. Option D is wrong because MIME types are application-layer concerns.",
@@ -71,10 +71,10 @@ export const QUESTIONS = [
     "subtopic": "Blob Storage Fundamentals",
     "question": "Your system stores user documents averaging 500KB each. The team debates whether to use S3 or keep them in the application database. Given the file sizes, which consideration should MOST influence this architectural decision?",
     "options": [
-      "At 500KB, the overhead of presigned URL generation and the two-step upload dance adds more latency than directly proxying through the API — keep them in the database for simplicity.",
+      "At 500KB, the overhead of presigned URL generation, two-step coordination, and async state reconciliation adds more end-to-end latency than directly proxying through the API tier — for files this small, keep them in the database where transactional guarantees with the rest of the document metadata simplify the consistency model.",
       "While 500KB files can be proxied through API servers without major bottlenecks, the decision should hinge on query patterns: if you never need to JOIN document contents with other data, blob storage still offers better cost efficiency and operational simplicity at scale.",
-      "S3 is always the correct choice regardless of file size because relational databases are fundamentally incompatible with binary data storage.",
-      "500KB files should be stored as base64-encoded strings in a TEXT column to avoid the BLOB performance penalties while keeping the single-store simplicity."
+      "Blob storage is the correct default at any size because per-GB cost is roughly 10x cheaper than provisioned database storage, and S3's 11 nines durability is fundamentally unattainable in a relational database tier without elaborate cross-region replication and snapshot infrastructure that you'd be paying for separately.",
+      "500KB files should be stored as binary-safe BYTEA columns with PostgreSQL's TOAST out-of-line storage handling the spillover automatically — this keeps the file co-located with its row metadata for transactional consistency while avoiding the BLOB-specific performance penalties of older designs."
     ],
     "correctIndex": 1,
     "explanation": "At 500KB, files are small enough that the server proxy approach works fine — the 10MB threshold is where pain becomes real. However, the decision isn't purely about size; it's about query patterns and scale. If you never query the file contents with SQL, blob storage offers better cost efficiency and operational separation. Option A is partially right about latency but wrong to suggest database storage as default. Option C is too absolute — small structured binary data can live in databases. Option D is terrible — base64 encoding increases size by ~33% and creates worse problems.",
@@ -86,10 +86,10 @@ export const QUESTIONS = [
     "subtopic": "Server Proxy Bottleneck",
     "question": "A video platform proxies all uploads through its API servers. During a live event, 10,000 users simultaneously upload 2GB highlight clips. Each API server has 32GB RAM and 10Gbps network. What fails first and why?",
     "options": [
-      "CPU exhaustion — transcoding the video streams in real-time during upload consumes all available compute cycles.",
+      "CPU exhaustion — TLS termination, gzip decompression, and per-connection HTTP/2 frame parsing under thousands of concurrent multi-GB streams will saturate the CPU long before memory pressure or network bandwidth become the binding constraint, since each in-flight stream forces context switches at every kernel buffer flush.",
       "Memory exhaustion — even with streaming, each connection requires buffering, and 10,000 concurrent 2GB uploads will overwhelm the servers' ability to proxy data, forcing either connection drops or OOM kills long before network saturation.",
-      "Network bandwidth — 10,000 × 2GB = 20TB of data exceeds the aggregate network capacity of any reasonable server fleet.",
-      "Database connection pool — each upload creates a long-held database transaction to track progress, exhausting the connection pool and blocking all other operations."
+      "Network bandwidth — at 10Gbps per server you can sustain ~1.25 GB/s of ingress, but each 2GB upload typically completes in 30-60 seconds on a real client uplink, so 10,000 concurrent transfers represent ~330 GB/s of sustained inbound traffic — which exceeds the aggregate fleet capacity unless you scale to hundreds of nodes.",
+      "Ephemeral port exhaustion — each upload connection consumes a backend socket toward S3 plus a frontend socket from the load balancer, and Linux's default 28K-port range per source IP is depleted within minutes under 10K concurrent flows, causing new connections to fail with EADDRNOTAVAIL before any other resource is stressed."
     ],
     "correctIndex": 1,
     "explanation": "When servers act as dumb pipes for large uploads, memory is the bottleneck. Each proxied connection requires buffer memory, and with thousands of concurrent multi-GB uploads, servers run out of memory to hold in-flight data. Even with streaming (not buffering entire files), the per-connection overhead multiplied by concurrency is devastating. The article emphasizes that servers 'add no value to the transfer, just latency and cost.' Option A is wrong — proxying doesn't involve transcoding. Option C miscalculates — 10Gbps per server across a fleet can handle the bandwidth. Option D is a real concern but not the first failure point.",
@@ -101,10 +101,10 @@ export const QUESTIONS = [
     "subtopic": "Server Proxy Bottleneck",
     "question": "A candidate proposes: 'Since presigned URLs bypass the server, let's use them for ALL uploads including 2KB JSON API payloads and form submissions.' What's the most critical flaw in this design?",
     "options": [
-      "Presigned URLs cannot handle JSON payloads — they only support binary file uploads.",
+      "Presigned URLs are designed around the PUT/POST object semantics of blob storage, which strips the request body of structured headers and JSON parsing — your application server can no longer apply schema validation, request signing, or middleware-level authorization checks that depend on inspecting the parsed payload before persistence.",
       "The two-step flow (request URL, then upload) adds unnecessary latency and complexity for small payloads where the server proxy approach has negligible overhead — you're optimizing away a problem that doesn't exist for small files.",
-      "S3 charges per-request, so millions of tiny JSON uploads would cost 100x more than a traditional API.",
-      "Presigned URLs expire, so if a client caches a URL and tries to submit a form 2 hours later, the submission silently fails with no user-friendly error."
+      "S3 PUT requests cost roughly $0.005 per 1,000 operations, and a JSON-heavy API doing millions of writes per day will see the per-request blob storage charges swamp what would otherwise be a near-zero cost on a normal compute-tier API endpoint, inverting the economics of the architecture.",
+      "Bypassing the API server moves all authorization logic into IAM and presigned URL conditions, but those conditions can't express business invariants (e.g. 'user X may submit at most 5 forms per minute and only if their account is in good standing') — so you lose the gate where most application-layer security actually lives."
     ],
     "correctIndex": 1,
     "explanation": "The article explicitly states: 'Small files don't need it. Anything under 10MB should use normal API endpoints. The two-step dance adds latency and complexity for no real benefit.' For 2KB JSON payloads, the overhead of generating presigned URLs, making two round trips, and managing async state synchronization far exceeds the cost of simply proxying through the API server. Option A is wrong — presigned URLs can handle any content type. Option C overstates cost impact. Option D describes a real concern but isn't the core flaw.",
@@ -116,10 +116,10 @@ export const QUESTIONS = [
     "subtopic": "Presigned URLs (Upload)",
     "question": "An interviewer asks: 'How does your API server generate a presigned URL? Does it need to call S3 first?' A candidate answers: 'Yes, the server makes an API call to S3 which returns the presigned URL.' What's wrong with this answer?",
     "options": [
-      "Nothing is wrong — S3 must be contacted to reserve the upload slot and generate a unique signature.",
+      "Nothing is wrong — S3 must be contacted because the presigned URL embeds a server-side-issued nonce that S3 records in its authorization service, so that when the client later uploads, S3 can confirm the request matches an outstanding reservation rather than a forged signature with no corresponding session.",
       "The candidate is incorrect. Presigned URL generation happens entirely in application memory using the server's cloud credentials to create a cryptographic signature — no network call to S3 is needed. S3 verifies the signature later when the client uploads.",
-      "The candidate is partially correct — a lightweight HEAD request to S3 is needed to verify the bucket exists, but the signature itself is computed locally.",
-      "The candidate is wrong because presigned URLs are generated by the CDN layer (CloudFront), not by either the application server or S3."
+      "The candidate is partially correct — the AWS SDK does perform a lightweight signing-key fetch against STS to obtain temporary credentials before computing the signature, so while the URL bytes are produced locally, there is a network dependency on the credential provider that effectively makes generation a remote operation.",
+      "The candidate is wrong because presigned URL generation in modern AWS deployments is delegated to a Lambda@Edge function colocated with CloudFront, which holds the long-term IAM credentials and returns the signed URL to the application server — the application server itself never touches the secret key directly."
     ],
     "correctIndex": 1,
     "explanation": "This is a common gotcha. The article explicitly states: 'Generating a presigned URL happens entirely in your application's memory — no network call to blob storage needed. Your server uses its cloud credentials to create a signature that the storage service can verify later.' The signature is a cryptographic hash of request details combined with the secret key. S3 has its own copy of the credentials and recalculates the hash when the client uploads. This is critical for latency — URL generation is effectively free.",
@@ -131,10 +131,10 @@ export const QUESTIONS = [
     "subtopic": "Presigned URLs (Upload)",
     "question": "You generate a presigned URL for a profile picture upload endpoint with `content-type: image/*` and `content-length-range: [0, 5242880]` (5MB max). An attacker obtains this URL. Which attack vector is NOT mitigated by these conditions?",
     "options": [
-      "Uploading a 500MB video file to explode your storage costs.",
+      "Uploading a 500MB video file disguised as a profile picture by setting Content-Type to image/png in the upload headers — since content-length-range conditions are baked into the signature, S3 will accept the headers as valid but reject any request whose declared payload exceeds the 5MB ceiling, terminating the connection mid-stream.",
       "Uploading a malicious executable renamed with a .jpg extension, since content-type validation only checks the declared MIME type header, not the actual file contents.",
       "Uploading a 4MB text file with a spoofed Content-Type header of 'image/png' — oh wait, this IS blocked because the storage service validates the Content-Type matches the restriction.",
-      "Using the URL from a different IP address than the one that requested it, since presigned URLs don't encode client IP restrictions."
+      "Replaying the same presigned URL hundreds of times to overwrite the destination object with attacker-controlled bytes, since the URL's signature does not embed an idempotency token and S3 will accept any request whose conditions match until the URL's expiry timestamp passes."
     ],
     "correctIndex": 1,
     "explanation": "Content-type conditions in presigned URLs validate the HTTP Content-Type header, not the actual file contents. An attacker can upload a malicious executable with a Content-Type header of 'image/png' — the presigned URL validation will pass because the header matches. This is why the article emphasizes a quarantine/processing pipeline: 'file type validation to ensure a photo isn't actually an executable.' The content-length-range blocks oversized uploads (Option A), and the content-type check blocks mismatched headers (Option C). Option D describes a real limitation but is less dangerous.",
