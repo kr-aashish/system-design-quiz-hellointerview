@@ -352,6 +352,16 @@
       "lastAttempt": null,
       "outputFile": null,
       "retryCount": 0
+    },
+    {
+      "category": "LLD",
+      "name": "Design Principles",
+      "path": "/learn/lld/in-a-hurry/design-principles",
+      "slug": "lld-design-principles",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": "lld-design-principles-quiz.jsx",
+      "retryCount": 0
     }
   ]
 }
