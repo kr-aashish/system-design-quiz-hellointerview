@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { HashRouter, Routes, Route, Link } from 'react-router-dom';
-import { ChevronDown, ChevronRight, CheckCircle2, LayoutGrid, BookOpen, ExternalLink, PlayCircle, Trash2, XCircle, RotateCcw, Clock, AlertTriangle, Cloud, UploadCloud, DownloadCloud, RefreshCw, Layers, Boxes } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle2, LayoutGrid, BookOpen, ExternalLink, PlayCircle, Trash2, XCircle, RotateCcw, Clock, AlertTriangle, Cloud, UploadCloud, DownloadCloud, RefreshCw, Layers, Boxes, ScrollText } from 'lucide-react';
 import quizState from './quiz-state.json';
 import quizDataCatalog from './quiz-data.json';
 import { getQuizSummaries, clearQuizProgress, clearAllProgress, PROGRESS_CHANGED_EVENT } from './quizProgressStore';
 import { getCloudSyncConfig, hasCloudSyncConfig, pushProgressToCloud, pullProgressFromCloud, syncProgress } from './quizCloudSync';
 import QuizEngine from './QuizEngine';
+import QuizReview from './QuizReview';
 
 const quizDataBySlug = quizDataCatalog.quizzes || {};
 
@@ -561,7 +562,7 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                       {/* Action buttons — always visible on hover */}
                       <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                         {hasQuiz && (
-                          <Link 
+                          <Link
                             to={`/${item.slug}${status === 'in_progress' ? '?resume=true' : ''}`}
                             className="flex items-center gap-1.5 text-xs bg-teal-500/10 text-teal-400 px-2.5 py-1.5 rounded-md hover:bg-teal-500/20 transition-colors font-semibold"
                           >
@@ -581,6 +582,16 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                                 Take Quiz
                               </>
                             )}
+                          </Link>
+                        )}
+                        {hasQuiz && (
+                          <Link
+                            to={`/${item.slug}/review`}
+                            className="flex items-center gap-1.5 text-xs bg-violet-500/10 text-violet-300 px-2.5 py-1.5 rounded-md hover:bg-violet-500/20 transition-colors font-semibold"
+                            title="Review all questions and answers"
+                          >
+                            <ScrollText className="w-3.5 h-3.5" />
+                            Review
                           </Link>
                         )}
                         <a 
@@ -616,15 +627,18 @@ export default function App() {
     <HashRouter>
       <Routes>
         <Route path="/" element={<Index />} />
-        {quizState.topics.filter(t => quizDataBySlug[t.slug]).map((quiz) => {
-          return (
-            <Route 
-              key={quiz.slug} 
-              path={`/${quiz.slug}`} 
-              element={<QuizEngine quiz={quizDataBySlug[quiz.slug]} />}
-            />
-          );
-        })}
+        {quizState.topics.filter(t => quizDataBySlug[t.slug]).flatMap((quiz) => [
+          <Route
+            key={quiz.slug}
+            path={`/${quiz.slug}`}
+            element={<QuizEngine quiz={quizDataBySlug[quiz.slug]} />}
+          />,
+          <Route
+            key={`${quiz.slug}-review`}
+            path={`/${quiz.slug}/review`}
+            element={<QuizReview quiz={quizDataBySlug[quiz.slug]} />}
+          />,
+        ])}
       </Routes>
     </HashRouter>
   );
