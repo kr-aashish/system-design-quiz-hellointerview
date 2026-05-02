@@ -530,11 +530,6 @@ export default function QuizEngine({ quiz }) {
     timer,
   ]);
 
-  useEffect(() => {
-    if (screen === "quiz" && timer === 0 && !submitted && currentQuestion) {
-      recordCurrentAnswer({ timedOut: true });
-    }
-  }, [currentQuestion, recordCurrentAnswer, screen, submitted, timer]);
 
   useEffect(() => {
     if (screen !== "quiz") return undefined;
