@@ -1,63 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { HashRouter, Routes, Route, Link } from 'react-router-dom';
-import { ChevronDown, ChevronRight, CheckCircle2, LayoutGrid, BookOpen, ExternalLink, PlayCircle, Trash2, XCircle, RotateCcw, Clock, Trophy, AlertTriangle } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle2, LayoutGrid, BookOpen, ExternalLink, PlayCircle, Trash2, XCircle, RotateCcw, Clock, AlertTriangle } from 'lucide-react';
 import quizState from './quiz-state.json';
+import quizDataCatalog from './quiz-data.json';
 import { getQuizSummaries, clearQuizProgress, clearAllProgress } from './quizProgressStore';
+import QuizEngine from './QuizEngine';
 
-import ContentionQuiz from './contention-quiz';
-import LargeBlobsQuiz from './handling-large-blobs-quiz';
-import MultiStepQuiz from './multi-step-processes-quiz';
-import RealTimeUpdatesQuiz from './real-time-updates-quiz';
-import ScalingReadsQuiz from './scaling-reads-quiz';
-import ScalingWritesQuiz from './scaling-writes-quiz';
-import LongRunningTasksQuiz from './managing-long-running-tasks-quiz';
-import DataModelingQuiz from './data-modeling-quiz';
-import NetworkingEssentialsQuiz from './networking-essentials-quiz';
-import ApiDesignQuiz from './api-design-quiz';
-import CachingQuiz from './caching-quiz';
-import DatabaseIndexingQuiz from './database-indexing-quiz';
-import ShardingQuiz from './sharding-quiz';
-import CAPTheoremQuiz from './cap-theorem-quiz';
-import BigDataStructuresQuiz from './big-data-structures-quiz';
-import ConsistentHashingQuiz from './consistent-hashing-quiz';
-import NumbersToKnowQuiz from './numbers-to-know-quiz';
-import TimeSeriesDatabasesQuiz from './time-series-databases-quiz';
-import VectorDatabaseQuiz from './vector-database-quiz';
-import RedisQuiz from './redis-quiz';
-import KeyTechnologiesQuiz from './key-technologies-quiz';
-import HowToPrepareQuiz from './how-to-prepare-quiz';
-import DeliveryFrameworkQuiz from './delivery-framework-quiz';
-import CoreConceptsOverviewQuiz from './core-concepts-overview-quiz';
-import InAHurryIntroductionQuiz from './in-a-hurry-introduction-quiz';
-
-// Map output file names to imported components
-const componentsMap = {
-  'contention-quiz.jsx': ContentionQuiz,
-  'handling-large-blobs-quiz.jsx': LargeBlobsQuiz,
-  'managing-long-running-tasks-quiz.jsx': LongRunningTasksQuiz,
-  'multi-step-processes-quiz.jsx': MultiStepQuiz,
-  'real-time-updates-quiz.jsx': RealTimeUpdatesQuiz,
-  'scaling-reads-quiz.jsx': ScalingReadsQuiz,
-  'scaling-writes-quiz.jsx': ScalingWritesQuiz,
-  'data-modeling-quiz.jsx': DataModelingQuiz,
-  'networking-essentials-quiz.jsx': NetworkingEssentialsQuiz,
-  'api-design-quiz.jsx': ApiDesignQuiz,
-  'caching-quiz.jsx': CachingQuiz,
-  'database-indexing-quiz.jsx': DatabaseIndexingQuiz,
-  'sharding-quiz.jsx': ShardingQuiz,
-  'cap-theorem-quiz.jsx': CAPTheoremQuiz,
-  'big-data-structures-quiz.jsx': BigDataStructuresQuiz,
-  'consistent-hashing-quiz.jsx': ConsistentHashingQuiz,
-  'numbers-to-know-quiz.jsx': NumbersToKnowQuiz,
-  'time-series-databases-quiz.jsx': TimeSeriesDatabasesQuiz,
-  'vector-database-quiz.jsx': VectorDatabaseQuiz,
-  'redis-quiz.jsx': RedisQuiz,
-  'key-technologies-quiz.jsx': KeyTechnologiesQuiz,
-  'how-to-prepare-quiz.jsx': HowToPrepareQuiz,
-  'delivery-framework-quiz.jsx': DeliveryFrameworkQuiz,
-  'core-concepts-overview-quiz.jsx': CoreConceptsOverviewQuiz,
-  'in-a-hurry-introduction-quiz.jsx': InAHurryIntroductionQuiz,
-};
+const quizDataBySlug = quizDataCatalog.quizzes || {};
 
 function timeAgo(isoStr) {
   if (!isoStr) return '';
@@ -140,7 +89,7 @@ function QuizItemActions({ slug, hasProgress, onClear }) {
 }
 
 function ProgressStats({ summaries, quizTopics }) {
-  const quizSlugs = quizTopics.filter(t => t.outputFile && componentsMap[t.outputFile]).map(t => t.slug);
+  const quizSlugs = quizTopics.filter(t => quizDataBySlug[t.slug]).map(t => t.slug);
   const totalQuizzes = quizSlugs.length;
   const completed = quizSlugs.filter(s => summaries[s]?.status === 'completed').length;
   const inProgress = quizSlugs.filter(s => summaries[s]?.status === 'in_progress').length;
@@ -317,7 +266,7 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
       {isOpen && (
         <ul className="mt-1 pl-[18px] border-l border-[#374151] ml-[14px] space-y-1">
           {items.map(item => {
-            const hasQuiz = item.outputFile && componentsMap[item.outputFile];
+            const hasQuiz = !!quizDataBySlug[item.slug];
             const progress = summaries[item.slug];
             const status = progress?.status || 'not_started';
             const hasProgress = !!progress;
@@ -421,13 +370,12 @@ export default function App() {
     <HashRouter>
       <Routes>
         <Route path="/" element={<Index />} />
-        {quizState.topics.filter(t => t.outputFile && componentsMap[t.outputFile]).map((quiz) => {
-          const Component = componentsMap[quiz.outputFile];
+        {quizState.topics.filter(t => quizDataBySlug[t.slug]).map((quiz) => {
           return (
             <Route 
               key={quiz.slug} 
               path={`/${quiz.slug}`} 
-              element={<Component quizSlug={quiz.slug} />} 
+              element={<QuizEngine quiz={quizDataBySlug[quiz.slug]} />}
             />
           );
         })}

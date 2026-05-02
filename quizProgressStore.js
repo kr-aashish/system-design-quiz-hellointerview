@@ -77,11 +77,13 @@ export function startAttempt(slug, totalQuestions) {
     attemptId,
     startedAt: new Date().toISOString(),
     completedAt: null,
+    lastSavedAt: new Date().toISOString(),
     totalQuestions: totalQuestions || 0,
     score: { correct: 0, total: 0 },
     totalTimeSeconds: 0,
     questionResults: {},
     questionOrder: [], // track the order questions were presented
+    state: null, // full resumable UI state for the shared quiz runtime
   };
   
   store.quizzes[slug].attempts.push(attempt);
@@ -104,12 +106,37 @@ export function saveQuestionOrder(slug, attemptId, questionIds) {
   if (!attempt) return;
   
   attempt.questionOrder = questionIds;
+  attempt.lastSavedAt = new Date().toISOString();
+  saveStore(store);
+}
+
+/**
+ * Persist a complete resumable attempt state.
+ * This intentionally stores UI state in addition to answer results so reloads
+ * can restore the quiz exactly where the learner left off.
+ */
+export function saveAttemptState(slug, attemptId, state) {
+  const store = getStore();
+  const quiz = store.quizzes[slug];
+  if (!quiz) return;
+
+  const attempt = quiz.attempts.find(a => a.attemptId === attemptId);
+  if (!attempt) return;
+
+  attempt.state = state;
+  attempt.lastSavedAt = new Date().toISOString();
+  if (state?.questionOrder?.length) {
+    attempt.questionOrder = state.questionOrder;
+  }
+  if (Number.isFinite(state?.totalElapsed)) {
+    attempt.totalTimeSeconds = state.totalElapsed;
+  }
   saveStore(store);
 }
 
 /**
  * Record an individual answer.
- * result: { selectedIndex, correctIndex, isCorrect, confidence, timedOut, skipped }
+ * result: { selectedIndex, correctIndex, isCorrect, confidence, timedOut, skipped, revealed }
  */
 export function recordAnswer(slug, attemptId, questionId, result) {
   const store = getStore();
@@ -126,8 +153,13 @@ export function recordAnswer(slug, attemptId, questionId, result) {
     confidence: result.confidence || null,
     timedOut: result.timedOut || false,
     skipped: result.skipped || false,
+    revealed: result.revealed || false,
+    optionText: result.optionText || null,
+    correctOptionText: result.correctOptionText || null,
+    elapsedSeconds: result.elapsedSeconds || null,
     answeredAt: new Date().toISOString(),
   };
+  attempt.lastSavedAt = new Date().toISOString();
   
   // Recompute score from all answers
   const results = Object.values(attempt.questionResults);
@@ -142,7 +174,7 @@ export function recordAnswer(slug, attemptId, questionId, result) {
 /**
  * Complete an attempt — mark it as finished.
  */
-export function completeAttempt(slug, attemptId, finalScore, totalTimeSeconds) {
+export function completeAttempt(slug, attemptId, finalScore, totalTimeSeconds, finalState) {
   const store = getStore();
   const quiz = store.quizzes[slug];
   if (!quiz) return;
@@ -151,9 +183,16 @@ export function completeAttempt(slug, attemptId, finalScore, totalTimeSeconds) {
   if (!attempt) return;
   
   attempt.completedAt = new Date().toISOString();
+  attempt.lastSavedAt = attempt.completedAt;
   attempt.totalTimeSeconds = totalTimeSeconds || 0;
   if (finalScore) {
     attempt.score = finalScore;
+  }
+  if (finalState) {
+    attempt.state = finalState;
+    if (finalState.questionOrder?.length) {
+      attempt.questionOrder = finalState.questionOrder;
+    }
   }
   
   quiz.status = 'completed';
@@ -194,6 +233,7 @@ export function getQuizSummaries() {
     const pct = latest.score.total > 0 
       ? Math.round((latest.score.correct / latest.score.total) * 100) 
       : 0;
+    const results = Object.values(latest.questionResults);
     
     summaries[slug] = {
       status: quiz.status,
@@ -204,6 +244,9 @@ export function getQuizSummaries() {
       lastAttemptAt: quiz.lastAttemptAt,
       attemptCount: quiz.attempts.length,
       isComplete: !!latest.completedAt,
+      skippedCount: results.filter(r => r.skipped).length,
+      flaggedCount: latest.state?.flagged?.length || 0,
+      lastSavedAt: latest.lastSavedAt || quiz.lastAttemptAt,
     };
   }
   

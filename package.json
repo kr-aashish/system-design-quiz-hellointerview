@@ -4,8 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "build:quiz-data": "node scripts/build-quiz-data.mjs",
+    "strip:quiz-ui": "node scripts/strip-quiz-ui.mjs",
+    "dev": "node scripts/build-quiz-data.mjs && vite",
+    "build": "node scripts/build-quiz-data.mjs && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

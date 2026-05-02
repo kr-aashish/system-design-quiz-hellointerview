@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-04-27T00:00:00Z",
+  "lastUpdated": "2026-05-02T00:00:00Z",
   "lastProcessedLink": "/learn/system-design/in-a-hurry/key-technologies",
   "topics": [
     {
@@ -340,7 +340,7 @@
       "slug": "in-a-hurry-patterns",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
+      "outputFile": "common-patterns-quiz.jsx",
       "retryCount": 0
     },
     {

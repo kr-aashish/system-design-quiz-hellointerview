@@ -13,7 +13,7 @@ import {
   completeAttempt,
   getInProgressAttempt,
   saveQuestionOrder,
-  getLatestAttempt,
+  saveAttemptState,
 } from './quizProgressStore';
 
 /**
@@ -47,8 +47,10 @@ export function useQuizProgress(quizSlug, totalQuestions) {
         attemptId: inProgress.attemptId,
         questionResults: inProgress.questionResults,
         questionOrder: inProgress.questionOrder || [],
+        state: inProgress.state || null,
         answeredCount: Object.keys(inProgress.questionResults).length,
         score: inProgress.score,
+        totalTimeSeconds: inProgress.totalTimeSeconds || 0,
       });
       setIsResuming(true);
     }
@@ -57,14 +59,17 @@ export function useQuizProgress(quizSlug, totalQuestions) {
   /**
    * Start a new attempt (used when user clicks "Start Quiz" or "Restart")
    */
-  const startNewAttempt = useCallback((questionIds) => {
-    const id = startAttempt(quizSlug, totalQuestions || questionIds?.length || 0);
+  const startNewAttempt = useCallback((questionIds, initialState = null) => {
+    const id = startAttempt(quizSlug, questionIds?.length || totalQuestions || 0);
     setAttemptId(id);
     setResumeData(null);
     setIsResuming(false);
     
     if (questionIds && questionIds.length > 0) {
       saveQuestionOrder(quizSlug, id, questionIds);
+    }
+    if (initialState) {
+      saveAttemptState(quizSlug, id, initialState);
     }
     
     return id;
@@ -106,16 +111,26 @@ export function useQuizProgress(quizSlug, totalQuestions) {
   }, [quizSlug, attemptId]);
 
   /**
+   * Persist full resumable UI state for the active attempt.
+   */
+  const saveState = useCallback((state) => {
+    const id = attemptId;
+    if (!id) return;
+
+    saveAttemptState(quizSlug, id, state);
+  }, [quizSlug, attemptId]);
+
+  /**
    * Mark the quiz as complete.
    * 
    * @param {{ correct: number, total: number }} score - Final score
    * @param {number} totalTimeSeconds - Total time taken
    */
-  const completeQuiz = useCallback((score, totalTimeSeconds) => {
+  const completeQuiz = useCallback((score, totalTimeSeconds, finalState = null) => {
     const id = attemptId;
     if (!id) return;
     
-    completeAttempt(quizSlug, id, score, totalTimeSeconds);
+    completeAttempt(quizSlug, id, score, totalTimeSeconds, finalState);
   }, [quizSlug, attemptId]);
 
   return {
@@ -125,6 +140,7 @@ export function useQuizProgress(quizSlug, totalQuestions) {
     resumeData,
     startNewAttempt,
     saveQuestionOrder: persistQuestionOrder,
+    saveState,
     resumeAttempt,
     isResuming,
   };
