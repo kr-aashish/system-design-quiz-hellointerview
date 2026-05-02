@@ -483,7 +483,7 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                       <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                         {hasQuiz && (
                           <Link 
-                            to={`/${item.slug}`}
+                            to={`/${item.slug}${status === 'in_progress' ? '?resume=true' : ''}`}
                             className="flex items-center gap-1.5 text-xs bg-teal-500/10 text-teal-400 px-2.5 py-1.5 rounded-md hover:bg-teal-500/20 transition-colors font-semibold"
                           >
                             {status === 'in_progress' ? (

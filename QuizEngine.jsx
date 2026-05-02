@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   Award,
@@ -299,6 +299,8 @@ export default function QuizEngine({ quiz }) {
     isResuming,
   } = useQuizProgress(quiz.slug, allQuestions.length);
 
+  const location = useLocation();
+
   const [screen, setScreen] = useState("landing");
   const [mode, setMode] = useState(defaultMode);
   const [questions, setQuestions] = useState([]);
@@ -430,6 +432,12 @@ export default function QuizEngine({ quiz }) {
     setTotalElapsed(restoredState?.totalElapsed ?? data.totalTimeSeconds ?? 0);
     setScreen("quiz");
   }, [allQuestions, defaultMode, questionsById, resumeAttempt]);
+
+  useEffect(() => {
+    if (location.search.includes("resume=true") && isResuming && screen === "landing") {
+      restoreFromAttempt();
+    }
+  }, [location.search, isResuming, screen, restoreFromAttempt]);
 
   useEffect(() => {
     if (!attemptId || screen === "landing") return;
