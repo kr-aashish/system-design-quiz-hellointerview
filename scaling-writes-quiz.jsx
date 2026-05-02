@@ -498,7 +498,7 @@ export const QUESTIONS = [
     "style": "Gotcha/trap question",
     "question": "You implement dynamic hot key splitting: writers detect hot keys and split writes across sub-keys. You choose the 'simple' approach where readers always check all sub-keys. A writer detects a key is hot and starts writing to sub-key 0, 1, and 2. But the reader only checks the base key (no sub-keys) and returns a count of 50 when the true total across sub-keys is 5,000. What went wrong?",
     "options": [
-      "The reader's code has a bug — it should be checking sub-keys but isn't looking up the sub-key configuration",
+      "The reader's code has a bug — it should be checking sub-keys but isn't looking up the sub-key configuration correctly, which causes it to miss the partitioning metadata and read from the wrong partition",
       "The writer is using a different hashing scheme for sub-key assignment than the reader expects, so the reader can't find the sub-keys",
       "Both readers and writers must agree on whether a key is split. The reader was deployed before the hot key logic and doesn't know to check sub-keys — the write spread across sub-keys while the reader only queries the base key",
       "The writer created the sub-keys but didn't delete the base key, so the reader finds the base key (with its stale count of 50) and returns it without checking for sub-keys"

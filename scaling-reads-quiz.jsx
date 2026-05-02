@@ -76,8 +76,8 @@ export const QUESTIONS = [
     "options": [
       "Application-level optimization can't reduce query count because the ORM generates fixed queries",
       "Even with a 30% reduction, 56,000 QPS still exceeds what a single server can sustain at safe utilization levels, and traffic will continue growing",
-      "Code optimization only helps write performance, not read performance",
-      "The CPU bottleneck is caused by connection overhead, not query execution, so fewer queries won't help"
+      "Code optimization primarily reduces write-path latency through better batching and connection pooling, but read performance is bottlenecked by I/O throughput and disk seek time, neither of which application code changes can influence — the CPU spike is caused by kernel-level context switching between database connections, not query execution overhead",
+      "The CPU bottleneck is caused by TCP connection establishment overhead, not actual query execution — each of the 80K queries opens a new connection, and reducing query count by 30% doesn't help because the connection pool is the saturated resource, so the fix is connection pooling rather than fewer queries"
     ],
     "correctIndex": 1,
     "explanation": "At 95% CPU with 80K QPS, a 30% reduction brings you to ~56K QPS — still dangerously close to capacity with no room for traffic spikes. More critically, this is a physics problem: CPU cores have finite instruction throughput. Code optimization buys temporary headroom but doesn't address the fundamental constraint that a single machine has physical limits. You need architectural solutions (replicas, caching) rather than just code tuning.",
@@ -106,10 +106,10 @@ export const QUESTIONS = [
     "style": "Gotcha/trap question",
     "question": "You create a compound index on (status, created_at) for an orders table. A teammate writes a query: SELECT * FROM orders WHERE created_at > '2024-01-01'. They report the query is still doing a full table scan despite the index existing. What's the root cause?",
     "options": [
-      "Compound indexes can only be used for exact-match queries, not range queries",
-      "The query optimizer determined the full table scan is faster because most rows match the date filter",
+      "Compound indexes can only be used for exact-match (equality) queries and cannot accelerate range queries like greater-than or BETWEEN — for range queries, the database must fall back to a full table scan even when an index exists, because B-tree traversal requires exact key comparison to navigate the tree structure",
+      "The query optimizer determined that a full table scan is faster than using the index because the date filter matches a large percentage of rows — when more than roughly 10-15% of rows match the filter predicate, sequential scanning is more efficient than the random I/O pattern of index lookups",
       "The index's leftmost prefix is 'status', so a query filtering only on 'created_at' cannot use this index — column order matters",
-      "B-tree indexes don't support date comparisons; you need a specialized temporal index"
+      "B-tree indexes don't support date and timestamp comparisons natively — they're designed for string and numeric equality checks, so date range queries require a specialized temporal index type like GiST or BRIN that understands chronological ordering"
     ],
     "correctIndex": 2,
     "explanation": "This is a classic compound index gotcha. A compound index on (status, created_at) is sorted first by status, then by created_at within each status group. Queries that skip the leftmost column can't efficiently traverse the index. The article explicitly states: 'an index on (status, created_at) helps both queries filtering by status and queries filtering by both. But it won't help queries filtering only by created_at.' Option B is a plausible distractor but the real issue is index prefix ordering.",
@@ -122,10 +122,10 @@ export const QUESTIONS = [
     "style": "Anti-pattern identification",
     "question": "A candidate designing a social media application says: 'I'll only add one index per table to avoid write overhead. Too many indexes will slow down our writes significantly.' What's the most critical flaw in this reasoning?",
     "options": [
-      "Modern databases support a maximum of one index per table anyway, so this is a moot point",
-      "Indexes only slow down reads, not writes, so this concern is entirely unfounded",
+      "Modern databases enforce a practical limit of one B-tree index per table because each additional index competes for the same buffer pool memory, and at two or more indexes the page eviction rate causes thrashing that degrades both read and write performance below single-index baselines",
+      "Indexes only slow down reads by adding an extra indirection layer — the query planner must decide whether to use the index or do a sequential scan, and for small result sets the index lookup plus heap fetch is actually slower than a direct scan, so this concern about write overhead is entirely unfounded",
       "The fear of over-indexing is dramatically overblown on modern hardware — under-indexing causes far more damage than over-indexing, and read-heavy apps need indexes on every frequently queried column",
-      "You should add indexes only after the application is in production and you can measure actual query patterns"
+      "You should add indexes only after the application is in production and you can measure actual slow-query patterns using pg_stat_statements or equivalent — premature indexing based on assumed access patterns often creates indexes that the query planner never uses, wasting write overhead on maintaining unused index structures"
     ],
     "correctIndex": 2,
     "explanation": "The article directly addresses this anti-pattern: 'You'll read outdated resources warning about too many indexes slowing down writes. While index overhead is real, this fear is dramatically overblown in most applications. Modern hardware and database engines handle well-designed indexes efficiently. Under-indexing kills more applications than over-indexing ever will.' In interviews, you should confidently add indexes for your query patterns.",
@@ -138,10 +138,10 @@ export const QUESTIONS = [
     "style": "Interviewer pushback",
     "question": "You mention vertical scaling (SSDs, more RAM) as a first step for a read-heavy application. Your interviewer pushes back: 'But vertical scaling doesn't really solve anything.' What's the strongest response?",
     "options": [
-      "Agree completely — vertical scaling is never worth discussing in system design interviews",
+      "Agree completely — vertical scaling demonstrates a lack of distributed systems understanding and should never be mentioned in system design interviews, because interviewers are specifically testing your ability to design horizontally scalable architectures, and mentioning hardware upgrades signals that you default to brute-force solutions rather than elegant engineering",
       "Explain that SSDs provide 10-100x faster random I/O and more RAM keeps datasets in memory, buying meaningful breathing room while you implement architectural solutions — but acknowledge it doesn't scale indefinitely",
-      "Argue that vertical scaling is always sufficient for read workloads since modern servers can handle millions of QPS",
-      "Pivot entirely to horizontal scaling since the interviewer clearly wants distributed systems discussion"
+      "Argue that vertical scaling is always sufficient for read workloads since modern servers with NVMe SSDs and 2TB of RAM can handle millions of QPS through in-memory B-tree traversal — the entire dataset fits in RAM for most applications, making horizontal scaling unnecessary until you reach truly exceptional data volumes",
+      "Pivot entirely to horizontal scaling since the interviewer's pushback is a clear signal that they want to discuss distributed systems design — responding with more vertical scaling arguments risks appearing inflexible and missing the interviewer's intent to explore your knowledge of replication, sharding, and caching"
     ],
     "correctIndex": 1,
     "explanation": "The article notes vertical scaling 'won't solve every problem, but it's often the fastest way to buy yourself some breathing room.' The key is framing it honestly: it's a pragmatic first step with real performance benefits (10-100x I/O improvement) while acknowledging its ceiling. Option D is too reactive — showing judgment means standing by valid points while acknowledging their limits.",
@@ -154,10 +154,10 @@ export const QUESTIONS = [
     "style": "Anti-pattern identification",
     "question": "Your team's database is at 60,000 read QPS on a high-end server. A senior engineer proposes: 'Let's just keep upgrading the hardware — we can get 2x the cores and 4x the RAM for $50K/month. No architectural changes needed.' For a fast-growing application, what's the most dangerous assumption in this proposal?",
     "options": [
-      "The $50K/month cost is too high — distributed systems are always cheaper",
-      "Hardware upgrades only improve write performance, not read performance",
+      "The $50K/month cost is the primary concern — distributed systems running on commodity hardware are always cheaper than a single high-end server, because cloud providers offer horizontal scaling at linear cost while vertical scaling follows a superlinear pricing curve where each doubling of capacity costs 3-4x more",
+      "Hardware upgrades only improve write performance through faster disk I/O and larger WAL buffers, but read performance is bottlenecked by network bandwidth between the database and application servers, which no amount of server-side hardware improvement can address",
       "Vertical scaling has a physical ceiling — you can't buy a server with infinite cores — and each upgrade gets proportionally more expensive, while traffic growth is often exponential",
-      "Modern cloud providers don't offer hardware upgrades, so this isn't feasible"
+      "Modern cloud providers don't offer true hardware upgrades beyond their largest instance types, and migrating to a bigger instance requires database downtime for the resize operation, making this approach operationally risky for a fast-growing application that can't afford maintenance windows"
     ],
     "correctIndex": 2,
     "explanation": "The core issue is physics meets economics: CPU cores, memory, and I/O have hard physical limits. You can't buy a server with 10,000 cores. Meanwhile, user growth and traffic are often exponential. At some point, the most expensive server available simply can't keep up. Option A is wrong because distributed systems often cost more in total (operational complexity), but they scale beyond what any single machine can achieve.",
@@ -170,10 +170,10 @@ export const QUESTIONS = [
     "style": "Scenario-based trade-offs",
     "question": "Your e-commerce order page joins users, orders, order_items, and products tables — a 4-table join serving 10,000 QPS. You denormalize by creating an order_summary table with redundant user names and product names. A product name changes. What's the operational cost you've accepted?",
     "options": [
-      "No cost — denormalized tables auto-sync with their source tables in all modern databases",
+      "No operational cost — denormalized tables in modern databases like PostgreSQL 15+ automatically propagate changes from source tables through materialized view triggers, so when the product name changes in the products table, the order_summary table is updated transparently by the database engine without application intervention",
       "You must update every order_summary row containing that product name — potentially millions of rows — but this is acceptable because product name changes are rare compared to order page reads",
-      "You can't denormalize product data because product names change too frequently",
-      "The order_summary table becomes permanently stale; you'd need to rebuild it from scratch on every product update"
+      "You can't denormalize product data because product names change too frequently — even if name changes are rare today, product data evolves unpredictably as the business grows, and denormalizing creates a maintenance burden that compounds over time as more fields are embedded",
+      "The order_summary table becomes permanently stale after any source data change — you'd need to rebuild the entire table from scratch on every product update by re-joining and re-aggregating all source tables, making the denormalization approach untenable for any data that ever changes"
     ],
     "correctIndex": 1,
     "explanation": "Denormalization trades write complexity for read speed. When a product name changes, you must update all order_summary rows containing it — a potentially expensive write operation touching millions of rows. But the article emphasizes: 'Always consider your read/write ratio before denormalizing.' Product name changes are extremely rare compared to thousands of order page views per second, making this trade-off clearly worthwhile.",
@@ -186,10 +186,10 @@ export const QUESTIONS = [
     "style": "Scenario-based trade-offs",
     "question": "Your product listing page shows average ratings, requiring a JOIN across products and reviews tables with GROUP BY aggregation on every page load. This query runs 50,000 times per day. Which approach best balances performance and freshness?",
     "options": [
-      "Add a B-tree index on reviews.product_id — this makes the JOIN and aggregation essentially free",
+      "Add a B-tree index on reviews.product_id — this makes the JOIN and GROUP BY aggregation essentially free because the index provides pre-sorted access to reviews by product, allowing the database to compute the average incrementally without materializing the full join result set",
       "Create a materialized view precomputing AVG(rating) per product via a background job, refreshing every few minutes — eliminates expensive aggregation from the hot path",
-      "Cache the entire product listing page in Redis with a 24-hour TTL — stale ratings are acceptable",
-      "Denormalize by storing the current average directly in the products table, updated synchronously on every new review"
+      "Cache the entire product listing page in Redis with a 24-hour TTL — slightly stale ratings are acceptable for a product listing page since individual ratings fluctuate by small amounts, and the 24-hour refresh cadence aligns with most users' browsing patterns where they revisit the catalog daily",
+      "Denormalize by storing the current average rating directly in the products table, updated synchronously on every new review submission — this eliminates the JOIN entirely and provides real-time accuracy, which is important because product ratings directly influence purchase decisions"
     ],
     "correctIndex": 1,
     "explanation": "Materialized views are the ideal fit here. The article describes this exact pattern: 'Instead of calculating average product ratings on every page load, compute them once (via a background job) and store the results.' Indexing (A) helps but doesn't eliminate the aggregation cost. A 24-hour TTL (C) is too stale for ratings. Synchronous denormalization (D) adds latency to every review submission, which is especially problematic during high-review periods.",
@@ -204,8 +204,8 @@ export const QUESTIONS = [
     "options": [
       "The denormalized posts table update fails but the cache is invalidated, so users see the old name from the database",
       "The cache is invalidated and the posts table is updated, but a read replica serves stale denormalized data that gets re-cached — polluting the cache with the old name for the duration of the TTL",
-      "The user's profile table is updated but their browser cache still shows the old name",
-      "The posts table update succeeds but is too slow, causing the user to see a timeout error"
+      "The user's profile table is updated correctly, but their browser's HTTP cache still shows the old display name because the profile API response includes a Cache-Control: max-age=300 header that prevents the browser from requesting fresh data — this is a client-side caching issue that requires cache-busting headers, not a server-side denormalization concern",
+      "The posts table update succeeds but takes so long to propagate across millions of denormalized rows that the user sees a timeout error on their profile update request — the synchronous write amplification of updating every post creates a feedback loop where the user's simple name change triggers a multi-second database operation that exceeds the API gateway's request timeout"
     ],
     "correctIndex": 1,
     "explanation": "This is a nasty interaction between denormalization and caching. Even if you correctly update the denormalized posts table AND invalidate the Redis cache, a read replica with replication lag might serve the old denormalized data to a request that arrives between cache invalidation and replication propagation. That request re-caches stale data, potentially serving the old name for the entire TTL duration. This compounds two complexities: denormalization's write amplification and caching's race conditions.",
@@ -218,10 +218,10 @@ export const QUESTIONS = [
     "style": "Scenario-based trade-offs",
     "question": "You're adding read replicas to a user profile service. Profile views are 50,000 QPS, profile updates are 50 QPS. Your interviewer asks: 'synchronous or asynchronous replication?' For THIS specific use case, which choice is best justified?",
     "options": [
-      "Synchronous — user profiles contain critical identity data that must never be stale across replicas",
+      "Synchronous — user profiles contain critical identity data (email, name, profile picture) that must never be stale across replicas, because a user who updates their email for account recovery and then gets routed to a stale replica could be locked out of their account if the recovery flow checks the old email",
       "Asynchronous — the massive read/write imbalance (1000:1) means replication lag is negligible in practice, and sync replication would add latency to the already-rare writes without meaningful consistency benefit",
-      "Semi-synchronous — replicate synchronously to one replica and asynchronously to the rest for a balanced approach",
-      "Asynchronous with zero-lag guarantee — modern databases can ensure async replicas never lag behind"
+      "Semi-synchronous — replicate synchronously to one replica and asynchronously to the rest, providing a hot standby for failover while keeping write latency lower than full synchronous replication across all replicas, which is the optimal balanced approach for any read-heavy workload regardless of the specific read/write ratio",
+      "Asynchronous with zero-lag guarantee — modern databases like PostgreSQL 16+ and Aurora support bounded-lag asynchronous replication that guarantees replicas are within 1ms of the primary through adaptive flow control, combining the performance benefits of async with the consistency guarantees of sync"
     ],
     "correctIndex": 1,
     "explanation": "With a 1000:1 read/write ratio, writes are so infrequent that async replication lag is practically invisible — a replica might lag by milliseconds at most. Synchronous replication would add latency to every write (blocking until all replicas confirm) for negligible consistency benefit. Option D is impossible — 'zero-lag async' is a contradiction. Semi-sync (C) is valid but overengineered for this ratio.",
@@ -234,10 +234,10 @@ export const QUESTIONS = [
     "style": "Gotcha/trap question",
     "question": "A user updates their profile picture, then immediately refreshes their profile page. They see the old picture. A junior engineer says: 'The cache must be stale — let's reduce the TTL.' But you're not using any application-level cache. What's actually happening?",
     "options": [
-      "The browser is caching the old image — this is a client-side issue, not a backend one",
+      "The browser is caching the old image in its local HTTP cache due to aggressive Cache-Control headers on the profile image URL — this is a client-side caching issue that requires either cache-busting query parameters on the image URL or shorter max-age directives, not a backend infrastructure change",
       "The profile read hit an async read replica that hasn't received the write yet — this is replication lag, and reducing cache TTL wouldn't help because there's no cache to invalidate",
-      "The database transaction for the image upload hasn't committed yet when the read arrives",
-      "The CDN is serving a cached version of the profile page"
+      "The database transaction for the image upload hasn't committed yet when the read arrives — the image upload involves writing the binary blob to object storage and then updating the profile row with the new URL, and if these are in a single transaction, the read could arrive between the object storage write and the database commit",
+      "The CDN is serving a cached version of the profile page from an edge location that hasn't been invalidated yet — CDN edge caches typically have a propagation delay of 30-60 seconds for cache invalidation commands, so the old image persists at edge nodes until the invalidation fully propagates across the CDN's global network"
     ],
     "correctIndex": 1,
     "explanation": "This is the classic replication lag gotcha. The article states: 'Users might not see their own changes immediately if they're reading from a lagging replica.' The user wrote to the primary, then their read request was routed to a replica that hasn't received the update yet. The junior engineer's instinct to check the cache is reasonable but wrong here — the staleness comes from the replication layer. The fix is read-after-write consistency: route the user's reads to the primary for a short window after writes.",
@@ -252,8 +252,8 @@ export const QUESTIONS = [
     "options": [
       "All replicas will refuse to accept the promoted primary because they have different data versions",
       "The promoted replica may be missing the most recent writes that hadn't replicated before the crash — these transactions are effectively lost unless recovered from the old primary's WAL",
-      "Read traffic will immediately overwhelm the new primary because replicas can't handle reads",
-      "The promoted replica will have MORE data than the old primary due to split-brain replication"
+      "Read traffic will immediately overwhelm the newly promoted primary because it now handles both the 50,000 read QPS and 3,000 write QPS on a single instance that was previously only handling read traffic — the remaining 4 replicas can't help because they're still pointed at the old primary's replication slot and need to be reconfigured",
+      "The promoted replica will have MORE data than the old primary due to split-brain replication — during the brief window between the primary crash and the promotion, remaining replicas may have accepted writes from application servers that didn't detect the primary failure, creating conflicting state that must be resolved through manual merge"
     ],
     "correctIndex": 1,
     "explanation": "With async replication, the primary can acknowledge writes before they propagate to replicas. When the primary crashes, any writes in flight (acknowledged to the client but not yet replicated) are lost on the replicas. The promoted replica becomes primary but is missing those transactions. Recovery requires accessing the old primary's write-ahead log (WAL), which may not be possible if the disk failed. This is the fundamental trade-off of async replication: better performance at the cost of potential data loss during failover.",
@@ -267,8 +267,8 @@ export const QUESTIONS = [
     "question": "Your application has distinct user profiles, product catalog, and order history services. User queries are 30K QPS, product queries are 50K QPS, and order queries are 20K QPS. You choose functional sharding — putting each domain in its own database. What's the primary benefit for READ scaling specifically?",
     "options": [
       "Each database holds a smaller dataset, so indexes are smaller and queries are faster — plus read load is distributed across 3 servers instead of one",
-      "Functional sharding eliminates the need for read replicas entirely",
-      "You can now JOIN across all three databases more efficiently using distributed query engines",
+      "Functional sharding eliminates the need for read replicas entirely because each domain database only handles its own traffic (30K, 50K, or 20K QPS), all of which are within a single PostgreSQL instance's capacity — the functional split provides sufficient horizontal scaling without the operational complexity of replication lag management",
+      "You can now JOIN across all three databases more efficiently using a distributed query engine like Presto or Trino, which parallelizes the cross-database join across all three servers simultaneously — this is faster than a single-database join because each server only scans its smaller dataset",
       "Each database can use a different storage engine optimized for its access pattern, but read throughput stays the same"
     ],
     "correctIndex": 0,
@@ -284,8 +284,8 @@ export const QUESTIONS = [
     "options": [
       "The request hits the US CDN edge, cache misses, queries the US database (which doesn't have EU user data), returns 404 — geographic sharding breaks cross-region reads entirely",
       "The request hits the US CDN edge, cache misses, routes to the EU database for the profile, populates both the US Redis cache and CDN edge — subsequent US reads are fast, but the first request has cross-region latency",
-      "Geographic sharding automatically replicates all data to all regions, so the US database already has the EU profile",
-      "The CDN always routes to the closest database, so it will query the US database which proxies to EU — adding double the latency"
+      "Geographic sharding automatically replicates all user data to all regions using cross-region synchronous replication, so the US database already contains a full copy of the EU profile data — geographic sharding distributes writes to the nearest datacenter but reads are served from a global replica that contains data from all regions",
+      "The CDN always routes the request to the geographically closest database regardless of which shard contains the data, so it queries the US database, which then proxies the request to the EU shard — this adds double the network latency (US→EU→US) compared to a direct EU query because the request must traverse the Atlantic Ocean twice"
     ],
     "correctIndex": 1,
     "explanation": "Geographic sharding means data lives in its home region. When a US user requests an EU profile, the application must route to the EU shard — incurring cross-region latency (~100-200ms extra). However, caching layers (Redis + CDN) absorb this cost: the first request is slow, but subsequent US-region reads for the same EU profile are served from the local cache. This is why the article notes caching and sharding are complementary — caching mitigates sharding's cross-region read penalties.",
@@ -298,10 +298,10 @@ export const QUESTIONS = [
     "style": "Scenario-based trade-offs",
     "question": "You're designing a URL shortener like Bitly. URLs are created once and redirected millions of times. The short-to-long URL mapping never changes once created. Which caching strategy is optimal and why?",
     "options": [
-      "Cache with a 1-hour TTL in Redis — short enough to keep memory usage low, long enough for performance",
+      "Cache in Redis with a 1-hour TTL — short enough to keep memory usage bounded for millions of URL mappings while still providing a meaningful cache hit rate for popular links that receive bursts of clicks within the first hour of sharing",
       "Cache in Redis with NO expiration — the mapping is immutable, so there's zero invalidation complexity, and the DB only gets hit for cache misses on unpopular links",
-      "Don't cache at all — use a hash index in the database for O(1) lookups, which is fast enough",
-      "Cache at the CDN layer only — Redis adds unnecessary infrastructure for simple key-value lookups"
+      "Don't cache at all — use a hash index in the database for O(1) lookups, which is fast enough for any practical QPS because hash indexes have constant-time performance regardless of table size, and the overhead of maintaining a separate Redis cluster isn't justified when the database itself can serve the same access pattern",
+      "Cache at the CDN layer only — Redis adds unnecessary infrastructure complexity for simple key-value lookups, and CDN edge caching provides the same sub-millisecond latency benefit with geographic distribution that Redis alone cannot match, since CDN edges are located closer to end users than a centralized Redis cluster"
     ],
     "correctIndex": 1,
     "explanation": "The article explicitly describes Bitly as 'a caching dream scenario. Cache the short URL to long URL mapping aggressively in Redis with no expiration (URLs don't change).' Since the mapping is immutable, you never face cache invalidation complexity — the hardest part of caching disappears. The DB becomes a cold-storage fallback for unpopular links. Option A introduces unnecessary eviction for data that never changes. Option C ignores that even O(1) DB lookups can't match sub-millisecond Redis for millions of QPS.",
@@ -314,10 +314,10 @@ export const QUESTIONS = [
     "style": "Cross-subtopic bridge (Caching × Replicas)",
     "question": "Your product catalog serves 100,000 QPS. 80% of traffic goes to the top 1% of products (popular items). You have budget for either 5 read replicas OR a Redis cache cluster. Which provides better read scaling for THIS workload and why?",
     "options": [
-      "Read replicas — they provide both read scaling AND redundancy, making them strictly better than caching",
+      "Read replicas — they provide both read scaling AND redundancy (failover capability), making them strictly better than caching because caching only addresses performance while replicas address both performance and availability, and the redundancy benefit alone justifies the operational overhead of managing replication",
       "Redis cache — the highly skewed access pattern (80/1 distribution) means caching exploits hot data locality, serving 80K QPS from memory at sub-millisecond latency while the DB handles only 20K QPS of diverse queries",
-      "They're equivalent — both distribute 100K QPS across multiple servers",
-      "Read replicas — caches don't help because product data changes frequently and invalidation is too complex"
+      "They're equivalent for this workload — both distribute 100K QPS across multiple servers with similar per-request latency, so the choice should be made based on operational complexity rather than performance characteristics, and replicas are simpler to operate since they're just additional database instances",
+      "Read replicas — caches don't help for product catalog data because product details change frequently (prices, inventory, descriptions) and the invalidation complexity of keeping the Redis cache consistent with the database outweighs any latency benefit, especially at 100K QPS where invalidation events would themselves generate significant traffic"
     ],
     "correctIndex": 1,
     "explanation": "The article emphasizes that 'most applications exhibit highly skewed access patterns.' When 80% of reads hit 1% of products, a cache naturally keeps those hot items in memory. 80K QPS served at sub-millisecond latency from Redis, leaving only 20K diverse queries for the database. Read replicas would spread 100K QPS evenly across 6 servers (~17K each) — functional but slower per request. For skewed distributions, caching is dramatically more efficient.",
@@ -330,10 +330,10 @@ export const QUESTIONS = [
     "style": "Implementation-specific nuance",
     "question": "Your non-functional requirements state: 'Search results should be no more than 30 seconds stale. User profiles can tolerate 5 minutes of staleness.' How should these NFRs directly inform your caching design?",
     "options": [
-      "Use a single 30-second TTL for all cached data — the stricter requirement should apply everywhere for consistency",
+      "Use a single 30-second TTL for all cached data — the stricter staleness requirement should apply as the universal default, because applying different TTLs per data type creates inconsistency in the caching layer that's difficult to reason about and debug when staleness issues arise",
       "Set search result cache TTL to 30 seconds and user profile cache TTL to 5 minutes — each data type's TTL directly maps to its staleness tolerance from the NFRs",
-      "Don't use TTL at all — rely entirely on write-through invalidation to meet both staleness requirements",
-      "Set TTLs to half the staleness tolerance (15 seconds and 2.5 minutes) as a safety margin"
+      "Don't use TTL at all — rely entirely on write-through invalidation to meet both staleness requirements, because active invalidation provides tighter consistency guarantees than any TTL-based approach and eliminates the possibility of serving stale data within the TTL window",
+      "Set TTLs to half the staleness tolerance (15 seconds for search and 2.5 minutes for profiles) as a safety margin — this accounts for clock skew between application servers and Redis nodes, cache write propagation delays, and the possibility that the TTL timer starts slightly before the data was actually fresh, ensuring you never exceed the NFR-defined staleness bound even under adverse timing conditions"
     ],
     "correctIndex": 1,
     "explanation": "The article directly states: 'Ideally, your cache TTL should be driven by non-functional requirements around data staleness. If your requirements state search results should be no more than 30 seconds stale, that gives you your exact TTL. For user profiles that can tolerate 5 minutes of staleness, use a 5-minute TTL.' This maps staleness requirements directly to cache configuration, making design decisions straightforward and justified.",
@@ -349,7 +349,7 @@ export const QUESTIONS = [
       "TTL-only with a 1-hour expiration — stale venue data for up to an hour is an acceptable trade-off for simplicity",
       "Write-behind invalidation — queue the invalidation to process asynchronously for better write performance",
       "Write-through invalidation — update or delete cache entries immediately when writing to the database, accepting the additional write latency to ensure users never see stale venue information",
-      "No caching for event details — the consistency requirement means caching is inappropriate"
+      "No caching for event details — the strict accuracy requirement for venue information means caching introduces unacceptable risk, because any caching layer creates a window where stale data could be served, and the consequence of displaying the wrong venue is severe enough to justify the latency cost of always reading from the database"
     ],
     "correctIndex": 2,
     "explanation": "The article uses this exact example: 'If an event organizer updates the venue address, attendees should not see the old location for another hour just because it's cached somewhere.' Write-through invalidation ensures cache entries are updated or deleted at write time. The added write latency is acceptable because event detail updates are rare. Write-behind (B) introduces a staleness window that's unacceptable for venue data. TTL-only (A) could serve wrong venues for up to an hour.",
@@ -364,7 +364,7 @@ export const QUESTIONS = [
     "options": [
       "Iterate through all cached feeds and update the profile picture URL in each one — ensures immediate consistency",
       "Use tagged invalidation — associate each cached feed entry with tags like 'user:123:profile'. When the picture changes, invalidate all entries tagged with 'user:123:profile', forcing regeneration on next access",
-      "Set a 30-second TTL on all feed entries — the picture will update everywhere within 30 seconds",
+      "Set a 30-second TTL on all feed entries — this ensures the picture will update everywhere within 30 seconds, and since most social media platforms consider 30-second staleness acceptable for profile metadata, this provides a simpler implementation than tagged invalidation with equivalent practical freshness",
       "Use write-through to update the user's profile cache and ignore feed caches — feeds will show the old picture until TTL expires"
     ],
     "correctIndex": 1,
@@ -379,9 +379,9 @@ export const QUESTIONS = [
     "question": "Your production system uses both short TTLs (5 minutes) as a safety net AND active write-through invalidation for critical data. An engineer asks: 'Why both? Isn't write-through invalidation sufficient?' What's the strongest justification for the dual approach?",
     "options": [
       "Write-through invalidation can fail silently — the cache delete call might timeout or the message queue might lose the event. Short TTLs provide a bounded staleness guarantee even when active invalidation fails",
-      "TTLs are cheaper computationally, so they reduce the load on the invalidation system",
-      "Write-through only works for single-key invalidation, not for related cached objects",
-      "The two approaches are actually redundant — using both wastes resources and adds complexity"
+      "TTLs are computationally cheaper than active invalidation because TTL expiration is handled by Redis's lazy expiration mechanism at zero CPU cost to the application, while write-through invalidation requires the application to make an explicit DELETE call to Redis on every write, adding latency and consuming connection pool resources",
+      "Write-through only works for single-key invalidation and cannot handle cascading invalidation of related cached objects — when a user profile changes, the write-through handler can only delete the profile cache key but cannot identify and invalidate the feed entries, search results, and recommendation lists that also contain that user's data",
+      "The two approaches are actually fully redundant — implementing both wastes computational resources and adds architectural complexity because TTL-based expiration and write-through invalidation serve the exact same purpose (keeping cached data fresh), and running both means every cache entry is invalidated twice, doubling the load on both the cache and the database"
     ],
     "correctIndex": 0,
     "explanation": "The article states: 'Most production systems combine approaches. Use short TTLs (5-15 minutes) as a safety net, with active invalidation for critical data.' The key insight is that active invalidation can fail: network partitions, message queue failures, or application bugs can cause invalidation events to be lost. Short TTLs bound the maximum staleness — even in the worst case, data is at most 5 minutes old. The dual approach provides defense in depth.",
@@ -394,10 +394,10 @@ export const QUESTIONS = [
     "style": "Estimation-backed reasoning",
     "question": "Your application serves users globally. A user in Tokyo requests data from your Virginia data center. CDN edge caching can reduce this latency from ~200ms to under 10ms. With 40% of your 100K QPS coming from Asia-Pacific, what's the approximate origin load reduction from CDN caching with a 90% cache hit rate at APAC edges?",
     "options": [
-      "Origin load drops by ~4,000 QPS — 10% of APAC traffic misses the CDN, while the other 90% never reaches the origin",
+      "Origin load drops by approximately 4,000 QPS — only 10% of APAC traffic misses the CDN cache, while the other 90% is served from edge nodes and never reaches the origin, but this calculation doesn't account for CDN-to-origin revalidation requests that occur on approximately 30% of cache hits",
       "Origin load drops by ~36,000 QPS — 90% of the 40K APAC queries are absorbed by CDN edges, leaving only 4K APAC cache misses hitting the origin",
-      "Origin load drops by ~90,000 QPS — CDN caching helps all regions equally",
-      "Origin load is unchanged — CDN edges still proxy all requests to the origin for freshness checks"
+      "Origin load drops by approximately 90,000 QPS — CDN caching benefits all regions equally regardless of geographic distribution, so the 90% hit rate applies to the full 100K QPS, not just the APAC portion",
+      "Origin load is effectively unchanged — CDN edge nodes still proxy all requests to the origin server for freshness validation using conditional GET requests with If-None-Match/If-Modified-Since headers, so while response payloads are served from edge cache, the origin still processes the validation logic for every request"
     ],
     "correctIndex": 1,
     "explanation": "40% of 100K = 40K APAC QPS. With 90% CDN hit rate, 36K requests are served from edge (never reaching origin) and only 4K cache misses hit the origin. The article notes 'CDN caching can reduce origin load by 90% or more.' This 36K QPS reduction is significant — it's like removing a third of your total read load from the origin database. The remaining 60K non-APAC traffic could get similar treatment from CDN edges in their regions.",
@@ -410,10 +410,10 @@ export const QUESTIONS = [
     "style": "Anti-pattern identification",
     "question": "A candidate proposes caching ALL API responses at the CDN layer — including user settings, private messages, and account preferences — to maximize cache hit rates. What's the most critical flaw in this design?",
     "options": [
-      "CDN caching is limited to static assets like images and CSS files; it can't cache API responses",
+      "CDN caching is limited to static assets like images, CSS, and JavaScript files — CDN edge servers can't cache dynamic API responses because they lack the ability to parse response headers and determine cacheability, so all API traffic must pass through to the origin regardless of content type",
       "User-specific data like private messages and account settings have zero shared cache benefit — only one user ever requests them — while introducing significant privacy and security risks by storing personal data at edge locations",
-      "CDN caching only works with GET requests, and these endpoints likely use POST",
-      "The cache hit rate would actually be very high because users check their settings frequently"
+      "CDN caching only works with HTTP GET requests, and user settings and private messages are typically accessed via POST requests for security reasons (to prevent URL-based data leakage), so the CDN would bypass caching for these endpoints automatically based on the HTTP method",
+      "The cache hit rate would actually be very high for these endpoints because users frequently check their settings and messages — the high access frequency per user means each user's data stays warm in the CDN edge cache, providing sub-10ms response times that justify the edge storage cost"
     ],
     "correctIndex": 1,
     "explanation": "The article explicitly warns: 'CDNs only make sense for data accessed by multiple users. Don't cache user-specific data like personal preferences, private messages, or account settings. These have no cache hit rate benefit since only one user ever requests them. Focus CDN caching on content with natural sharing patterns.' Caching private data at edge locations also creates security concerns — edge servers are a wider attack surface.",
@@ -428,7 +428,7 @@ export const QUESTIONS = [
     "options": [
       "500,000 QPS — coalescing only helps with database load, not cache load",
       "200 requests per second — one from each application server, since coalescing deduplicates requests within each server",
-      "50,000 QPS — coalescing reduces load by 10x",
+      "50,000 QPS — coalescing reduces backend load by exactly 10x because the algorithm batches every 10 concurrent requests into a single backend call, with the batch size determined by the coalescing window duration rather than the number of application servers",
       "1 request per second — coalescing globally deduplicates across all servers"
     ],
     "correctIndex": 1,
@@ -443,8 +443,8 @@ export const QUESTIONS = [
     "question": "Request coalescing alone isn't enough. You implement cache key fanout: storing the celebrity's post under 10 keys (feed:taylor-swift:1 through feed:taylor-swift:10), with clients randomly selecting one. What's the primary trade-off you've introduced?",
     "options": [
       "10x higher memory usage for this entry AND more complex invalidation — you must clear all 10 copies when data changes — but the load per key drops from 500K to 50K QPS",
-      "10x higher latency because clients must check multiple keys to find the data",
-      "Inconsistency between the 10 copies since they're updated at different times",
+      "10x higher latency per request because clients must randomly select a key and then check whether that specific replica contains valid data — if the randomly selected key was recently invalidated, the client must try another key, creating a retry loop that degrades average response time proportionally to the number of fanout copies",
+      "Inconsistency between the 10 copies is unavoidable because they're written and invalidated at slightly different times due to network jitter between the application and cache nodes — a user hitting copy 3 might see updated data while a user hitting copy 7 still sees stale data, creating a confusing experience where the same URL shows different content to different users",
       "10x more cache misses because the probability of any single key being warm decreases"
     ],
     "correctIndex": 0,
@@ -458,8 +458,8 @@ export const QUESTIONS = [
     "style": "Gotcha/trap question",
     "question": "Your team implements request coalescing and celebrates that backend load dropped from 500K QPS to exactly N requests (one per app server). A week later, you add 300 more application servers to handle general traffic growth. What happens to the backend load for the hot key?",
     "options": [
-      "Backend load stays at 200 QPS because coalescing remembers the original server count",
-      "Backend load drops further because more servers means each one handles fewer users",
+      "Backend load stays at the original 200 QPS because the coalescing configuration remembers and locks to the server count at deployment time — adding new servers doesn't increase coalesced backend requests because the coalescing layer maintains a fixed-size request pool based on the initial cluster topology",
+      "Backend load drops further to approximately 100 QPS because more servers means each individual server handles fewer concurrent users, and with fewer concurrent users per server the probability of multiple requests for the same key arriving at the same server simultaneously decreases, resulting in fewer coalesced requests overall",
       "Backend load increases to 500 QPS — coalescing bounds load to N application servers, and you just increased N from 200 to 500, potentially recreating the hot key problem at sufficient scale",
       "Backend load is unaffected because coalescing works at the cache layer, not the application layer"
     ],
@@ -477,7 +477,7 @@ export const QUESTIONS = [
       "They efficiently wait and all get served once the rebuild completes — distributed locks handle this gracefully",
       "Most requests timeout waiting for the lock, resulting in a cascade of errors. If they retry, they create additional stampede pressure. The lock approach is fragile under load because rebuild time is unpredictable",
       "The lock automatically releases after 3 seconds, allowing a second request to start rebuilding in parallel",
-      "Waiting requests are served stale data from a backup cache while the rebuild proceeds"
+      "Waiting requests are served stale data from a backup cache layer while the primary cache rebuild proceeds — the system maintains a shadow cache with the previous version of every entry, so when the primary entry expires and a rebuild lock is acquired, all other requests are transparently served from the shadow cache with the last known good value until the rebuild completes"
     ],
     "correctIndex": 1,
     "explanation": "The article warns that distributed locks have 'serious downsides: if the rebuild fails or takes too long, thousands of requests timeout waiting. You need complex timeout handling and fallback logic, making this approach fragile under load.' A 15-second rebuild during a traffic spike means thousands of user-facing requests hanging, hitting timeout thresholds, and potentially retrying — which creates more pressure on an already struggling database.",
@@ -490,10 +490,10 @@ export const QUESTIONS = [
     "style": "Implementation-specific nuance",
     "question": "You implement probabilistic early refresh for a cache entry with a 60-minute TTL. At minute 50, each request has a 1% chance of triggering a background refresh. At minute 55, it increases to 5%. At minute 59, it's 20%. What is the key advantage of this approach over distributed locks?",
     "options": [
-      "It guarantees the cache is always fresh — no user ever sees stale data",
-      "It eliminates all database load from cache rebuilds by using a peer-to-peer protocol",
+      "It guarantees the cache is always fresh — no user ever sees stale data because the probabilistic refresh triggers before the TTL boundary, ensuring the cached entry is replaced with a fresh copy before any staleness window opens",
+      "It eliminates all database load from cache rebuilds by distributing the refresh responsibility across a peer-to-peer protocol where application servers share cached data with each other, avoiding the need to query the database entirely — the first server to refresh pushes the new value to all other servers via gossip",
       "It spreads cache rebuild requests across time rather than concentrating them at a single expiration moment, while most users continue getting served from the existing cache — no requests block waiting",
-      "It uses less memory than lock-based approaches because it doesn't need to store lock state"
+      "It uses significantly less memory than lock-based approaches because it doesn't need to store distributed lock state, lock holder information, or lock timeout metadata in Redis — the memory savings compound as the number of cached entries grows, making probabilistic refresh more memory-efficient at scale"
     ],
     "correctIndex": 2,
     "explanation": "The article explains: 'Instead of 100,000 requests hammering your database at minute 60, you spread those refreshes across the last 10-15 minutes. Most users still get cached data while a few unlucky ones trigger refreshes.' The critical distinction from locks: no user request blocks. Users either get cached data or trigger a background refresh (and still get the current cached data). This eliminates the timeout cascade problem entirely.",
@@ -506,10 +506,10 @@ export const QUESTIONS = [
     "style": "Cross-subtopic bridge (Stampede × Hot Key)",
     "question": "You have a cache entry that's both a hot key (500K QPS) AND has an expensive rebuild (5 seconds). Neither probabilistic early refresh nor distributed locks are sufficient alone. What's the most robust combined strategy?",
     "options": [
-      "Use distributed locks with a very long lock timeout (60 seconds) to ensure the rebuild always completes",
+      "Use distributed locks with a very long lock timeout (60 seconds) to ensure the cache rebuild always completes even under extreme database load — the longer timeout prevents premature lock release that would allow a second rebuild attempt to start while the first is still in progress, avoiding duplicate work",
       "Use background refresh processes that continuously update the entry before expiration, combined with cache key fanout to distribute the read load — this ensures the entry never expires and reads never overwhelm a single key",
-      "Increase the TTL to 24 hours to minimize the frequency of stampedes",
-      "Use probabilistic early refresh with a very high probability (50% starting 30 minutes before expiration)"
+      "Increase the TTL to 24 hours to minimize the frequency of stampedes — the longer the TTL, the fewer expiration events occur, and for a hot key the 24-hour staleness is acceptable because the underlying data changes slowly enough that day-old cached data is still useful",
+      "Use probabilistic early refresh with a very high probability (50% starting 30 minutes before expiration) to ensure at least one server triggers a background refresh well before the TTL expires — the high probability guarantees multiple refresh attempts, providing redundancy in case any individual attempt fails or times out"
     ],
     "correctIndex": 1,
     "explanation": "For the most critical cached data, the article recommends background refresh: 'Background refresh processes continuously update these entries before expiration, ensuring they never go stale.' Combined with cache key fanout to handle the hot key problem, you get entries that are always fresh (no stampede possible) AND distributed reads (no single key bottleneck). Option C just delays the problem. Option D would create thousands of simultaneous rebuild attempts — essentially a slower-motion stampede.",
@@ -538,10 +538,10 @@ export const QUESTIONS = [
     "style": "Gotcha/trap question",
     "question": "Without cache versioning, you use simple cache-aside: on write, update DB then delete the cache key. Two requests arrive: Request A reads the old data from a read replica (replication lag), Request B writes new data. The sequence is: B writes DB → B deletes cache → A's stale read populates the cache. With cache versioning, why doesn't this race condition cause stale data to persist?",
     "options": [
-      "Cache versioning prevents Request A from writing to the cache at all",
+      "Cache versioning prevents Request A from writing to the cache entirely — the versioning system detects that A's data is stale by comparing A's read timestamp against the current version, and rejects A's cache population attempt with a version conflict error",
       "Request A would populate cache key 'event:123:v42' with old data, but Request B already advanced the version to v43 — subsequent readers look up v43, making A's stale v42 entry unreachable and harmless",
-      "The version number is stored in the database with the data, so Request A's replica read returns the old version and the old data, which are consistent with each other",
-      "Cache versioning uses distributed locks to serialize A and B, preventing concurrent cache writes"
+      "The version number is stored in the database alongside the data row, so Request A's replica read returns the old version number and the old data, which are internally consistent with each other — the staleness is bounded to a single version and doesn't compound across multiple stale reads",
+      "Cache versioning uses distributed locks behind the scenes to serialize Request A and Request B, preventing them from writing to the cache concurrently — the lock ensures that B's write completes and is visible before A's write begins, maintaining strict ordering of cache mutations"
     ],
     "correctIndex": 1,
     "explanation": "This is the core elegance of cache versioning. The article states: 'There are no race conditions because a late writer can't overwrite new data — the database forces a new version number.' Request A might still cache stale data, but it caches it under the OLD version key (v42). Since B already incremented the version to v43, all subsequent readers construct key 'event:123:v43' — they never see A's stale v42 entry. The stale data exists in cache but is unreachable, harmlessly expiring via TTL.",
@@ -554,10 +554,10 @@ export const QUESTIONS = [
     "style": "Cross-subtopic bridge (Versioning × CDN)",
     "question": "Cache versioning works well for single-entity caches. You also have CDN-cached search results and aggregated feed data. Why doesn't cache versioning solve invalidation for these computed caches?",
     "options": [
-      "CDNs don't support versioned cache keys — they only work with URL-based caching",
+      "CDNs don't support versioned cache keys because CDN edge servers only understand URL-based caching with path and query string parameters — the version-prefixed key format (entity:id:v42) is a Redis-specific convention that doesn't translate to CDN cache key formats, so cache versioning is architecturally incompatible with CDN edge caching",
       "Computed data like search results and feeds depend on potentially thousands of entities — there's no single version number that captures 'search results for query X changed because product 47,231 was updated'",
-      "Cache versioning is patented and can't be used with third-party CDN providers",
-      "Computed caches don't have invalidation problems because they're regenerated from scratch on every request"
+      "Cache versioning is covered under distributed caching patents held by major cloud providers and cannot be legally used with third-party CDN providers without a licensing agreement, limiting its applicability to first-party caching infrastructure",
+      "Computed caches don't have invalidation problems because they're regenerated from scratch on every request — search results and feeds are always computed fresh from the database, and the 'cache' is just a response buffer that's discarded after each request, so there's no stale data to invalidate"
     ],
     "correctIndex": 1,
     "explanation": "The article notes cache versioning 'really shines for single-entity caches like user profiles or product details, but it doesn't help much with computed data like search results or feeds where invalidation is inherently more complex.' Search results aggregate many entities — a version number on 'product:47231' doesn't tell you which cached search results contain that product. For these cases, you need alternative strategies like the deleted items cache or tagged invalidation.",
@@ -572,8 +572,8 @@ export const QUESTIONS = [
     "options": [
       "It stores deleted post IDs in a small, fast cache. When serving any feed, you first check this cache and filter out matches before returning results — feeds are 'mostly correct' immediately without full invalidation",
       "It pre-deletes the post from all cached feeds using a background job, achieving full consistency within seconds",
-      "It replaces the deleted post with a '[removed]' placeholder in all cached feeds simultaneously",
-      "It redirects all feed requests to the database until the cached feeds naturally expire"
+      "It replaces the deleted post with a '[removed]' placeholder in all cached feeds simultaneously through a broadcast invalidation message to every cache node — this preserves the feed's pagination and ordering structure while immediately signaling to users that content was moderated, providing transparency about the content policy action",
+      "It redirects all feed requests to the database until the cached feeds naturally expire and are rebuilt from the database's current state — this guarantees zero staleness during the expiration window but temporarily increases database load proportionally to the cache miss rate"
     ],
     "correctIndex": 0,
     "explanation": "The article describes this exact pattern: 'Maintain a cache of recently deleted post IDs. When serving feeds, you first check this small cache and filter out any matches. This lets you serve mostly-correct cached data immediately while taking time to properly invalidate the larger, more complex cached structures in the background.' The deleted items cache is small (just recent deletions) and fast to query, making it an efficient overlay that effectively removes content without expensive cache-wide invalidation.",
@@ -588,7 +588,7 @@ export const QUESTIONS = [
     "options": [
       "The deleted post reappears in that user's feed — a 'resurrection' bug — until the feed cache naturally refreshes",
       "Nothing — the feed cache's 5-minute TTL guarantees all feed entries refresh within 5 minutes, long before the 24-hour deleted items TTL expires",
-      "The system crashes because it finds a reference to a non-existent post",
+      "The system throws a runtime exception and crashes because the feed rendering code attempts to fetch the deleted post's content by ID and receives a null reference — without proper null handling in the feed rendering pipeline, this cascades into an unhandled exception that brings down the feed service",
       "The deleted items cache automatically extends its TTL to match the longest-lived cache in the system"
     ],
     "correctIndex": 1,

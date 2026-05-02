@@ -146,10 +146,10 @@ export const QUESTIONS = [
     "subtopic": "Presigned URLs (Upload)",
     "question": "A developer sets presigned URL expiry to 24 hours 'so users have plenty of time.' The system serves 100K daily users. What's the most dangerous consequence of this long expiry window?",
     "options": [
-      "S3 will reject the URLs because the maximum allowed expiry for presigned URLs is 1 hour.",
+      "S3 will reject the URLs because the maximum allowed expiry for presigned URLs is 1 hour. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "The long window means leaked or intercepted URLs remain valid for 24 hours, creating a large attack surface — any URL shared accidentally, logged in server logs, or captured in network traffic becomes a valid upload credential for an entire day.",
       "24-hour URLs will cause S3 to pre-allocate storage for all potential uploads, increasing costs even if most URLs are never used.",
-      "The cryptographic signatures become weaker over time because the HMAC key rotation happens every 12 hours by default."
+      "The cryptographic signatures become weaker over time because the HMAC key rotation happens every 12 hours by default. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 1,
     "explanation": "The article warns: 'Since anyone with the URL can use it, you need to encode restrictions when generating them.' A 24-hour window dramatically expands the blast radius of any URL leak. URLs logged in proxy servers, captured in browser history, or intercepted over insecure connections all become usable credentials. The typical recommendation is 15 minutes to 1 hour. Option A is wrong — S3 supports up to 7 days for presigned URLs. Option C is wrong — S3 doesn't pre-allocate. Option D is wrong — HMAC doesn't degrade over time.",
@@ -161,10 +161,10 @@ export const QUESTIONS = [
     "subtopic": "Download & CDN Signatures",
     "question": "You're serving video content. 80% of views are for the top 100 videos, 20% for the long tail of 500K videos. A candidate proposes serving ALL downloads directly from S3 presigned URLs. What's the primary problem with this architecture?",
     "options": [
-      "S3 presigned URLs expire, so frequently accessed videos would require constant URL regeneration, overloading the API server.",
+      "S3 presigned URLs expire, so frequently accessed videos would require constant URL regeneration, overloading the API server. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "S3 charges for data transfer out, and without CDN caching, every single view of a popular video fetches from origin — so the top 100 videos generate 80% of your bandwidth costs from the same repeated S3 origin fetches instead of being served from edge caches.",
-      "S3 has a limit of 5,500 GET requests per second per prefix, so popular videos would hit rate limits and return 503 errors.",
-      "S3 doesn't support range requests, making it impossible to implement adaptive bitrate streaming for video playback."
+      "S3 has a limit of 5,500 GET requests per second per prefix, so popular videos would hit rate limits and return 503 errors. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "S3 doesn't support range requests, making it impossible to implement adaptive bitrate streaming for video playback. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 1,
     "explanation": "The article explains: 'Direct blob storage access is simpler and cheaper for infrequent downloads. CDN distribution costs more but gives better performance for frequently accessed files.' Without a CDN, every view of a popular video pulls from S3 origin — repeated data transfer costs add up massively, and users far from the S3 region face high latency. The CDN caches content at edge locations so subsequent requests in a region are served locally. Option A overstates the problem — URL generation is cheap. Option C is a real S3 limit but can be mitigated with prefix distribution. Option D is wrong — S3 supports range requests.",
@@ -191,10 +191,10 @@ export const QUESTIONS = [
     "subtopic": "Download & CDN Signatures",
     "question": "Your streaming platform needs to serve a video player that makes hundreds of small segment requests (.ts files) per viewing session. Each segment is a separate HTTP request. Should you use CloudFront signed URLs or signed cookies?",
     "options": [
-      "Signed URLs — each segment gets its own individually signed URL, giving you fine-grained access control per segment.",
+      "Signed URLs — each segment gets its own individually signed URL, giving you fine-grained access control per segment. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Signed cookies — a single signed cookie covers all requests matching a URL pattern, so the player can request hundreds of segments without needing individually signed URLs for each one, reducing both server-side URL generation load and client-side complexity.",
       "Neither — adaptive bitrate streaming segments should be served unsigned through a public CDN distribution with IP-based access control.",
-      "Signed URLs with a wildcard path parameter that covers all segments in a single signature, avoiding the per-segment overhead."
+      "Signed URLs with a wildcard path parameter that covers all segments in a single signature, avoiding the per-segment overhead. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 1,
     "explanation": "The article mentions that CloudFront supports both signed URLs and signed cookies. For streaming with hundreds of segment requests per session, signed cookies are ideal — you set a single cookie that grants access to a URL pattern (e.g., /videos/lecture/*), and every subsequent request includes the cookie automatically. Signed URLs would require generating hundreds of individual URLs. Option A works but is wasteful. Option C sacrifices access control. Option D doesn't exist — CloudFront signed URLs don't support wildcards in the path.",
@@ -221,10 +221,10 @@ export const QUESTIONS = [
     "subtopic": "Resumable / Chunked Uploads",
     "question": "A user's browser crashes at 80% of a multipart upload. They reopen the app the next day. What information does the client need to resume the upload, and where should it be stored?",
     "options": [
-      "The client needs the Upload ID (session identifier). Smart implementations store this client-side (e.g., localStorage keyed by a file fingerprint — hash of filename, size, and last-modified date) so uploads can resume even after app restarts. The client uses this to call ListParts and resume.",
+      "The client needs to re-upload the entire file because S3 automatically cleans up incomplete multipart uploads after 1 hour. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "No client-side storage is needed — the server tracks all upload sessions in the database, so the client just re-requests an upload URL and the server automatically matches it to the existing session.",
-      "The client needs to re-upload the entire file because S3 automatically cleans up incomplete multipart uploads after 1 hour.",
-      "The client needs the ETag of every previously uploaded part. Without all ETags, the multipart upload cannot be completed even if all parts are in S3."
+      "The client needs to re-upload the entire file because S3 automatically cleans up incomplete multipart uploads after 1 hour. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "The client needs the ETag of every previously uploaded part. Without all ETags, the multipart upload cannot be completed even if all parts are in S3. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "The article states: 'The implementation requires the client to track the upload session identifier... Some teams store this in localStorage so uploads can resume even after app restarts.' A file fingerprint (hash of name, size, last-modified) lets the client recognize it's the same file and retrieve the stored Upload ID. With the Upload ID, calling ListParts reveals which parts succeeded. Option B is plausible but the client still needs to identify which session to resume. Option C is wrong — lifecycle rules are typically 24-48 hours, not 1 hour. Option D is partially wrong — ListParts returns ETags.",
@@ -236,9 +236,9 @@ export const QUESTIONS = [
     "subtopic": "Resumable / Chunked Uploads",
     "question": "Your system must support uploads across AWS S3, Google Cloud Storage, and Azure Blob Storage. A developer writes a unified upload client that sends 5MB chunks with individual presigned URLs for each chunk across all providers. What breaks?",
     "options": [
-      "Nothing breaks — 5MB chunks with individual presigned URLs is the universal standard across all three providers.",
+      "Nothing breaks — 5MB chunks with individual presigned URLs is the universal standard across all three providers. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "GCS and Azure use a single session URL with range headers for all chunks, not individual presigned URLs per chunk. Only AWS S3 uses the pattern of individual presigned URLs per part. A unified client must handle both paradigms.",
-      "Azure Block Blobs require a minimum chunk size of 100MB, so 5MB chunks will be rejected.",
+      "Azure Block Blobs require a minimum chunk size of 100MB, so 5MB chunks will be rejected. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "GCS doesn't support chunked uploads at all — it requires the entire file in a single PUT request regardless of size."
     ],
     "correctIndex": 1,
@@ -251,7 +251,7 @@ export const QUESTIONS = [
     "subtopic": "Upload Completion & Assembly",
     "question": "After all parts of a multipart upload are sent to S3, a developer's code immediately generates a download URL for the file. Users report getting 404 errors. What step did the developer miss?",
     "options": [
-      "The developer forgot to set the file's ACL to public-read, so the download URL has no permission to access the object.",
+      "The developer forgot to set the file's ACL to public-read, so the download URL has no permission to access the object. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "The developer skipped the completion step — after all parts upload, the client must call a completion endpoint with the list of part numbers and their checksums. Until this succeeds, the parts exist but there is no accessible file object.",
       "S3 has eventual consistency for new objects, so the 404 is expected for up to 30 seconds after upload completion. The developer should add a polling retry.",
       "The developer generated a download URL pointing to the wrong S3 region, since multipart uploads can scatter parts across regions."
@@ -266,10 +266,10 @@ export const QUESTIONS = [
     "subtopic": "Upload Completion & Assembly",
     "question": "Your system has been running for 6 months and storage costs are 3x higher than projected. Investigation reveals millions of incomplete multipart upload parts sitting in S3. What went wrong and what's the fix?",
     "options": [
-      "S3 has a bug where it doesn't garbage-collect failed uploads — you need to file a support ticket with AWS to trigger cleanup.",
+      "S3 has a bug where it doesn't garbage-collect failed uploads — you need to file a support ticket with AWS to trigger cleanup. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Your clients are crashing mid-upload and never calling the completion endpoint, leaving orphaned parts. Since incomplete multipart uploads cost money for stored parts, you need S3 lifecycle rules to automatically abort incomplete uploads after 24-48 hours.",
-      "Your presigned URLs are expiring mid-upload, causing uploads to fail but leaving the destination objects in a corrupted state.",
-      "S3 versioning is enabled and every partial upload creates a new version — disable versioning to stop accumulating old parts."
+      "Your presigned URLs are expiring mid-upload, causing uploads to fail but leaving the destination objects in a corrupted state. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "S3 versioning is enabled and every partial upload creates a new version — disable versioning to stop accumulating old parts. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 1,
     "explanation": "The article explicitly warns: 'Incomplete multipart uploads cost money, so lifecycle rules should clean them up after 24-48 hours.' When clients crash, lose connectivity, or abandon uploads, the uploaded parts remain in S3 indefinitely unless lifecycle rules are configured to abort incomplete multipart uploads. This is a real-world gotcha that catches teams who deploy multipart uploads without configuring cleanup. Option A is wrong — this is expected S3 behavior, not a bug. Option C mischaracterizes the failure mode. Option D conflates versioning with multipart.",
@@ -281,9 +281,9 @@ export const QUESTIONS = [
     "subtopic": "State Synchronization",
     "question": "In a Dropbox-like system, you store file metadata (including a 'status' column) in PostgreSQL and files in S3. A file's status is 'pending' in the database. Which of the following correctly describes all the possible states of the actual file in S3?",
     "options": [
-      "The file definitely does not exist in S3 yet — 'pending' means the upload hasn't started.",
+      "The file definitely does not exist in S3 yet — 'pending' means the upload hasn't started. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "The file might not exist, might be partially uploaded (some multipart parts present), or might be fully uploaded but the status update hasn't propagated yet — all three states are possible when the DB shows 'pending' because the two systems update at different times.",
-      "The file exists in S3 but is encrypted and inaccessible until the status changes to 'completed.'",
+      "The file exists in S3 but is encrypted and inaccessible until the status changes to 'completed.' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "The file cannot exist in S3 while status is 'pending' because the presigned URL is only generated after status changes to 'uploading.'"
     ],
     "correctIndex": 1,
@@ -343,7 +343,7 @@ export const QUESTIONS = [
     "options": [
       "Increase the event retry count to 100 and add a dead-letter queue. If events are retried enough times, they'll eventually succeed, eliminating the need for additional mechanisms.",
       "Run a periodic reconciliation job that finds files stuck in 'pending' beyond a threshold and verifies them directly against S3 — this catches any cases where event notifications fail, providing a safety net for the primary event-driven flow.",
-      "Accept 99.9% reliability as sufficient for a file storage system and let users manually re-upload the 0.1% that fail.",
+      "Accept 99.9% reliability as sufficient for a file storage system and let users manually re-upload the 0.1% that fail. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Switch from push-based events to a pull-based model where your server polls S3 every second for new objects, eliminating the possibility of missed events."
     ],
     "correctIndex": 1,
@@ -371,10 +371,10 @@ export const QUESTIONS = [
     "subtopic": "Abuse Prevention",
     "question": "You implement direct uploads for a social media platform. A malicious user discovers they can upload files directly to S3 and immediately share the S3 URL with other users before any content moderation runs. How should the architecture prevent this?",
     "options": [
-      "Use S3 bucket policies to make all objects private by default and only generate signed download URLs for files that pass moderation.",
+      "Use S3 bucket policies to make all objects private by default and only generate signed download URLs for files that pass moderation. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Implement a quarantine bucket pattern: uploads go to a separate quarantine bucket first, content validation runs (virus scans, image recognition, file type verification), and only after checks pass are files moved to the public-serving bucket and marked as 'available' in the database.",
-      "Add real-time content scanning middleware to the presigned URL upload flow so files are scanned as bytes stream into S3.",
-      "Rate-limit presigned URL generation to 1 per minute per user so attackers can't upload malicious content quickly enough to exploit."
+      "Add real-time content scanning middleware to the presigned URL upload flow so files are scanned as bytes stream into S3. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Rate-limit presigned URL generation to 1 per minute per user so attackers can't upload malicious content quickly enough to exploit. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 1,
     "explanation": "The article describes exactly this: 'Uploads go into a quarantine bucket first. Run virus scans, content validation, and any other checks before moving files to the public bucket... Even if someone bypasses your rate limiting and uploads malicious content, they can't use it until your systems approve it.' The quarantine pattern ensures no uploaded content is accessible until validated. Option A helps with access control but doesn't address content moderation workflow. Option C is impractical — you can't inject middleware into direct S3 uploads. Option D is insufficient alone.",
@@ -386,10 +386,10 @@ export const QUESTIONS = [
     "subtopic": "Abuse Prevention",
     "question": "A team generates presigned URLs for a profile picture endpoint but forgets to include content-length-range conditions. What's the worst-case impact?",
     "options": [
-      "Users will upload corrupted images that crash the image processing pipeline.",
+      "Users will upload corrupted images that crash the image processing pipeline. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Without size limits baked into the presigned URL signature, a malicious user could upload terabytes of data on a URL meant for a small profile picture, exploding storage costs — and the upload will succeed because S3 has no default per-object size limit.",
-      "The images will upload successfully but will be stored in a non-standard format that CloudFront cannot cache.",
-      "S3 will apply its own default 5GB limit per presigned URL, so the practical impact is limited to moderately oversized uploads."
+      "The images will upload successfully but will be stored in a non-standard format that CloudFront cannot cache. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "S3 will apply its own default 5GB limit per presigned URL, so the practical impact is limited to moderately oversized uploads. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 1,
     "explanation": "The article warns: 'Always include file size limits in the presigned URL conditions. Without these, someone could upload terabytes of data on a URL meant for a small image, exploding your storage costs.' S3's maximum object size is 5TB for multipart uploads. A single PUT presigned URL allows up to 5GB. Without content-length-range conditions, there's no server-side enforcement of your expected file size. Option A is about format, not size. Option C is fabricated. Option D understates the risk — 5GB is still massively oversized for a profile picture.",
@@ -401,10 +401,10 @@ export const QUESTIONS = [
     "subtopic": "Metadata Handling",
     "question": "When generating a presigned URL, your system creates a database record with status 'pending' and a storage_key of 'uploads/user123/1711634400/abc-uuid.pdf'. Why is it critical to generate the storage key server-side and never let the client specify it?",
     "options": [
-      "Client-specified keys would break the presigned URL signature because the key is part of the signed parameters.",
+      "Client-specified keys would prevent S3 event notifications from firing because events only trigger on server-generated key patterns. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Client-specified keys create two security risks: key collisions (clients could overwrite other users' files by guessing keys) and path traversal attacks. Server-generated keys with UUID components prevent collisions, and the consistent pattern (user_id/timestamp/uuid) enables efficient querying while maintaining security.",
-      "Client-specified keys would exceed S3's maximum key length of 128 characters.",
-      "Client-specified keys would prevent S3 event notifications from firing because events only trigger on server-generated key patterns."
+      "Client-specified keys would exceed S3's maximum key length of 128 characters. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Client-specified keys would prevent S3 event notifications from firing because events only trigger on server-generated key patterns. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 1,
     "explanation": "The article states: 'Never let clients specify their own keys — that's asking for overwrites and security issues.' Server-generated keys with a consistent pattern like uploads/{user_id}/{timestamp}/{uuid} prevent collisions (UUID ensures uniqueness), prevent one user from overwriting another user's files, and enable efficient listing/querying. Option A is partially true but misses the core security concern. Option C is wrong — S3 keys can be up to 1024 bytes. Option D is fabricated.",
@@ -416,10 +416,10 @@ export const QUESTIONS = [
     "subtopic": "Metadata Handling",
     "question": "A candidate proposes storing file metadata (uploader, tags, permissions) as S3 object tags instead of in a database, arguing it 'keeps everything in one place.' Why is this approach fundamentally flawed for a file sharing system?",
     "options": [
-      "S3 object tags are immutable after creation, so you can never update metadata like permissions or tags.",
+      "S3 object tags are eventually consistent, so metadata queries would return stale results for up to 24 hours. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "S3 limits tags to 10 per object with 256 characters each, and you can't efficiently query across objects — finding 'all PDFs uploaded by user X in the last week' requires scanning every object's tags instead of a simple database query.",
-      "S3 object tags are eventually consistent, so metadata queries would return stale results for up to 24 hours.",
-      "S3 charges per tag read operation, making metadata queries prohibitively expensive at scale."
+      "S3 object tags are eventually consistent, so metadata queries would return stale results for up to 24 hours. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "S3 charges per tag read operation, making metadata queries prohibitively expensive at scale. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 1,
     "explanation": "The article explains: 'S3 lets you attach up to 10 tags with 256 characters each. But this is limiting and makes queries painful. You can't efficiently find all PDFs uploaded by user X in the last week by scanning object tags. Keep rich metadata in your database where it belongs.' The database is purpose-built for complex queries; S3 is purpose-built for blob storage. Option A is wrong — tags can be updated. Option C overstates consistency issues. Option D is a concern but not the fundamental flaw.",
@@ -446,9 +446,9 @@ export const QUESTIONS = [
     "subtopic": "Download Optimization",
     "question": "A game distribution platform needs to deliver 50GB game updates to millions of users. An engineer proposes parallel chunk downloads — splitting the file into parts and downloading 4-6 chunks simultaneously. The article describes this approach. When is this technique actually worth the complexity?",
     "options": [
-      "Always — parallel downloads are strictly faster than single-connection downloads because they utilize more of the available bandwidth.",
+      "Always — parallel downloads are strictly faster than single-connection downloads because they utilize more of the available bandwidth. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Only when users are bottlenecked by per-connection throttling, not total bandwidth. Most users are limited by their total connection speed, so parallel downloads offer no benefit — they only help when the network or CDN throttles individual connections below the user's actual bandwidth.",
-      "Only for files over 1GB, because the TCP slow-start overhead per connection makes parallel downloads slower for smaller files.",
+      "Only for files over 1GB, because the TCP slow-start overhead per connection makes parallel downloads slower for smaller files. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Only when serving from blob storage directly — CDNs already implement parallel chunk delivery internally so client-side parallelism provides no additional benefit."
     ],
     "correctIndex": 1,
@@ -461,10 +461,10 @@ export const QUESTIONS = [
     "subtopic": "Download Optimization",
     "question": "Your Sydney-based user downloads a file from your Virginia S3 bucket. Latency is 200ms per request. You add CloudFront. The first Sydney user still experiences 200ms+, but subsequent Sydney users get single-digit milliseconds. An interviewer asks: 'What if EVERY file is unique and never accessed twice — does the CDN still help?'",
     "options": [
-      "Yes — CDN edge servers still negotiate TLS faster due to geographic proximity, reducing connection setup time even for cache misses.",
+      "Yes — CDN edge servers still negotiate TLS faster due to geographic proximity, reducing connection setup time even for cache misses. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "No — if content is never accessed twice from the same edge location, CDN caching provides zero benefit. You're paying CDN costs for pass-through requests that still pull from origin. For unique, single-access files, serving directly from a regional S3 bucket closer to users (e.g., S3 in Sydney) is more cost-effective.",
-      "Yes — CDNs compress data at the edge, reducing transfer size regardless of cache hit rates.",
-      "No — but you should still use a CDN because it hides your S3 bucket URL from clients, providing a security benefit."
+      "Yes — CDNs compress data at the edge, reducing transfer size regardless of cache hit rates. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "No — but you should still use a CDN because it hides your S3 bucket URL from clients, providing a security benefit. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 1,
     "explanation": "The article states CDN value comes from caching: 'The first user pulls from origin, but subsequent users in that region get cached copies.' If every file is unique and accessed once, there are no cache hits — every request is a cache miss that pulls from origin. You're adding CDN costs without the caching benefit. A better strategy is regional S3 buckets to reduce origin latency. Option A describes a minor TLS benefit that doesn't justify CDN costs. Option C overstates CDN compression capabilities. Option D is a minor point, not a justification.",
@@ -491,9 +491,9 @@ export const QUESTIONS = [
     "subtopic": "Cloud Provider Terminology",
     "question": "Your system needs to support chunked uploads across all three major cloud providers. What's the KEY architectural difference your upload client must handle between AWS S3 and Google Cloud Storage / Azure?",
     "options": [
-      "S3 requires server-side encryption to be configured before upload; GCS and Azure encrypt by default.",
+      "S3 requires server-side encryption to be configured before upload; GCS and Azure encrypt by default. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "S3 uses individual presigned URLs per chunk (each part gets its own URL), while GCS and Azure use a single session URL where chunks are uploaded via range headers to the same endpoint. Your client needs two different upload paradigms.",
-      "S3 limits chunks to 5GB while GCS and Azure limit to 100MB, requiring different chunking strategies.",
+      "S3 limits chunks to 5GB while GCS and Azure limit to 100MB, requiring different chunking strategies. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "S3 validates checksums per-part while GCS and Azure only validate the final assembled object, affecting error detection granularity."
     ],
     "correctIndex": 1,
@@ -506,10 +506,10 @@ export const QUESTIONS = [
     "subtopic": "When to Use / When NOT to Use",
     "question": "A fintech startup is building a document processing system where users upload bank statements (CSV files, ~2MB each). The system must validate CSV headers, check for required columns, verify data types, and reject invalid files BEFORE accepting the upload. A developer proposes presigned URLs with post-upload validation. Why is this the wrong pattern here?",
     "options": [
-      "2MB files are too small for presigned URLs — the pattern only makes sense above 100MB.",
+      "2MB files are too small for presigned URLs — the pattern only makes sense above 100MB. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Financial documents require the server-as-proxy approach for two reasons: first, the files are small enough that proxying adds negligible overhead; second, synchronous validation requirements mean you need to reject invalid data BEFORE accepting the upload, which requires seeing the bytes as they flow through your server.",
-      "Presigned URLs don't support CSV content types, so the upload would be rejected by S3.",
-      "Financial regulations prohibit direct-to-S3 uploads — all financial data must transit through application servers for audit logging."
+      "Presigned URLs don't support CSV content types, so the upload would be rejected by S3. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Financial regulations prohibit direct-to-S3 uploads — all financial data must transit through application servers for audit logging. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 1,
     "explanation": "The article explicitly lists this as a 'When NOT to use' case: 'Synchronous validation requirements. If you need to reject invalid data before accepting the upload, you need to proxy it. For example, a CSV import where you must validate headers and data types before confirming the upload.' Combined with the small file size (2MB << 10MB threshold), the traditional proxy approach is clearly correct. Option A uses the wrong threshold — it's 10MB, not 100MB. Option C is fabricated. Option D overgeneralizes compliance requirements.",
@@ -521,10 +521,10 @@ export const QUESTIONS = [
     "subtopic": "When to Use / When NOT to Use",
     "question": "A healthcare startup building a HIPAA-compliant imaging system needs to store 50MB medical scans. The CTO says 'use presigned URLs since the files are over 10MB.' A compliance officer pushes back. Who's right and why?",
     "options": [
-      "The CTO is right — presigned URLs work fine for HIPAA because the data is encrypted in transit (HTTPS) and at rest (S3 encryption).",
-      "The compliance officer is right — HIPAA requires that all medical data be stored in on-premises servers, not cloud storage.",
+      "The CTO is right — presigned URLs work fine for HIPAA because the data is encrypted in transit (HTTPS) and at rest (S3 encryption). Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "The compliance officer is right — HIPAA requires that all medical data be stored in on-premises servers, not cloud storage. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "The compliance officer has a valid concern. The article notes that 'some regulatory frameworks require that data passes through certified systems or gets scanned before storage' — healthcare systems enforcing HIPAA requirements may need the proxy approach to ensure data is inspected and logged through certified systems, even though the files are large.",
-      "Both are wrong — medical imaging systems should use a specialized DICOM storage service, not general-purpose blob storage."
+      "Both are wrong — medical imaging systems should use a specialized DICOM storage service, not general-purpose blob storage. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 2,
     "explanation": "The article explicitly addresses this: 'Compliance and data inspection. Some regulatory frameworks require that data passes through certified systems or gets scanned before storage. Healthcare systems enforcing HIPAA requirements... needs the traditional proxy approach.' While the file size suggests direct upload, compliance requirements override the performance optimization. This is a nuanced trade-off question. Option A ignores compliance workflow requirements beyond encryption. Option B is wrong — HIPAA doesn't require on-premises. Option D is tangential.",
@@ -551,10 +551,10 @@ export const QUESTIONS = [
     "subtopic": "CDN Signatures × Abuse Prevention",
     "question": "Your social media platform serves user-uploaded images through CloudFront with signed URLs that expire in 24 hours. A user uploads an image that passes initial content moderation, gets a signed download URL, then the content moderation system retroactively flags the image as policy-violating 6 hours later. Users who received the signed URL can still access the image for 18 more hours. How do you immediately revoke access?",
     "options": [
-      "Regenerate all CloudFront key pairs, which invalidates all existing signed URLs across the platform.",
+      "Regenerate all CloudFront key pairs, which invalidates all existing signed URLs across the platform. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Delete the image from the S3 origin. When CloudFront edge caches expire and try to refetch from origin, they'll get a 404. For immediate revocation, also create a CloudFront invalidation for the image's path to purge it from all edge caches.",
       "Update the S3 bucket policy to deny access to that specific object key, which CloudFront will respect on the next request.",
-      "Reduce all future signed URL expiry times to 5 minutes. This doesn't fix the current URLs but prevents future issues."
+      "Reduce all future signed URL expiry times to 5 minutes. This doesn't fix the current URLs but prevents future issues. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 1,
     "explanation": "This cross-subtopic question bridges CDN delivery with abuse prevention. Signed URLs grant time-limited access, but you need an emergency revocation mechanism. Deleting from S3 origin handles new requests after cache expiry, but CDN edge caches still serve the cached copy. CloudFront invalidation purges the content from all edge caches immediately. Combined, these two actions provide immediate revocation. Option A is nuclear — it breaks all URLs for all users. Option C doesn't work because CloudFront uses its own auth. Option D doesn't address the current problem.",

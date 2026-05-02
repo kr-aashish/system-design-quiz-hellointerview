@@ -98,9 +98,9 @@ export const QUESTIONS = [
     "question": "A candidate designs a social media API with: GET /users/{id}/posts (user's posts), GET /users/{id}/followers (user's followers), GET /users/{id}/followers/{followerId}/posts (posts from a specific follower). The interviewer raises an eyebrow at the last endpoint. What's the issue?",
     "options": [
       "The nesting is too deep — follower posts don't have a parent-child relationship with the user's followers; /users/{followerId}/posts already provides this data",
-      "The endpoint should use POST instead of GET since accessing another user's posts requires write permission",
-      "Follower IDs should be passed as query parameters instead: /users/{id}/followers?followerId=456",
-      "The problem is performance — three levels of nesting causes three separate database joins"
+      "The endpoint should use POST instead of GET since accessing another user's posts requires write permission to log the access event in the audit trail — any read operation that triggers side effects should use POST to signal that the request is not idempotent",
+      "Follower IDs should be passed as query parameters instead of path parameters — the correct endpoint would be /users/{id}/followers?followerId=456&include=posts, which keeps the URL flat and allows additional filter parameters to be added without deepening the nesting",
+      "The primary problem is performance — three levels of URL nesting causes three separate database joins in the query execution plan, where each nesting level adds a JOIN clause, and the compounding JOIN overhead degrades query latency exponentially with nesting depth"
     ],
     "correct": 0,
     "confidence": null,
@@ -331,8 +331,8 @@ export const QUESTIONS = [
     "style": "Decision framework application",
     "question": "You're building a platform with: (1) a React web app for end users, (2) a mobile app, and (3) third-party developer integrations for event promoters to programmatically create events. What authentication strategy should you use for each, and why?",
     "options": [
-      "JWT tokens for all three — JWTs are stateless and universally applicable",
-      "API keys for all three — simpler to implement and manage centrally",
+      "JWT tokens for all three consumer types — JWTs are stateless, universally applicable, and carry embedded claims that eliminate the need for per-request database lookups, making them the optimal choice for both user sessions and third-party integrations because they scale horizontally without session stores",
+      "API keys for all three consumer types — simpler to implement and manage centrally through a single key management service, and API keys can carry embedded permissions just like JWTs through the key's metadata, making them sufficient for both user authentication and third-party authorization",
       "JWT tokens for the web and mobile apps (user sessions with expiry); API keys for third-party developer integrations (long-lived, application-level access)",
       "OAuth2 for web/mobile, API keys for developers, and JWT for service-to-service communication between your own services"
     ],
@@ -370,7 +370,7 @@ export const QUESTIONS = [
       "The user is correctly treated as admin because the JWT is verified against the database on each request",
       "The user is still treated as 'customer' until their JWT expires — this is the stateless trade-off; JWTs don't reflect real-time permission changes without a database lookup or short expiry times",
       "The request fails because the JWT signature becomes invalid when the user's role changes in the database",
-      "The API gateway detects the role mismatch and issues a new JWT automatically"
+      "The API gateway automatically detects the role mismatch between the JWT's embedded claims and the database state, and transparently issues a refreshed JWT with the updated 'admin' role before forwarding the request to the downstream service"
     ],
     "correct": 1,
     "confidence": null,
@@ -423,8 +423,8 @@ export const QUESTIONS = [
     "options": [
       "gRPC is faster only because Protocol Buffers are compressed — using gzip with REST would achieve the same performance",
       "gRPC wins on three fronts: binary serialization is 5-10x smaller than JSON, HTTP/2 multiplexes requests over a single connection avoiding TCP overhead, and generated client code eliminates serialization bugs",
-      "gRPC is only marginally faster — the real advantage is that it supports streaming, which REST doesn't",
-      "gRPC wins because it bypasses the network stack entirely when services are on the same machine"
+      "gRPC is only marginally faster than REST in practice — the real advantage is that gRPC supports bidirectional streaming, which REST doesn't support natively, and streaming is essential for the ride-matching service to continuously receive updated driver locations while simultaneously sending price recalculations",
+      "gRPC wins because it bypasses the network stack entirely when services are co-located on the same machine through Unix domain sockets, eliminating TCP/IP overhead — this is the primary performance advantage, and it only applies when services are deployed on the same host, which is common in sidecar-based service mesh architectures"
     ],
     "correct": 1,
     "confidence": null,
@@ -548,9 +548,9 @@ export const QUESTIONS = [
     "question": "A candidate proposes rate limiting solely by IP address: '100 requests per IP per minute should prevent abuse.' The interviewer asks about potential issues. What's the most dangerous flaw in this approach?",
     "options": [
       "IP-based limiting blocks legitimate users behind corporate NATs or shared proxies — thousands of employees behind one IP get collectively throttled, while attackers with botnets have thousands of unique IPs",
-      "IP addresses can be spoofed, making IP-based rate limiting completely ineffective against any attacker",
-      "IP-based limiting doesn't work with IPv6 because the address space is too large to track",
-      "The flaw is that 100 requests per minute is too generous — it should be 10 per minute per IP"
+      "IP addresses can be trivially spoofed in TCP connections, making IP-based rate limiting completely ineffective against any attacker with basic networking knowledge — since the attacker can forge the source IP in the TCP SYN packet, your rate limiter counts the requests against the wrong IP and the attacker bypasses all limits",
+      "IP-based limiting doesn't work with IPv6 because the address space is too large (2^128 addresses) to track in memory — each unique IPv6 address would require a separate rate limit counter, and the memory overhead of maintaining counters for the potential address space makes this approach computationally infeasible",
+      "The flaw is that 100 requests per minute is too generous for any abuse prevention scenario — the limit should be 10 requests per minute per IP to effectively throttle automated scripts, because legitimate users rarely make more than 5-10 requests per minute through normal browsing behavior"
     ],
     "correct": 0,
     "confidence": null,
@@ -567,8 +567,8 @@ export const QUESTIONS = [
     "options": [
       "URL versioning is more performant because the server can route to different code paths at the load balancer level without parsing headers",
       "URL versioning makes the version explicitly visible in every API call, documentation, and debug log — there's zero ambiguity about which version a client is using, which is critical when debugging 'why did my app break?' reports from mobile developers",
-      "Header versioning doesn't work with CDN caching, while URL versioning allows each version to be cached separately",
-      "URL versioning is the only approach that allows running both versions simultaneously in production"
+      "Header versioning doesn't work with CDN caching because CDN edge servers don't inspect custom request headers like Accept-Version when computing cache keys, while URL versioning (/v1/events vs /v2/events) creates naturally distinct cache entries that CDN infrastructure handles natively",
+      "URL versioning is the only approach that allows running both v1 and v2 simultaneously in production — header versioning requires a single server to handle both versions through conditional logic, which means you can't independently deploy, scale, or roll back individual API versions"
     ],
     "correct": 1,
     "confidence": null,
@@ -619,10 +619,10 @@ export const QUESTIONS = [
     "style": "Cross-subtopic bridge",
     "question": "You chose GraphQL for your platform's public API. Your infrastructure team reports that the CDN cache hit rate dropped from 85% (with the old REST API) to 3% after the migration. Why did this happen, and what's the mitigation?",
     "options": [
-      "GraphQL responses are larger than REST responses, exceeding the CDN's cache size limits",
+      "GraphQL responses are significantly larger than REST responses because the response includes the full query structure alongside the data, exceeding the CDN's per-object cache size limits and causing cache eviction of GraphQL responses before they can serve subsequent requests",
       "GraphQL sends all requests as POST to a single endpoint (/graphql), making URL-based CDN caching impossible; the mitigation is persisted queries (pre-registered queries with unique IDs) that can be sent as GET requests with cache-friendly URLs",
-      "The CDN can't parse GraphQL response formats — you need a GraphQL-aware CDN",
-      "This is expected — GraphQL is designed for dynamic data that shouldn't be cached, so you should remove the CDN entirely"
+      "The CDN can't parse GraphQL's response format because GraphQL returns data in a nested JSON structure with a 'data' envelope and optional 'errors' array that doesn't match the flat JSON structure CDNs are optimized to cache and compress",
+      "This drop is expected and by design — GraphQL is specifically intended for dynamic, user-specific data that shouldn't be cached at the edge, so the correct response is to remove the CDN from the GraphQL request path entirely and route all traffic directly to the origin GraphQL server"
     ],
     "correct": 1,
     "confidence": null,
@@ -638,9 +638,9 @@ export const QUESTIONS = [
     "question": "You're presenting your Ticketmaster system design. You've defined public REST APIs for clients and mention that internal services communicate via gRPC. The interviewer asks: 'Your booking flow goes: Mobile App → API Gateway → Booking Service → Payment Service → Inventory Service. Why not use REST everywhere?' What's your strongest answer?",
     "options": [
       "gRPC forces type safety — with REST, a developer could accidentally send a string where a number is expected, causing runtime crashes in the payment service",
-      "REST would work fine internally — the gRPC choice is premature optimization for most systems at this scale",
+      "REST would work perfectly fine for internal service communication at this scale — the gRPC choice is premature optimization for most systems because the serialization overhead difference between JSON and protobuf is only a few milliseconds per request, which is negligible compared to network latency and database query time",
       "Internal services communicate at high frequency with strict latency budgets; gRPC's binary serialization, HTTP/2 multiplexing, and generated type-safe clients reduce per-call overhead significantly compared to JSON-over-HTTP/1.1, while REST remains better for public APIs due to cacheability and tooling",
-      "gRPC is required for inter-service communication because REST doesn't support service discovery"
+      "gRPC is technically required for inter-service communication in a microservices architecture because REST doesn't support service discovery, health checking, or load balancing between service instances — these capabilities are built into the gRPC framework through its integration with service mesh infrastructure like Envoy and Istio"
     ],
     "correct": 2,
     "confidence": null,
@@ -655,10 +655,10 @@ export const QUESTIONS = [
     "style": "Cross-subtopic bridge",
     "question": "You're using GraphQL with cursor-based pagination. Your schema uses the Relay Connection spec: events(first: 10, after: \"cursor\") returns { edges { node { ... }, cursor }, pageInfo { hasNextPage, endCursor } }. A product manager asks for a 'Jump to page 5' feature. What's your response?",
     "options": [
-      "Add an 'offset' argument alongside 'after' — the Relay spec supports combining cursor and offset pagination",
+      "Add an 'offset' argument alongside 'after' to the connection field — the Relay Connection spec supports combining cursor and offset pagination modes, allowing clients to use cursor-based pagination for sequential browsing and offset-based jumps for direct page access within the same query",
       "Cursor-based pagination fundamentally doesn't support random page access because the cursor for page 5 is only known after loading pages 1-4; propose a 'Jump to letter' or 'Jump to date range' alternative that maps to a cursor naturally",
-      "Implement it client-side — cache all previously loaded cursors and use the one corresponding to the start of page 5",
-      "Switch from cursor pagination to offset pagination in your GraphQL schema to support this requirement"
+      "Implement it client-side by caching all previously loaded cursors in local storage and using the cursor corresponding to the start of page 5 when the user clicks 'Jump to page 5' — this avoids schema changes and works within the existing Relay Connection spec",
+      "Switch the entire GraphQL schema from cursor pagination to offset pagination to support this product requirement — offset pagination natively supports random page access through simple arithmetic (page 5 = offset 40 with limit 10), and the consistency trade-offs of offset pagination are acceptable for most content browsing use cases"
     ],
     "correct": 1,
     "confidence": null,
@@ -673,10 +673,10 @@ export const QUESTIONS = [
     "style": "Cross-subtopic bridge",
     "question": "Your API uses JWT-based authentication and per-user rate limiting (1000 requests/hour). An attacker obtains a valid JWT (e.g., from a compromised device) and hammers your API at 999 requests/hour — just below the rate limit. The JWT doesn't expire for another 2 hours. What layered defense is this architecture missing?",
     "options": [
-      "The rate limit is too high — reduce it to 100 requests/hour so abuse is caught sooner",
+      "The rate limit is set too high — reduce it to 100 requests per hour so that abuse patterns are detected sooner, since legitimate users rarely make more than 50 requests per hour and a lower threshold provides earlier detection of compromised tokens",
       "JWT revocation capability — without a token blocklist or short expiry with refresh tokens, you can't invalidate the compromised JWT, and behavioral anomaly detection on top of static rate limits to catch usage patterns that are technically within limits but anomalous",
-      "IP-based blocking — block the attacker's IP address immediately upon detection",
-      "Switch from JWT to session-based auth — server-side sessions can be invalidated immediately"
+      "IP-based blocking should be the immediate response — block the attacker's IP address at the network edge as soon as the compromised token is detected, which instantly cuts off access without requiring any changes to the JWT infrastructure or rate limiting configuration",
+      "Switch entirely from JWT to server-side session-based authentication — server-side sessions stored in Redis can be invalidated immediately by deleting the session record, which eliminates the revocation problem entirely and provides real-time control over active sessions at the cost of requiring a centralized session store"
     ],
     "correct": 1,
     "confidence": null,

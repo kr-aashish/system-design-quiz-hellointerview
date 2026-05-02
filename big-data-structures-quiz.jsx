@@ -481,7 +481,7 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "Yes — the sketch stores compressed representations of all items, which can be decompressed for reporting."
+        "text": "Yes — the sketch stores compressed representations of all items, which can be decompressed for reporting by reversing the hash function and recovering the original search terms from their counter positions."
       },
       {
         "label": "C",
@@ -576,7 +576,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "Yes — 12KB gives exactly 1.5% error for up to 1 billion items, but error increases linearly beyond that threshold."
+        "text": "Yes — 12KB gives exactly 1.5% error for up to 1 billion items, but the error increases linearly beyond that threshold as register saturation causes collisions that inflate the estimate."
       }
     ],
     "correctIndex": 1,
@@ -601,11 +601,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "The 1-2% error rate is unacceptable for product analytics. Stakeholders need exact unique visitor counts, so HLL is fundamentally unsuitable for this use case."
+        "text": "The 1-2% error rate is unacceptable for product analytics dashboards where stakeholders need exact unique visitor counts for business reporting and revenue attribution. HLL is fundamentally unsuitable for any user-facing analytics feature."
       },
       {
         "label": "D",
-        "text": "50 million separate HLL instances would require 50 million separate hash function configurations to avoid cross-page interference. This is computationally prohibitive."
+        "text": "50 million separate HLL instances would require 50 million separate hash function configurations to avoid cross-page interference in the register arrays. This is computationally prohibitive and operationally impractical at scale."
       }
     ],
     "correctIndex": 0,
@@ -626,7 +626,7 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "HLL is better because it's faster to compute than incrementing a counter. The trade-off is accuracy — some scrapers with fewer unique pages might be missed due to HLL underestimation."
+        "text": "HLL is better because it's faster to compute than incrementing a counter in a database. The trade-off is accuracy — some scrapers with fewer unique pages might be missed due to HLL underestimation, since HLL can undercount cardinality in low-cardinality regimes."
       },
       {
         "label": "C",
@@ -651,7 +651,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "HLL is always the best choice because it's the most space-efficient. The other approaches are strictly inferior."
+        "text": "HLL is always the best choice because it's the most space-efficient option for cardinality estimation. The other approaches are strictly inferior in all dimensions — accuracy, memory, and operational simplicity."
       },
       {
         "label": "B",
@@ -684,7 +684,7 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "The problem is the open-ended 1000ms+ bucket. Extreme outliers in this bucket will skew all percentile calculations, making p99 unreliable."
+        "text": "The problem is the open-ended 1000ms+ bucket at the top of the range. Extreme outliers in this unbounded bucket will skew all percentile calculations, making p99 unreliable because the maximum value in the bucket is unknown and could be arbitrarily large."
       },
       {
         "label": "C",
@@ -692,7 +692,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "The 100ms bucket width means your percentile estimates can be off by up to 100ms. Since most requests are under 50ms, a 100ms error is larger than the actual latency — making all estimates meaningless for the common case."
+        "text": "The 100ms bucket width means your percentile estimates can be off by up to 100ms due to linear interpolation within the bucket. Since most requests are under 50ms, a 100ms error is potentially larger than the actual latency itself — making all estimates effectively meaningless for the common case and impossible to use for SLO monitoring."
       }
     ],
     "correctIndex": 0,
@@ -709,7 +709,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Fixed-width buckets with 1ms granularity from 0ms to 30,000ms — this gives exact precision at all ranges, with only 30,000 counters."
+        "text": "Fixed-width buckets with 1ms granularity from 0ms to 30,000ms — this gives exact precision at all ranges, with only 30,000 counters needed to cover the full range at the finest possible resolution."
       },
       {
         "label": "B",
@@ -767,7 +767,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Yes — Prometheus histograms provide exact percentile calculations within bucket boundaries, so 180ms is precise."
+        "text": "Yes — Prometheus histograms provide exact percentile calculations within bucket boundaries using cumulative counter differencing, so 180ms is a precise measurement you can rely on for SLO compliance reporting."
       },
       {
         "label": "B",
@@ -779,7 +779,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "Yes — with 7 buckets spanning the 10-1000ms range, the interpolation error is at most 5%, making 180ms reliable enough to confirm SLO compliance."
+        "text": "Yes — with 7 buckets spanning the 10-1000ms range, the interpolation error is mathematically bounded to at most 5% of the bucket width, making 180ms reliable enough to confirm SLO compliance with high confidence."
       }
     ],
     "correctIndex": 1,
@@ -796,7 +796,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "The traffic spike happened between metric collection intervals, so the histogram never captured the high CPU values."
+        "text": "The traffic spike happened between metric collection intervals, so the histogram never captured the high CPU values during the brief window when the spike occurred and then subsided."
       },
       {
         "label": "B",
@@ -808,7 +808,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "The auto-scaler should use p99, not p95, for CPU utilization because p95 is too conservative for scale-up decisions."
+        "text": "The auto-scaler should use p99, not p95, for CPU utilization because p95 is too conservative for scale-up decisions — it filters out the highest 5% of CPU observations where the actual overload signal exists."
       }
     ],
     "correctIndex": 1,
@@ -837,7 +837,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "This is impossible with 20KB. Each of these data structures needs at minimum 10KB to provide useful results, so you'd need at least 30KB per endpoint."
+        "text": "This is impossible with 20KB. Each of these data structures needs at minimum 10KB to provide useful results at production scale, so you'd need at least 30KB per endpoint, making the requirement fundamentally infeasible."
       }
     ],
     "correctIndex": 1,
@@ -854,7 +854,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Use the Bloom filter — it fits in 1GB with the required 1% FPR. The 80% space savings over the hash set makes it the clear winner."
+        "text": "Use the Bloom filter — it fits in 1GB with the required 1% FPR. The 80% space savings over the hash set makes it the clear winner for any use case involving set membership queries at this scale."
       },
       {
         "label": "B",
@@ -866,7 +866,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "Use HyperLogLog instead — it can provide set membership queries in just 12KB of memory, which is far more efficient than both options."
+        "text": "Use HyperLogLog instead — it can provide set membership queries alongside cardinality estimation in just 12KB of memory, which is far more efficient than both options and eliminates the false positive problem."
       }
     ],
     "correctIndex": 1,
@@ -887,15 +887,15 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "Bloom filters per user are the industry standard for this problem. The proposal is actually correct and widely used by companies like Facebook and Twitter."
+        "text": "Bloom filters per user are the industry standard for this problem at scale. The proposal is actually correct and widely used by companies like Facebook and Twitter for exactly this purpose — tracking seen posts per user."
       },
       {
         "label": "C",
-        "text": "The proposal fails because Bloom filters can't be distributed across servers. Each user's filter must be on a single machine, creating hotspots."
+        "text": "The proposal fails because Bloom filters can't be distributed across servers due to their bit-array structure requiring atomic operations. Each user's filter must reside on a single machine, creating hotspot problems for popular users."
       },
       {
         "label": "D",
-        "text": "The only issue is that false positives would occasionally hide posts the user hasn't seen. This is a minor UX issue and the approach is otherwise sound."
+        "text": "The only issue is that false positives would occasionally hide posts the user hasn't seen, which is a minor UX issue. The approach is otherwise architecturally sound and the 1% false positive rate means only 1 in 100 posts would be incorrectly hidden."
       }
     ],
     "correctIndex": 0,
@@ -912,7 +912,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "It signals strong knowledge of advanced data structures, which is always positive in an SDE2 interview."
+        "text": "It signals strong knowledge of advanced data structures, which is always positive in an SDE2 interview and demonstrates the candidate has studied beyond the basics of standard library collections."
       },
       {
         "label": "B",
@@ -920,11 +920,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "It's a neutral signal — the interviewer won't have an opinion as long as the final system works correctly."
+        "text": "It's a neutral signal — the interviewer won't have a strong opinion on data structure choice as long as the final system works correctly and meets the performance requirements."
       },
       {
         "label": "D",
-        "text": "It signals the candidate doesn't understand HyperLogLog, because HLL requires at least 1 million elements to produce meaningful estimates."
+        "text": "It signals the candidate doesn't understand HyperLogLog, because HLL requires at least 1 million elements to produce meaningful cardinality estimates due to the statistical properties of the leading-zeros estimation technique."
       }
     ],
     "correctIndex": 1,
@@ -941,7 +941,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Yes — Bloom filters are orders of magnitude smaller than hash tables, so a few megabytes is a reasonable expectation for 100M elements."
+        "text": "Yes — Bloom filters are orders of magnitude smaller than hash tables at any scale, so a few megabytes is a reasonable expectation for 100M elements with a 0.1% false positive rate."
       },
       {
         "label": "B",
@@ -949,11 +949,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "No — the filter will be approximately 1.7GB because lower FPR requirements scale linearly, requiring 10x the memory of a 1% FPR filter."
+        "text": "No — the filter will be approximately 1.7GB because lower FPR requirements scale linearly with the inverse of the target error rate, requiring 10x the memory of a 1% FPR filter to achieve 0.1%."
       },
       {
         "label": "D",
-        "text": "It depends entirely on the number of hash functions chosen. With k=1, the filter could be a few megabytes. With k=20, it would be gigabytes."
+        "text": "It depends entirely on the number of hash functions chosen. With k=1, the filter could be just a few megabytes since each element sets only one bit. With k=20, it would be gigabytes because each element sets 20 bits."
       }
     ],
     "correctIndex": 1,
@@ -1011,7 +1011,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "The only cost is memory — dynamic histograms require 2x the memory of fixed histograms to store both current and previous bucket configurations."
+        "text": "The only cost is memory — dynamic histograms require 2x the memory of fixed histograms to store both current and previous bucket configurations simultaneously, plus additional metadata for tracking boundary change history."
       }
     ],
     "correctIndex": 2,
@@ -1028,7 +1028,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "CMS does handle both — if the minimum count is 0, the IP hasn't been seen. If it's >0, it's been seen and the count is the estimate. The colleague is correct."
+        "text": "CMS does handle both questions adequately — if the minimum count across all rows is 0, the IP hasn't been seen before. If it's greater than 0, it has been seen and the minimum count is the frequency estimate. The colleague is correct."
       },
       {
         "label": "B",
@@ -1036,11 +1036,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "CMS can handle both, but a count of 0 in CMS doesn't guarantee the IP is new — it could be a false negative. You need a Bloom filter to eliminate false negatives."
+        "text": "CMS can handle both, but a minimum count of 0 in CMS doesn't guarantee the IP is new — it could be a false negative due to counter underflow or hash function limitations. You need a Bloom filter to eliminate false negatives and provide a reliable definitive absence guarantee for the membership question."
       },
       {
         "label": "D",
-        "text": "CMS requires knowing all possible IPs upfront to configure the hash functions, making it unsuitable for arbitrary IP addresses. Bloom filters don't have this limitation."
+        "text": "CMS requires knowing all possible IPs upfront to configure the hash functions and size the counter array, making it unsuitable for arbitrary IP addresses that may appear at any time. Bloom filters don't have this limitation."
       }
     ],
     "correctIndex": 1,
@@ -1057,7 +1057,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Impossible — 50MB for 500 services is only 100KB per service, which is insufficient for any meaningful probabilistic data structure."
+        "text": "Impossible — 50MB for 500 services is only 100KB per service, which is insufficient for any meaningful probabilistic data structure to provide production-grade accuracy for either cardinality or latency monitoring."
       },
       {
         "label": "B",
@@ -1086,7 +1086,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "HyperLogLog — it answers both questions. Cardinality is its primary purpose, and it can check membership by comparing the estimate before and after a hypothetical insertion."
+        "text": "HyperLogLog — it answers both questions. Cardinality is its primary purpose, and it can check membership by comparing the cardinality estimate before and after a hypothetical insertion — if the estimate doesn't change, the element was already present."
       },
       {
         "label": "B",
@@ -1098,7 +1098,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "Neither — you need both structures. Bloom filters can't count uniques and HLL can't check membership. With only one structure allowed, use a hash set instead."
+        "text": "Neither — you need both structures for this use case. Bloom filters can't count unique elements accurately and HLL can't check per-element membership. With only one structure allowed, use a hash set instead since it handles both."
       }
     ],
     "correctIndex": 2,
@@ -1123,11 +1123,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "CMS could work for p99 if you discretize latency into buckets first, effectively turning it into a histogram. The engineer's suggestion is actually valid with this modification."
+        "text": "CMS can technically handle both, but a minimum count of 0 in CMS doesn't guarantee the IP is actually new — it could be a false negative due to counter underflow or hash function limitations. You need a Bloom filter to eliminate false negatives and provide a definitive absence guarantee."
       },
       {
         "label": "D",
-        "text": "The issue is that CMS overestimates, which would report p99 latency as worse than it actually is. Histograms don't have this overestimation bias."
+        "text": "The issue is that CMS overestimates due to hash collisions, which would systematically report p99 latency as worse than it actually is. Histograms don't have this overestimation bias because they use explicit bucket boundaries rather than hash functions."
       }
     ],
     "correctIndex": 1,

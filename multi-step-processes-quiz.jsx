@@ -155,7 +155,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Temporal provides automatic horizontal scaling that the single-server approach can never achieve, so it's needed for throughput."
+        "text": "Temporal provides automatic horizontal scaling and built-in load balancing that the single-server approach can never achieve, so it's primarily needed for throughput capacity rather than reliability improvements."
       },
       {
         "label": "B",
@@ -163,7 +163,7 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "Temporal uses event sourcing internally, which provides better audit trails than any custom solution could achieve."
+        "text": "Temporal uses event sourcing internally for its history database, which provides significantly better audit trails and replay debugging capabilities than any custom checkpoint-based solution could achieve."
       },
       {
         "label": "D",
@@ -614,7 +614,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Deploy the new workflow version and let Temporal automatically migrate all running workflows to include the sanctions check at their current step."
+        "text": "Deploy the new workflow version and let Temporal automatically migrate all 10,000 running workflows to include the sanctions screening check at whatever step they're currently on in their execution."
       },
       {
         "label": "B",
@@ -622,7 +622,7 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "Stop all 10,000 running workflows, migrate their state to the new version's schema, and restart them at their current step with the new code."
+        "text": "Stop all 10,000 running workflows simultaneously, migrate their persisted state to conform to the new version's schema, and restart each one at exactly their current step with the new workflow code deployed."
       },
       {
         "label": "D",
@@ -722,7 +722,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Workflow patches can't change the schema of activity inputs/outputs — they can only add or remove entire activity steps."
+        "text": "Workflow patches can't change the schema of activity inputs and outputs — they can only add or remove entire activity steps from the execution flow, not modify how existing steps serialize data."
       },
       {
         "label": "B",
@@ -761,7 +761,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "Signals support exactly-once delivery semantics while database polling can miss updates due to race conditions."
+        "text": "Signals support exactly-once delivery semantics with built-in deduplication, while database polling can miss updates due to race conditions between the polling query and concurrent writes to the same row."
       }
     ],
     "correctIndex": 1,
@@ -861,7 +861,7 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "Add a distributed lock (e.g., Redis SETNX) before the check-and-insert to serialize concurrent retries."
+        "text": "Add a distributed lock (e.g., Redis SETNX) before the check-and-insert sequence to serialize concurrent retries so only one can proceed at a time, preventing the race condition at the application level."
       },
       {
         "label": "C",
@@ -888,7 +888,7 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "Temporal should have detected the duplicate refund by checking the payment gateway's transaction history before retrying."
+        "text": "Temporal should have detected the duplicate refund by checking the payment gateway's transaction history before retrying the activity on a new worker, preventing the second refund from being issued."
       },
       {
         "label": "C",

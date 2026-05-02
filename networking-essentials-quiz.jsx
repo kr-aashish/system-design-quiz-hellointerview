@@ -118,7 +118,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "UDP doesn't support multiplexing, so you can't have multiple streams per connection"
+          "text": "UDP doesn't support multiplexing, so you can't have multiple streams per connection Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -130,7 +130,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "D",
-          "text": "UDP's 8-byte header doesn't leave room for the cursor position metadata"
+          "text": "UDP's 8-byte header doesn't leave room for the cursor position metadata Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -207,7 +207,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Set Content-Length to a smaller value so the client only reads part of the response"
+          "text": "Set Content-Length to a smaller value so the client only reads part of the response Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -226,7 +226,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "HTTPS doesn't encrypt JSON bodies, only URL parameters and headers"
+          "text": "HTTPS doesn't encrypt JSON bodies, only URL parameters and headers Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -238,7 +238,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "D",
-          "text": "JSON parsing is vulnerable to injection attacks that bypass HTTPS encryption"
+          "text": "JSON parsing is vulnerable to injection attacks that bypass HTTPS encryption Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -257,15 +257,15 @@ export const QUIZ_DATA = {
         },
         {
           "label": "B",
-          "text": "GET requests don't support request bodies, so you can't pass a confirmation token"
+          "text": "GET requests don't support request bodies, so you can't pass a confirmation token Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
-          "text": "GET requests are limited to 2048 characters in the URL, which might not fit the user ID"
+          "text": "GET requests are limited to 2048 characters in the URL, which might not fit the user ID Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "GET requests aren't encrypted by HTTPS, exposing the user ID in the URL"
+          "text": "GET requests aren't encrypted by HTTPS, exposing the user ID in the URL Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 0,
@@ -280,7 +280,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "WebSocket frames are too large for the L7 load balancer's packet inspection buffer"
+          "text": "WebSocket frames are too large for the L7 load balancer's packet inspection buffer Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -288,11 +288,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "WebSockets require a dedicated L4 load balancer and cannot traverse L7 load balancers at all"
+          "text": "WebSockets require a dedicated L4 load balancer and cannot traverse L7 load balancers at all Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The HTTP upgrade handshake is failing because L7 load balancers strip the Upgrade header"
+          "text": "The HTTP upgrade handshake is failing because L7 load balancers strip the Upgrade header Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -307,7 +307,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Single L7 load balancer for everything — it can handle both routing and session affinity"
+          "text": "Single L7 load balancer for everything — it can handle both routing and session affinity Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -315,7 +315,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "L4 load balancer for everything with IP-hash routing to simulate session affinity"
+          "text": "L4 load balancer for everything with IP-hash routing to simulate session affinity Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -369,11 +369,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Round robin is random and statistical variance causes uneven distribution"
+          "text": "Round robin is random and statistical variance causes uneven distribution Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "SSE connections bypass the load balancer after initial setup, causing drift"
+          "text": "SSE connections bypass the load balancer after initial setup, causing drift Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -396,7 +396,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "WebSocket frames are encoded in HTTP format, so the upgrade tells the server to switch parsers"
+          "text": "WebSocket frames are encoded in HTTP format, so the upgrade tells the server to switch parsers Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -442,7 +442,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "WebSockets don't support binary data, so image-heavy feeds can't be transmitted"
+          "text": "WebSockets don't support binary data, so image-heavy feeds can't be transmitted Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -450,11 +450,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "WebSockets have a maximum message size of 64KB, too small for feed items"
+          "text": "WebSockets have a maximum message size of 64KB, too small for feed items Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "WebSockets require client-side certificate authentication, which social media users won't have"
+          "text": "WebSockets require client-side certificate authentication, which social media users won't have Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -469,7 +469,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "The backoff intervals should be linear, not exponential — exponential grows too slowly"
+          "text": "The backoff intervals should be linear, not exponential — exponential grows too slowly Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -477,11 +477,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "A maximum retry limit — clients should stop retrying after 5 attempts"
+          "text": "A maximum retry limit — clients should stop retrying after 5 attempts Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The retry should use UDP instead of TCP to reduce server load"
+          "text": "The retry should use UDP instead of TCP to reduce server load Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -504,11 +504,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "HTTP headers are case-insensitive, so the retry might send a different-cased key that doesn't match"
+          "text": "HTTP headers are case-insensitive, so the retry might send a different-cased key that doesn't match Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Redis TTL expires the key before the retry arrives, so the duplicate isn't detected"
+          "text": "Redis TTL expires the key before the retry arrives, so the duplicate isn't detected Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -535,7 +535,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "D",
-          "text": "Enter a new 'quarter-open' state that allows 25% of traffic through"
+          "text": "Enter a new 'quarter-open' state that allows 25% of traffic through Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -550,7 +550,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "This is a split-brain problem — use consensus protocols to coordinate circuit breaker state across services"
+          "text": "This is a split-brain problem — use consensus protocols to coordinate circuit breaker state across services Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -558,11 +558,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "This is a network partition — the circuit breakers should be disabled during network issues"
+          "text": "This is a network partition — the circuit breakers should be disabled during network issues Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "This is expected behavior — the database should be scaled to handle the probe load from 50 services"
+          "text": "This is expected behavior — the database should be scaled to handle the probe load from 50 services Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -608,7 +608,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "B",
-          "text": "The problem is REST itself — switch to GraphQL for all client-facing APIs"
+          "text": "The problem is REST itself — switch to GraphQL for all client-facing APIs Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
@@ -631,7 +631,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "gRPC is slower than REST for small payloads due to protobuf encoding overhead"
+          "text": "gRPC is slower than REST for small payloads due to protobuf encoding overhead Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -643,7 +643,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "D",
-          "text": "gRPC service definitions can't be versioned, making API evolution impossible"
+          "text": "gRPC service definitions can't be versioned, making API evolution impossible Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -658,7 +658,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "gRPC uses HTTP/2 which has built-in compression, so the payloads are smaller"
+          "text": "gRPC uses HTTP/2 which has built-in compression, so the payloads are smaller Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -666,11 +666,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "gRPC batches multiple messages into a single TCP packet, reducing per-message overhead"
+          "text": "gRPC batches multiple messages into a single TCP packet, reducing per-message overhead Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Protobuf skips validation entirely and trusts the sender, trading safety for speed"
+          "text": "Protobuf skips validation entirely and trusts the sender, trading safety for speed Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -712,7 +712,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "The corporate proxy is rate-limiting SSE connections to prevent abuse"
+          "text": "The corporate proxy is rate-limiting SSE connections to prevent abuse Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -720,11 +720,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "The server's event queue is backing up due to production load, causing batched delivery"
+          "text": "The server's event queue is backing up due to production load, causing batched delivery Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The browser's EventSource is batching events to reduce main thread interruptions"
+          "text": "The browser's EventSource is batching events to reduce main thread interruptions Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -739,7 +739,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "It breaks at 3-4 participants because WebRTC only supports 3 peer connections per browser; use a TURN relay for larger rooms"
+          "text": "It breaks at 3-4 participants because WebRTC only supports 3 peer connections per browser; use a TURN relay for larger rooms Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -747,11 +747,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "It never breaks down — WebRTC mesh scales linearly because each connection is independent"
+          "text": "It never breaks down — WebRTC mesh scales linearly because each connection is independent Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "It breaks at 10 participants due to signaling server overload; replace with DNS-based peer discovery"
+          "text": "It breaks at 10 participants due to signaling server overload; replace with DNS-based peer discovery Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -766,7 +766,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "WebRTC doesn't support text data — it only handles audio and video streams"
+          "text": "WebRTC doesn't support text data — it only handles audio and video streams Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -774,11 +774,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "WebRTC has higher latency than WebSockets for text messages due to UDP overhead"
+          "text": "WebRTC has higher latency than WebSockets for text messages due to UDP overhead Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "WebRTC requires native browser plugins that support agents may not have installed"
+          "text": "WebRTC requires native browser plugins that support agents may not have installed Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -801,7 +801,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "DNS propagation delay is preventing the new instances from being discoverable"
+          "text": "DNS propagation delay is preventing the new instances from being discoverable Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -847,7 +847,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Disable CDN caching for profile images entirely — serve all images from the origin server"
+          "text": "Disable CDN caching for profile images entirely — serve all images from the origin server Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -855,11 +855,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Send a purge request to all 200 CDN edge locations immediately after the update"
+          "text": "Send a purge request to all 200 CDN edge locations immediately after the update Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Reduce the CDN TTL to 10 seconds so stale images expire quickly"
+          "text": "Reduce the CDN TTL to 10 seconds so stale images expire quickly Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -874,7 +874,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Replicate all ride data across all regions synchronously so any region can continue the ride"
+          "text": "Replicate all ride data across all regions synchronously so any region can continue the ride Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -882,11 +882,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Migrate the ride record from West to Central Valley mid-ride when the GPS crosses the boundary"
+          "text": "Migrate the ride record from West to Central Valley mid-ride when the GPS crosses the boundary Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Use a global database instead of regional partitioning to avoid this problem entirely"
+          "text": "Use a global database instead of regional partitioning to avoid this problem entirely Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -913,7 +913,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "D",
-          "text": "The problem is the backend team, not the API paradigm — hire more backend engineers to build endpoints faster"
+          "text": "The problem is the backend team, not the API paradigm — hire more backend engineers to build endpoints faster Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -928,7 +928,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "GraphQL doesn't support real-time subscriptions, which the system might need in the future"
+          "text": "GraphQL doesn't support real-time subscriptions, which the system might need in the future Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -936,11 +936,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "GraphQL is proprietary to Facebook and has licensing restrictions for commercial use"
+          "text": "GraphQL is proprietary to Facebook and has licensing restrictions for commercial use Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "GraphQL can't handle more than 1000 requests per second, which limits scalability"
+          "text": "GraphQL can't handle more than 1000 requests per second, which limits scalability Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -959,15 +959,15 @@ export const QUIZ_DATA = {
         },
         {
           "label": "B",
-          "text": "10 servers cost 10x more than one large server due to licensing costs"
+          "text": "10 servers cost 10x more than one large server due to licensing costs Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
-          "text": "Horizontal scaling makes it impossible to use database transactions"
+          "text": "Horizontal scaling makes it impossible to use database transactions Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Network bandwidth between 10 servers creates a bottleneck worse than the original server"
+          "text": "Network bandwidth between 10 servers creates a bottleneck worse than the original server Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 0,
@@ -986,11 +986,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "B",
-          "text": "Application-layer protocols are faster because they avoid kernel context switching"
+          "text": "Application-layer protocols are faster because they avoid kernel context switching Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
-          "text": "Kernel-space protocols can't be encrypted, making them insecure for production use"
+          "text": "Kernel-space protocols can't be encrypted, making them insecure for production use Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -1044,11 +1044,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "DNS doesn't support removing individual IPs — you must replace the entire record set"
+          "text": "DNS doesn't support removing individual IPs — you must replace the entire record set Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The browsers are using HTTP connection pooling to maintain connections to the failed data center"
+          "text": "The browsers are using HTTP connection pooling to maintain connections to the failed data center Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 0,
@@ -1090,7 +1090,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "SSE is better because it's standard HTTP and corporate proxies will always pass it through correctly"
+          "text": "SSE is better because it's standard HTTP and corporate proxies will always pass it through correctly Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1098,11 +1098,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Neither works through corporate proxies — you must use simple HTTP polling"
+          "text": "Neither works through corporate proxies — you must use simple HTTP polling Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Use gRPC streaming, which is specifically designed to traverse corporate proxies"
+          "text": "Use gRPC streaming, which is specifically designed to traverse corporate proxies Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1121,15 +1121,15 @@ export const QUIZ_DATA = {
         },
         {
           "label": "B",
-          "text": "REST for read operations, gRPC for write operations, regardless of internal vs external"
+          "text": "REST for read operations, gRPC for write operations, regardless of internal vs external Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
-          "text": "gRPC everywhere with a grpc-web proxy for mobile — consistency outweighs the proxy overhead"
+          "text": "gRPC everywhere with a grpc-web proxy for mobile — consistency outweighs the proxy overhead Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "REST everywhere — the performance difference between JSON and protobuf is negligible at any scale"
+          "text": "REST everywhere — the performance difference between JSON and protobuf is negligible at any scale Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 0,
@@ -1144,7 +1144,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "The circuit breaker activates first, preventing any retries from executing — they never interact because the circuit breaker short-circuits before the retry logic runs"
+          "text": "The circuit breaker activates first, preventing any retries from executing — they never interact because the circuit breaker short-circuits before the retry logic runs Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1152,11 +1152,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "They conflict — retries and circuit breakers should never be used together because retries increase the failure count that trips the circuit breaker"
+          "text": "They conflict — retries and circuit breakers should never be used together because retries increase the failure count that trips the circuit breaker Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "They operate independently on different threads — retries handle individual request failures while circuit breakers handle system-wide failures"
+          "text": "They operate independently on different threads — retries handle individual request failures while circuit breakers handle system-wide failures Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1175,15 +1175,15 @@ export const QUIZ_DATA = {
         },
         {
           "label": "B",
-          "text": "Set a 0-second TTL on all CDN-cached pages so they always refetch from origin"
+          "text": "Set a 0-second TTL on all CDN-cached pages so they always refetch from origin Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
-          "text": "Use WebSockets to push inventory updates to the CDN edge nodes in real-time"
+          "text": "Use WebSockets to push inventory updates to the CDN edge nodes in real-time Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Move inventory data to a global database so all CDN nodes can query it directly"
+          "text": "Move inventory data to a global database so all CDN nodes can query it directly Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 0,

@@ -201,7 +201,7 @@ export const QUIZ_DATA = {
     "Streams",
     "Distributed Lock",
     "Distributed Cache",
-    "CDN"
+    "CDN Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
   ],
   "questions": [
     {
@@ -296,7 +296,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Joins"
+          "text": "Joins Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -360,11 +360,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Use a NoSQL database — joins don't exist there so the problem is solved"
+          "text": "Use a NoSQL database — joins don't exist there so the problem is solved Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Add indexes to every join column — that fully eliminates join cost"
+          "text": "Add indexes to every join column — that fully eliminates join cost Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -380,7 +380,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Indexes lock the table during inserts; with 4 indexes, writes serialize behind 4 lock acquisitions"
+          "text": "Indexes lock the table during inserts; with 4 indexes, writes serialize behind 4 lock acquisitions Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -388,11 +388,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Indexes consume RAM for caching, so adding 4 indexes evicted hot row data from buffer pool, causing disk I/O on every write"
+          "text": "Indexes consume RAM for caching, so adding 4 indexes evicted hot row data from buffer pool, causing disk I/O on every write Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Postgres rewrites the entire table when an index is added; the latency is from the migration not yet completing"
+          "text": "Postgres rewrites the entire table when an index is added; the latency is from the migration not yet completing Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -408,7 +408,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Postgres JSONB doesn't actually support indexing, so any query into the JSON is a full table scan"
+          "text": "Postgres JSONB doesn't actually support indexing, so any query into the JSON is a full table scan Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -416,11 +416,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "JSONB columns aren't ACID-compliant — writes to JSON fields aren't transactional"
+          "text": "JSONB columns aren't ACID-compliant — writes to JSON fields aren't transactional Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Postgres JSONB is 100x slower than DynamoDB document storage at any scale"
+          "text": "Postgres JSONB is 100x slower than DynamoDB document storage at any scale Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -440,15 +440,15 @@ export const QUIZ_DATA = {
         },
         {
           "label": "B",
-          "text": "Graph database — sessions are nodes, users are nodes, traversals between them"
+          "text": "Graph database — sessions are nodes, users are nodes, traversals between them Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
-          "text": "Column-family store — columns scale better than rows for session data"
+          "text": "Column-family store — columns scale better than rows for session data Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Document store — required because the value is JSON"
+          "text": "Document store — required because the value is JSON Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 0,
@@ -472,11 +472,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "DynamoDB — its auto-scaling handles bursty writes"
+          "text": "DynamoDB — its auto-scaling handles bursty writes Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Redis — in-memory writes are fastest"
+          "text": "Redis — in-memory writes are fastest Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -492,7 +492,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "DynamoDB is broken — both reads should see the same data"
+          "text": "DynamoDB is broken — both reads should see the same data Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -500,11 +500,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "User C's region had a network partition; eventual consistency is irrelevant here"
+          "text": "User C's region had a network partition; eventual consistency is irrelevant here Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "User C is using a read replica that's lagging by exactly 50ms; this is a configuration error"
+          "text": "User C is using a read replica that's lagging by exactly 50ms; this is a configuration error Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -520,7 +520,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "DynamoDB's auto-scaling is misconfigured; raising the WCU limit fixes it"
+          "text": "DynamoDB's auto-scaling is misconfigured; raising the WCU limit fixes it Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -528,11 +528,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "DynamoDB's eventual consistency means writes need to propagate; reducing replication factor fixes it"
+          "text": "DynamoDB's eventual consistency means writes need to propagate; reducing replication factor fixes it Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Adding more secondary indexes will redistribute the writes"
+          "text": "Adding more secondary indexes will redistribute the writes Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -548,7 +548,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Schema flexibility is always a benefit; there's no downside in production"
+          "text": "Schema flexibility is always a benefit; there's no downside in production Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -556,11 +556,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Mongo's flexible schema only works for documents under 16MB, which is the real production limitation"
+          "text": "Mongo's flexible schema only works for documents under 16MB, which is the real production limitation Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Schema flexibility breaks ACID guarantees, which is the actual issue"
+          "text": "Schema flexibility breaks ACID guarantees, which is the actual issue Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -576,7 +576,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Postgres can't store binary data"
+          "text": "Postgres can't store binary data Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -584,11 +584,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Postgres requires separate licensing for binary data"
+          "text": "Postgres requires separate licensing for binary data Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Videos always exceed Postgres's 1GB row size limit"
+          "text": "Videos always exceed Postgres's 1GB row size limit Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -604,11 +604,11 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "JPEG and metadata both go in Postgres for transactional consistency"
+          "text": "JPEG and metadata both go in Postgres for transactional consistency Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
-          "text": "JPEG and metadata both go in S3 for cost efficiency"
+          "text": "JPEG and metadata both go in S3 for cost efficiency Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
@@ -616,7 +616,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "D",
-          "text": "Both go in CDN for fast global delivery"
+          "text": "Both go in CDN for fast global delivery Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 2,
@@ -632,7 +632,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Client uploads file to your API server → server validates → server forwards bytes to S3 → server returns success to client"
+          "text": "Client uploads file to your API server → server validates → server forwards bytes to S3 → server returns success to client Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -640,11 +640,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Client requests an S3 access key from the server → client uploads directly to S3 with the key"
+          "text": "Client requests an S3 access key from the server → client uploads directly to S3 with the key Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Client encrypts the file → uploads to a queue → a worker drains the queue and writes to S3"
+          "text": "Client encrypts the file → uploads to a queue → a worker drains the queue and writes to S3 Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -660,7 +660,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Good idea — fewer technologies means simpler operations"
+          "text": "Good idea — fewer technologies means simpler operations Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -668,11 +668,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "DynamoDB doesn't store binary data — only JSON"
+          "text": "DynamoDB doesn't store binary data — only JSON Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "DynamoDB is fine for this; S3 has the same per-GB cost"
+          "text": "DynamoDB is fine for this; S3 has the same per-GB cost Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -688,7 +688,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Compression — restart with smaller bytes; the upload will succeed faster"
+          "text": "Compression — restart with smaller bytes; the upload will succeed faster Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -696,11 +696,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Replication — S3 replicates the partial upload to another region for backup"
+          "text": "Replication — S3 replicates the partial upload to another region for backup Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Encryption — encrypted uploads can resume from any byte offset"
+          "text": "Encryption — encrypted uploads can resume from any byte offset Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -744,7 +744,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Postgres doesn't support the LIKE operator"
+          "text": "Postgres doesn't support the LIKE operator Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -752,11 +752,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "LIKE only works on integer columns; you need REGEX"
+          "text": "LIKE only works on integer columns; you need REGEX Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "5M rows is too few for any noticeable performance issue"
+          "text": "5M rows is too few for any noticeable performance issue Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -772,7 +772,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Compression and encryption"
+          "text": "Compression and encryption Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -780,11 +780,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Caching and replication"
+          "text": "Caching and replication Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Hashing and bucketing"
+          "text": "Hashing and bucketing Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -800,7 +800,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Always use Elasticsearch — Postgres simply cannot do text search"
+          "text": "Always use Elasticsearch — Postgres simply cannot do text search Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -808,11 +808,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Elasticsearch is expensive — switch to Redis full-text search instead"
+          "text": "Elasticsearch is expensive — switch to Redis full-text search instead Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Postgres GIN indexes only work on small tables (< 1000 rows)"
+          "text": "Postgres GIN indexes only work on small tables (< 1000 rows) Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -828,7 +828,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Excellent design — one database is always simpler"
+          "text": "Excellent design — one database is always simpler Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "B",
@@ -836,11 +836,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Elasticsearch can't store JSON — only flat strings"
+          "text": "Elasticsearch can't store JSON — only flat strings Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "D",
-          "text": "Elasticsearch is too slow to be a primary database"
+          "text": "Elasticsearch is too slow to be a primary database Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         }
       ],
       "correct": 1,
@@ -864,7 +864,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "CDN"
+          "text": "CDN Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -884,7 +884,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Domain-specific business logic for `users-service`"
+          "text": "Domain-specific business logic for `users-service` Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -892,11 +892,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Database schema migrations"
+          "text": "Database schema migrations Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "User-interface rendering"
+          "text": "User-interface rendering Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -944,15 +944,15 @@ export const QUIZ_DATA = {
         },
         {
           "label": "B",
-          "text": "L7 — only L7 supports WebSocket connections"
+          "text": "L7 — only L7 supports WebSocket connections Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
-          "text": "L3 — you need network-layer routing for WebSockets"
+          "text": "L3 — you need network-layer routing for WebSockets Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "L2 — only data-link layer can keep connections alive"
+          "text": "L2 — only data-link layer can keep connections alive Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 0,
@@ -968,7 +968,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "L4 — performs better than L7"
+          "text": "L4 — performs better than L7 Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -976,11 +976,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "L3 — required for path-based routing"
+          "text": "L3 — required for path-based routing Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Either works equivalently"
+          "text": "Either works equivalently Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -996,7 +996,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Yes, draw all 12 — it shows operational rigor"
+          "text": "Yes, draw all 12 — it shows operational rigor Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1004,11 +1004,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Skip LBs because they're not real components in modern systems"
+          "text": "Skip LBs because they're not real components in modern systems Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Use a single global LB across all 12 services"
+          "text": "Use a single global LB across all 12 services Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1024,7 +1024,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Add more NGINX instances; horizontal scale always solves it"
+          "text": "Add more NGINX instances; horizontal scale always solves it Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1032,11 +1032,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Switch the LB to L7 — it\\'s faster than L4"
+          "text": "Switch the LB to L7 — it\\'s faster than L4. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "D",
-          "text": "There\\'s no solution above 8M QPS without sharding the problem"
+          "text": "There\\'s no solution above 8M QPS without sharding the problem. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         }
       ],
       "correct": 1,
@@ -1052,7 +1052,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "They\\'re redundant — drop one"
+          "text": "They\\'re redundant — drop one. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "B",
@@ -1060,11 +1060,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "API Gateway is L4, LB is L7"
+          "text": "API Gateway is L4, LB is L7 Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "D",
-          "text": "API Gateway handles writes, LB handles reads"
+          "text": "API Gateway handles writes, LB handles reads Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         }
       ],
       "correct": 1,
@@ -1092,7 +1092,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "D",
-          "text": "Sorted by message size"
+          "text": "Sorted by message size Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1108,7 +1108,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "It rejects the excess 42K/sec to protect the matcher"
+          "text": "It rejects the excess 42K/sec to protect the matcher Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1116,11 +1116,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "It speeds up the matcher to handle 50K/second"
+          "text": "It speeds up the matcher to handle 50K/second Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "It replicates messages 6x for fault tolerance"
+          "text": "It replicates messages 6x for fault tolerance Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1136,7 +1136,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "They should be silently dropped to keep the queue moving"
+          "text": "They should be silently dropped to keep the queue moving Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1144,11 +1144,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Retried forever until they succeed"
+          "text": "Retried forever until they succeed Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Routed back to the front of the main queue to retry again"
+          "text": "Routed back to the front of the main queue to retry again Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1164,7 +1164,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Eventual consistency — let the queue eventually drain"
+          "text": "Eventual consistency — let the queue eventually drain Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1172,11 +1172,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Sharding — split the queue into N partitions"
+          "text": "Sharding — split the queue into N partitions Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Replication — copy the queue to a backup"
+          "text": "Replication — copy the queue to a backup Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1192,7 +1192,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Smart move — that doubles capacity"
+          "text": "Smart move — that doubles capacity Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "B",
@@ -1200,11 +1200,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "The queue should be in-memory not on-disk"
+          "text": "The queue should be in-memory not on-disk Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "D",
-          "text": "Use Kafka instead of SQS"
+          "text": "Use Kafka instead of SQS Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         }
       ],
       "correct": 1,
@@ -1220,7 +1220,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Streams are faster than queues"
+          "text": "Streams are faster than queues Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1228,11 +1228,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Streams support encryption, queues don\\'t"
+          "text": "Streams support encryption, queues don\'t Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Streams are in-memory, queues are on-disk"
+          "text": "Streams are in-memory, queues are on-disk Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1248,7 +1248,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Request-response"
+          "text": "Request-response Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1256,11 +1256,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Round-robin work distribution"
+          "text": "Round-robin work distribution Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Master-slave replication"
+          "text": "Master-slave replication Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1276,7 +1276,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Replication"
+          "text": "Replication Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1284,11 +1284,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Sharding"
+          "text": "Sharding Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Compaction"
+          "text": "Compaction Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1304,7 +1304,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Replication"
+          "text": "Replication Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1312,11 +1312,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Compaction"
+          "text": "Compaction Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Eviction policy"
+          "text": "Eviction policy Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1332,7 +1332,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Queues are too slow for real-time fraud detection"
+          "text": "Queues are too slow for real-time fraud detection Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1340,11 +1340,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Queues don\\'t support encryption needed for banking"
+          "text": "Queues don\\'t support encryption needed for banking. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "D",
-          "text": "Queues don\\'t support FIFO ordering"
+          "text": "Queues don\\'t support FIFO ordering. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         }
       ],
       "correct": 1,
@@ -1368,11 +1368,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Message queue — the ticket sits in a queue for 10 minutes"
+          "text": "Message queue — the ticket sits in a queue for 10 minutes Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "CDN cache — the ticket is cached for 10 minutes"
+          "text": "CDN cache — the ticket is cached for 10 minutes Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1388,7 +1388,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Message queue with priority routing"
+          "text": "Message queue with priority routing Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1396,11 +1396,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Database connection pool"
+          "text": "Database connection pool Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "DNS-based service discovery"
+          "text": "DNS-based service discovery Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1416,7 +1416,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "The lock auto-releases after the worker's TCP connection times out"
+          "text": "The lock auto-releases after the worker's TCP connection times out Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1424,11 +1424,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Another worker can force-release after sensing the original is dead"
+          "text": "Another worker can force-release after sensing the original is dead Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The lock automatically transfers ownership to the next requesting worker"
+          "text": "The lock automatically transfers ownership to the next requesting worker Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1444,7 +1444,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Race condition; fix with retry-with-backoff"
+          "text": "Race condition; fix with retry-with-backoff Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1452,11 +1452,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Live-lock; fix with priority inversion"
+          "text": "Live-lock; fix with priority inversion Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Cache miss; fix with cache warming"
+          "text": "Cache miss; fix with cache warming Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1472,7 +1472,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Yes — Redis can\\'t do both simultaneously; pick one"
+          "text": "Yes — Redis can\\'t do both simultaneously; pick one. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "B",
@@ -1480,11 +1480,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Redis is wrong for both; use Memcached"
+          "text": "Redis is wrong for both; use Memcached Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "D",
-          "text": "Yes — Redis is single-threaded and can only handle one workload"
+          "text": "Yes — Redis is single-threaded and can only handle one workload Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         }
       ],
       "correct": 1,
@@ -1500,7 +1500,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "A random item"
+          "text": "A random item Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1508,11 +1508,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "The item that was added most recently"
+          "text": "The item that was added most recently Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The largest item by byte size"
+          "text": "The largest item by byte size Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1528,7 +1528,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Key-value pairs: SET player:1 score, then iterate all players to find top 100 on each read"
+          "text": "Key-value pairs: SET player:1 score, then iterate all players to find top 100 on each read Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1536,11 +1536,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Hash: store all players in one hash and iterate"
+          "text": "Hash: store all players in one hash and iterate Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "List: append each score and iterate"
+          "text": "List: append each score and iterate Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1556,7 +1556,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Write-Back is slower than Write-Through"
+          "text": "Write-Back is slower than Write-Through Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1564,11 +1564,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Write-Back doesn\\'t work for read-heavy workloads"
+          "text": "Write-Back doesn\\'t work for read-heavy workloads. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "D",
-          "text": "Write-Back requires a separate database"
+          "text": "Write-Back requires a separate database Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1584,7 +1584,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Cache eviction policy"
+          "text": "Cache eviction policy Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1592,11 +1592,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Cache write strategy"
+          "text": "Cache write strategy Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Cache replication strategy"
+          "text": "Cache replication strategy Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1612,7 +1612,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "What\\'s the cache hit rate?"
+          "text": "What\\'s the cache hit rate? Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "B",
@@ -1620,11 +1620,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Why not Memcached?"
+          "text": "Why not Memcached? Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "D",
-          "text": "What region is the cache in?"
+          "text": "What region is the cache in? Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         }
       ],
       "correct": 1,
@@ -1640,7 +1640,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "It compresses content more aggressively than the origin"
+          "text": "It compresses content more aggressively than the origin Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1648,11 +1648,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "It uses faster CPUs than typical origin servers"
+          "text": "It uses faster CPUs than typical origin servers Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "It uses HTTP/3 instead of HTTP/2"
+          "text": "It uses HTTP/3 instead of HTTP/2 Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1668,7 +1668,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Cache only at origin S3 — clients fetch directly from S3 every time"
+          "text": "Cache only at origin S3 — clients fetch directly from S3 every time Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1676,11 +1676,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Cache only in the user\\'s browser; CDN is unnecessary"
+          "text": "Cache only in the user\\'s browser; CDN is unnecessary. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic. Adopting this simplistic approach directly sacrifices crucial system resilience and long-term architectural maintainability, severely compromising the primary non-functional requirements for high availability."
         },
         {
           "label": "D",
-          "text": "Cache at origin only, but use HTTP/2 multiplexing to compensate"
+          "text": "Cache at origin only, but use HTTP/2 multiplexing to compensate Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1696,7 +1696,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Blog posts are dynamic; never cache them at the CDN"
+          "text": "Blog posts are dynamic; never cache them at the CDN Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1704,11 +1704,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Blog posts must be cached only in the application server, never at the CDN"
+          "text": "Blog posts must be cached only in the application server, never at the CDN Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "CDNs only support static files like images"
+          "text": "CDNs only support static files like images Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1724,11 +1724,11 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Lower TTL to 0 across the entire CDN"
+          "text": "Lower TTL to 0 across the entire CDN Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
-          "text": "Send a purge request to all 200 edge locations"
+          "text": "Send a purge request to all 200 edge locations Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
@@ -1736,7 +1736,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "D",
-          "text": "Disable the CDN until the rollout completes"
+          "text": "Disable the CDN until the rollout completes Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 2,
@@ -1752,7 +1752,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Set CDN TTL to 0 — fetch every page from origin"
+          "text": "Set CDN TTL to 0 — fetch every page from origin Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1760,11 +1760,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Replicate inventory to every CDN edge in real-time"
+          "text": "Replicate inventory to every CDN edge in real-time Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Move all inventory data into a single global database queried from every edge"
+          "text": "Move all inventory data into a single global database queried from every edge Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,

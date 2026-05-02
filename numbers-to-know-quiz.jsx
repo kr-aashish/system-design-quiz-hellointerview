@@ -346,7 +346,7 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "The 50ms estimate is roughly correct for cross-AZ latency, so the candidate's design is appropriately conservative."
+        "text": "The 50ms estimate is roughly correct for cross-AZ latency, so the candidate's design is appropriately conservative. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "C",
@@ -408,7 +408,7 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "Add a GPU instance — image transformations should be offloaded to GPU processing, which is 100x faster than CPU for this workload."
+        "text": "Add a GPU instance — image transformations should be offloaded to GPU processing, which is 100x faster than CPU for this workload. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
@@ -429,19 +429,19 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Pre-warming is unnecessary overkill — 45-second startup for containers is within the 30-60 second expected range, so auto-scaling responds within the first quarter of the 2-minute spike. Instead, configure aggressive scaling policies that trigger at 60% CPU rather than 80%, giving the new instances time to spin up before saturation."
+        "text": "Pre-warming is correct — 45 seconds is too slow for any production system, and you should always have standby capacity equal to your peak load. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
-        "text": "Pre-warming is correct — 45 seconds is too slow for any production system, and you should always have standby capacity equal to your peak load."
+        "text": "Pre-warming is correct — 45 seconds is too slow for any production system, and you should always have standby capacity equal to your peak load. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "C",
-        "text": "Neither approach works — 2-minute spikes are too short for auto-scaling to be effective. You need a message queue to buffer requests during the spike."
+        "text": "Neither approach works — 2-minute spikes are too short for auto-scaling to be effective. You need a message queue to buffer requests during the spike. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "Pre-warming 10 instances wastes resources 24/7. Instead, use serverless functions as an overflow valve — they scale to zero cost when idle and handle spikes in under 1 second."
+        "text": "Pre-warming 10 instances wastes resources 24/7. Instead, use serverless functions as an overflow valve — they scale to zero cost when idle and handle spikes in under 1 second. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,
@@ -495,7 +495,7 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "'I'll make the API async instead — the client can poll for results. This is the correct pattern whenever a queue is involved.'"
+        "text": "'I'll make the API async instead — the client can poll for results. This is the correct pattern whenever a queue is involved.' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
@@ -520,15 +520,15 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "The flaw is using Kafka instead of RabbitMQ — Kafka's log-based architecture adds unnecessary disk I/O for a simple write buffering use case."
+        "text": "The flaw is using Kafka instead of RabbitMQ — Kafka's log-based architecture adds unnecessary disk I/O for a simple write buffering use case. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "C",
-        "text": "The candidate is correct — 5k WPS exceeds safe database capacity, and a queue is the standard pattern for write buffering."
+        "text": "The candidate is correct — 5k WPS exceeds safe database capacity, and a queue is the standard pattern for write buffering. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "The flaw is not adding a dead letter queue — without DLQ handling, failed writes will be lost permanently."
+        "text": "The flaw is not adding a dead letter queue — without DLQ handling, failed writes will be lost permanently. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,
@@ -549,15 +549,15 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "The engineer is correct — rearchitecting a monolith into microservices is the most expensive migration in software. Starting distributed is always cheaper in the long run."
+        "text": "The engineer is correct — rearchitecting a monolith into microservices is the most expensive migration in software. Starting distributed is always cheaper in the long run. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "C",
-        "text": "Build microservices but skip sharding — microservices are necessary for team scaling at 10M users, but sharding isn't needed until 100M+ users."
+        "text": "Build microservices but skip sharding — microservices are necessary for team scaling at 10M users, but sharding isn't needed until 100M+ users. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "Use a serverless architecture instead — it auto-scales from 100k to 10M users without any architecture changes, eliminating the debate entirely."
+        "text": "Use a serverless architecture instead — it auto-scales from 100k to 10M users without any architecture changes, eliminating the debate entirely. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,
@@ -582,11 +582,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "Add a caching layer — 4ms average read latency can be reduced to sub-1ms with Redis, dramatically improving user experience."
+        "text": "Add a caching layer — 4ms average read latency can be reduced to sub-1ms with Redis, dramatically improving user experience. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "Do nothing — all metrics are within comfortable single-instance limits and no action is needed."
+        "text": "Do nothing — all metrics are within comfortable single-instance limits and no action is needed. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,
@@ -607,15 +607,15 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "The candidate should spend MORE time on costs — TCO analysis is a critical senior skill that interviewers always evaluate thoroughly."
+        "text": "The candidate should spend MORE time on costs — TCO analysis is a critical senior skill that interviewers always evaluate thoroughly. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "C",
-        "text": "The candidate is right to calculate costs, but should use GCP pricing instead of AWS since it's simpler to calculate on the fly."
+        "text": "The candidate is right to calculate costs, but should use GCP pricing instead of AWS since it's simpler to calculate on the fly. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "Cost should never be mentioned in a system design interview — it's purely a business concern that engineers shouldn't address."
+        "text": "Cost should never be mentioned in a system design interview — it's purely a business concern that engineers shouldn't address. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,
@@ -636,15 +636,15 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "The candidate is correct — sharding inherently provides HA because if one shard fails, the other two continue serving 67% of traffic."
+        "text": "The candidate is correct — sharding inherently provides HA because if one shard fails, the other two continue serving 67% of traffic. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "C",
-        "text": "The confusion is about the shard count — you need at least 5 shards for HA to ensure quorum-based failover."
+        "text": "The confusion is about the shard count — you need at least 5 shards for HA to ensure quorum-based failover. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "At 5 TiB, the database is too small to shard. But the candidate's instinct about needing HA through distribution is correct."
+        "text": "At 5 TiB, the database is too small to shard. But the candidate's instinct about needing HA through distribution is correct. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,
@@ -673,7 +673,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "The candidate should shard the reviews separately from the businesses since they have different access patterns, using a separate database for each."
+        "text": "The candidate should shard the reviews separately from the businesses since they have different access patterns, using a separate database for each. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,
@@ -694,7 +694,7 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "The candidate's latency estimate is correct for databases under load — 50-100ms is typical for a database handling thousands of concurrent queries."
+        "text": "The candidate's latency estimate is correct for databases under load — 50-100ms is typical for a database handling thousands of concurrent queries. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "C",
@@ -723,15 +723,15 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "The candidate is right to add Kafka — 3k WPS is high enough to warrant buffering, and Kafka provides additional benefits like replay and auditability."
+        "text": "The candidate is right to add Kafka — 3k WPS is high enough to warrant buffering, and Kafka provides additional benefits like replay and auditability. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "C",
-        "text": "Replace PostgreSQL with a write-optimized database like Cassandra, which handles millions of writes per second."
+        "text": "Replace PostgreSQL with a write-optimized database like Cassandra, which handles millions of writes per second. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "The only alternative is sharding the database across multiple write-primary nodes to distribute the 3k WPS across them."
+        "text": "The only alternative is sharding the database across multiple write-primary nodes to distribute the 3k WPS across them. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,
@@ -752,15 +752,15 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "Fully valid — complex transactions mean the effective write capacity is much lower, so Kafka buffering is the correct solution to smooth out the throughput."
+        "text": "Fully valid — complex transactions mean the effective write capacity is much lower, so Kafka buffering is the correct solution to smooth out the throughput. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "C",
-        "text": "Invalid — the 20k+ WPS figure already accounts for complex transactions, so their reasoning is still based on outdated capacity estimates."
+        "text": "Invalid — the 20k+ WPS figure already accounts for complex transactions, so their reasoning is still based on outdated capacity estimates. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "Invalid — Kafka doesn't help with complex transactions because the database still has to execute them. Buffering just delays the bottleneck without resolving it."
+        "text": "Invalid — Kafka doesn't help with complex transactions because the database still has to execute them. Buffering just delays the bottleneck without resolving it. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,
@@ -785,11 +785,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "Don't cache at all — at 40k reads and 8k writes, you're within a single database's capacity (50k TPS). No additional infrastructure is needed."
+        "text": "Don't cache at all — at 40k reads and 8k writes, you're within a single database's capacity (50k TPS). No additional infrastructure is needed. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "Replace the database with Redis entirely — if the read pattern is mostly simple lookups, Redis as the primary datastore eliminates the database latency overhead."
+        "text": "Replace the database with Redis entirely — if the read pattern is mostly simple lookups, Redis as the primary datastore eliminates the database latency overhead. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,
@@ -810,7 +810,7 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "The math is right at 400 GB, but Redis performance degrades severely above 100 GB, so sharding into 10 × 40 GB instances is correct for performance."
+        "text": "The math is right at 400 GB, but Redis performance degrades severely above 100 GB, so sharding into 10 × 40 GB instances is correct for performance. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "C",
@@ -818,7 +818,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "Sharding is correct but 10 shards is wrong — you should shard by competition ID so each shard handles 10k competitions, keeping related data together."
+        "text": "Sharding is correct but 10 shards is wrong — you should shard by competition ID so each shard handles 10k competitions, keeping related data together. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,
@@ -839,15 +839,15 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "The architecture is perfect — Kafka decouples the GPS ingestion from database writes, and at 100k WPS, the database definitely needs buffering."
+        "text": "The architecture is perfect — Kafka decouples the GPS ingestion from database writes, and at 100k WPS, the database definitely needs buffering. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "C",
-        "text": "Kafka is unnecessary — PostgreSQL handles 100k WPS with proper batching and async commits, no queue needed."
+        "text": "Kafka is unnecessary — PostgreSQL handles 100k WPS with proper batching and async commits, no queue needed. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "The entire approach is wrong — GPS data should be stored in Redis sorted sets, not PostgreSQL, making both Kafka and the database unnecessary for this use case."
+        "text": "The entire approach is wrong — GPS data should be stored in Redis sorted sets, not PostgreSQL, making both Kafka and the database unnecessary for this use case. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,
@@ -868,15 +868,15 @@ export const QUESTIONS = [
       },
       {
         "label": "B",
-        "text": "Always use Redis — local caches are an anti-pattern because they waste memory and create consistency issues that are impossible to manage."
+        "text": "Always use Redis — local caches are an anti-pattern because they waste memory and create consistency issues that are impossible to manage. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "C",
-        "text": "Always use local caches — they're faster and simpler. Redis adds network latency, operational overhead, and a single point of failure."
+        "text": "Always use local caches — they're faster and simpler. Redis adds network latency, operational overhead, and a single point of failure. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "Use both — a two-tier cache with local L1 and Redis L2. This is always the optimal architecture regardless of access patterns."
+        "text": "Use both — a two-tier cache with local L1 and Redis L2. This is always the optimal architecture regardless of access patterns. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,
@@ -893,19 +893,19 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Database sharding: ~50 TiB data or >10k sustained write TPS. Caching: when hit rate drops below 80% on frequently-accessed data, or for expensive queries — not for simple lookups regardless of data size. Message queues: when write spikes exceed ~20k WPS, or when you need guaranteed delivery/decoupling — not for routine throughput under 20k WPS."
+        "text": "Database sharding: ~1 TiB. Caching: any dataset over 100 GB. Message queues: over 5k writes/sec. These are the updated 2026 thresholds. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
-        "text": "Database sharding: ~1 TiB. Caching: any dataset over 100 GB. Message queues: over 5k writes/sec. These are the updated 2026 thresholds."
+        "text": "Database sharding: ~1 TiB. Caching: any dataset over 100 GB. Message queues: over 5k writes/sec. These are the updated 2026 thresholds. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "C",
-        "text": "None of these should ever be considered — modern hardware eliminates the need for sharding, caching, and message queues entirely for any reasonable scale."
+        "text": "None of these should ever be considered — modern hardware eliminates the need for sharding, caching, and message queues entirely for any reasonable scale. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "The thresholds haven't changed meaningfully — 2015 patterns still apply because the fundamental algorithms haven't changed, only the hardware."
+        "text": "The thresholds haven't changed meaningfully — 2015 patterns still apply because the fundamental algorithms haven't changed, only the hardware. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 0,

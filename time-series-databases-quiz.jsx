@@ -134,7 +134,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Append-only storage uses memory-mapped files, which bypass the kernel's I/O scheduler entirely"
+          "text": "Append-only storage uses memory-mapped files, which bypass the kernel's I/O scheduler entirely Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -154,7 +154,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Append-only storage can't handle updates or deletes, making it useless for most workloads"
+          "text": "Append-only storage can't handle updates or deletes, making it useless for most workloads Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -162,7 +162,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Append-only storage wastes disk space because deleted data is never reclaimed"
+          "text": "Append-only storage wastes disk space because deleted data is never reclaimed Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -182,11 +182,11 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Hash maps use more memory than sorted trees, which matters because the memtable must fit in RAM"
+          "text": "Hash maps use more memory than sorted trees, which matters because the memtable must fit in RAM Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
-          "text": "Hash maps can't handle concurrent writes from multiple threads, while red-black trees can"
+          "text": "Hash maps can't handle concurrent writes from multiple threads, while red-black trees can Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
@@ -194,7 +194,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "D",
-          "text": "Hash maps don't support range queries on keys, which are needed for the memtable to serve reads while in memory"
+          "text": "Hash maps don't support range queries on keys, which are needed for the memtable to serve reads while in memory Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 2,
@@ -218,7 +218,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "The memtable is full and refusing new writes, causing a backlog. Fix: increase memtable size to delay flushes"
+          "text": "The memtable is full and refusing new writes, causing a backlog. Fix: increase memtable size to delay flushes Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -266,11 +266,11 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "LSM trees can't perform range scans because SSTables store data in random order"
+          "text": "LSM trees can't perform range scans because SSTables store data in random order Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
-          "text": "Write amplification from compaction will overwhelm the 5% write volume, causing disk saturation"
+          "text": "Write amplification from compaction will overwhelm the 5% write volume, causing disk saturation Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
@@ -278,7 +278,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "D",
-          "text": "LSM trees don't support the GROUP BY and aggregation operations needed for analytics"
+          "text": "LSM trees don't support the GROUP BY and aggregation operations needed for analytics Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 2,
@@ -294,7 +294,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "The database truncates the floating-point precision, rounding deltas to integers that fit in fewer bytes"
+          "text": "The database truncates the floating-point precision, rounding deltas to integers that fit in fewer bytes Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -302,7 +302,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "The deltas are stored as fixed-point integers with a known scale factor, using 2 bytes instead of 8"
+          "text": "The deltas are stored as fixed-point integers with a known scale factor, using 2 bytes instead of 8 Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -322,7 +322,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Event-driven timestamps have no correlation between consecutive values, so delta encoding produces deltas as large as the original values"
+          "text": "Event-driven timestamps have no correlation between consecutive values, so delta encoding produces deltas as large as the original values Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -330,11 +330,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Event-driven systems use string timestamps instead of Unix epochs, which can't be delta-encoded"
+          "text": "Event-driven systems use string timestamps instead of Unix epochs, which can't be delta-encoded Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The compression algorithm falls back to storing raw timestamps when it detects irregular patterns, completely negating any benefit"
+          "text": "The compression algorithm falls back to storing raw timestamps when it detects irregular patterns, completely negating any benefit Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -354,7 +354,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "B",
-          "text": "When values are exactly equal — XOR produces all zeros, which confuses the decoder"
+          "text": "When values are exactly equal — XOR produces all zeros, which confuses the decoder Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
@@ -414,7 +414,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "The system's clock drifted, causing data to be written to the wrong partition"
+          "text": "The system's clock drifted, causing data to be written to the wrong partition Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -494,15 +494,15 @@ export const QUIZ_DATA = {
         },
         {
           "label": "B",
-          "text": "Bloom filters are too slow to check for every timestamp in a one-hour range"
+          "text": "Bloom filters are too slow to check for every timestamp in a one-hour range Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
-          "text": "The query doesn't specify a host, so there's no tag to look up in the Bloom filter"
+          "text": "The query doesn't specify a host, so there's no tag to look up in the Bloom filter Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Bloom filters are stored on disk and would add latency to the query"
+          "text": "Bloom filters are stored on disk and would add latency to the query Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 0,
@@ -518,7 +518,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "The real-time dashboard was showing predicted values, not actual measurements"
+          "text": "The real-time dashboard was showing predicted values, not actual measurements Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -526,11 +526,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "The downsampled data was computed before the spike was written to disk, creating a race condition"
+          "text": "The downsampled data was computed before the spike was written to disk, creating a race condition Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Downsampling applied averaging to the max values, diluting the 95% spike across the 1-minute window"
+          "text": "Downsampling applied averaging to the max values, diluting the 95% spike across the 1-minute window Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -546,7 +546,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "'That's feasible with enough storage. Let me calculate the disk requirements and show it's within budget.'"
+          "text": "'That's feasible with enough storage. Let me calculate the disk requirements and show it's within budget.' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -554,11 +554,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "'We should use a cheaper storage tier like S3 for data older than 30 days to manage cost.'"
+          "text": "'We should use a cheaper storage tier like S3 for data older than 30 days to manage cost.' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "'1 year of retention is unusual. Most monitoring systems only keep 90 days. Can we reduce the requirement?'"
+          "text": "'1 year of retention is unusual. Most monitoring systems only keep 90 days. Can we reduce the requirement?' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -578,11 +578,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "B",
-          "text": "The database creates a secondary index on the values, enabling direct lookup. Limitation: the secondary index doubles storage requirements"
+          "text": "The database creates a secondary index on the values, enabling direct lookup. Limitation: the secondary index doubles storage requirements Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "C",
-          "text": "Block metadata enables parallel scanning across all 10,000 blocks. Limitation: parallelism is bounded by CPU cores"
+          "text": "Block metadata enables parallel scanning across all 10,000 blocks. Limitation: parallelism is bounded by CPU cores Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -610,7 +610,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Switching to a document database like MongoDB for flexible schema and horizontal scaling"
+          "text": "Switching to a document database like MongoDB for flexible schema and horizontal scaling Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -630,7 +630,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "A B-tree index — it stores tag values in sorted order, enabling binary search for matching series"
+          "text": "A B-tree index — it stores tag values in sorted order, enabling binary search for matching series Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -638,7 +638,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "A hash table — it maps tag combinations to series IDs with O(1) lookup, making any tag filter instant"
+          "text": "A hash table — it maps tag combinations to series IDs with O(1) lookup, making any tag filter instant Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
@@ -658,7 +658,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Request IDs are too long to store efficiently as tag values, wasting disk space"
+          "text": "Request IDs are too long to store efficiently as tag values, wasting disk space Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -666,11 +666,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Request IDs change with every data point, preventing delta encoding of the tag values"
+          "text": "Request IDs change with every data point, preventing delta encoding of the tag values Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "Tags must be predefined in the schema and can't accept dynamic values like request IDs"
+          "text": "Tags must be predefined in the schema and can't accept dynamic values like request IDs Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -698,7 +698,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "D",
-          "text": "The database rejects the write because tag schemas must be consistent within a measurement"
+          "text": "The database rejects the write because tag schemas must be consistent within a measurement Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -742,7 +742,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "UUIDs are too long for tag storage, exceeding the maximum tag value length"
+          "text": "UUIDs are too long for tag storage, exceeding the maximum tag value length Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -750,11 +750,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Page view events are discrete events, not continuous metrics, so the TSDB can't store them"
+          "text": "Page view events are discrete events, not continuous metrics, so the TSDB can't store them Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The write throughput of 10 million user events would exceed the TSDB's ingestion capacity"
+          "text": "The write throughput of 10 million user events would exceed the TSDB's ingestion capacity Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -770,7 +770,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Adding memory is expensive and has physical limits on a single machine"
+          "text": "Adding memory is expensive and has physical limits on a single machine Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -778,11 +778,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Prometheus has a hard-coded limit on series count that can't be raised with more memory"
+          "text": "Prometheus has a hard-coded limit on series count that can't be raised with more memory Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The CPU cost of maintaining the tag index grows linearly with series count, so more memory doesn't help with query latency"
+          "text": "The CPU cost of maintaining the tag index grows linearly with series count, so more memory doesn't help with query latency Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -798,7 +798,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "TSDBs can't perform sorting operations on metric values"
+          "text": "TSDBs can't perform sorting operations on metric values Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -806,11 +806,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "The Top-K problem requires real-time computation, but TSDBs only support batch queries"
+          "text": "The Top-K problem requires real-time computation, but TSDBs only support batch queries Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "TSDBs don't support the GROUP BY operations needed for aggregation"
+          "text": "TSDBs don't support the GROUP BY operations needed for aggregation Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -826,7 +826,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "The buffer is flushed to disk first, then the query runs entirely on disk files for consistency"
+          "text": "The buffer is flushed to disk first, then the query runs entirely on disk files for consistency Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -834,11 +834,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "The buffer is only used for writes; reads always go to disk after a short delay for the buffer to flush"
+          "text": "The buffer is only used for writes; reads always go to disk after a short delay for the buffer to flush Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The database maintains a separate read-optimized cache that is periodically synced from the buffer"
+          "text": "The database maintains a separate read-optimized cache that is periodically synced from the buffer Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -866,7 +866,7 @@ export const QUIZ_DATA = {
         },
         {
           "label": "D",
-          "text": "The file is sorted by tag values, so all 'us-west' data is physically adjacent and can be found via binary search"
+          "text": "The file is sorted by tag values, so all 'us-west' data is physically adjacent and can be found via binary search Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -882,7 +882,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "The WAL is optional and can be disabled for maximum write performance at the cost of durability"
+          "text": "The WAL is optional and can be disabled for maximum write performance at the cost of durability Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -890,11 +890,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "The WAL write is asynchronous — data goes to the memtable immediately and the WAL write happens in the background"
+          "text": "The WAL write is asynchronous — data goes to the memtable immediately and the WAL write happens in the background Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The WAL only stores metadata about the write, not the actual data, so it's a small overhead"
+          "text": "The WAL only stores metadata about the write, not the actual data, so it's a small overhead Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -910,7 +910,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "Separate blocks allow parallel decompression of timestamps and values on different CPU cores"
+          "text": "Separate blocks allow parallel decompression of timestamps and values on different CPU cores Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -918,11 +918,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Separating timestamps from values allows the database to skip reading timestamps entirely for value-only queries"
+          "text": "Separating timestamps from values allows the database to skip reading timestamps entirely for value-only queries Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The separation reduces memory usage because only one block needs to be in memory at a time"
+          "text": "The separation reduces memory usage because only one block needs to be in memory at a time Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -938,7 +938,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "InfluxDB doesn't support SQL, making ad-hoc queries difficult for the analytics team"
+          "text": "InfluxDB doesn't support SQL, making ad-hoc queries difficult for the analytics team Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -946,11 +946,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "InfluxDB can't handle the write throughput of a user analytics platform"
+          "text": "InfluxDB can't handle the write throughput of a user analytics platform Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "TSDBs don't support transactions, which are needed for accurate page view counting"
+          "text": "TSDBs don't support transactions, which are needed for accurate page view counting Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -974,11 +974,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "Bloom filters are discarded during compaction and lazily rebuilt on the first read — this avoids slowing down compaction"
+          "text": "Bloom filters are discarded during compaction and lazily rebuilt on the first read — this avoids slowing down compaction Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The old Bloom filters are kept in memory alongside the new SSTable's filter until the old SSTables are garbage collected"
+          "text": "The old Bloom filters are kept in memory alongside the new SSTable's filter until the old SSTables are garbage collected Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -994,7 +994,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "The database reads all 10 daily partitions at raw resolution and computes the average — downsampling is only used for data older than 7 days"
+          "text": "The database reads all 10 daily partitions at raw resolution and computes the average — downsampling is only used for data older than 7 days Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1002,11 +1002,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "The entire 10-day range is downsampled to 1-minute resolution first, then the average is computed uniformly"
+          "text": "The entire 10-day range is downsampled to 1-minute resolution first, then the average is computed uniformly Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "The query fails because it spans two different data resolution levels, requiring the user to issue two separate queries"
+          "text": "The query fails because it spans two different data resolution levels, requiring the user to issue two separate queries Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1022,7 +1022,7 @@ export const QUIZ_DATA = {
       "options": [
         {
           "label": "A",
-          "text": "High-cardinality tags consume tag index memory, leaving less RAM for the compression buffer, forcing earlier flushes with smaller blocks"
+          "text": "High-cardinality tags consume tag index memory, leaving less RAM for the compression buffer, forcing earlier flushes with smaller blocks Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "B",
@@ -1030,11 +1030,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "The tags themselves are stored uncompressed alongside the values, inflating the per-point storage cost"
+          "text": "The tags themselves are stored uncompressed alongside the values, inflating the per-point storage cost Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "High-cardinality data violates the 'adjacent values are similar' assumption that XOR compression relies on"
+          "text": "High-cardinality data violates the 'adjacent values are similar' assumption that XOR compression relies on Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 1,
@@ -1058,11 +1058,11 @@ export const QUIZ_DATA = {
         },
         {
           "label": "C",
-          "text": "1→4→3→2→5→6: WAL, tag index, memtable — ensuring metadata is searchable before data is in memory"
+          "text": "1→4→3→2→5→6: WAL, tag index, memtable — ensuring metadata is searchable before data is in memory Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         },
         {
           "label": "D",
-          "text": "4→1→3→2→6→5: Tag index first so the series is discoverable, then WAL and memtable for storage"
+          "text": "4→1→3→2→6→5: Tag index first so the series is discoverable, then WAL and memtable for storage Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
         }
       ],
       "correct": 0,

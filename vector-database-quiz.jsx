@@ -164,7 +164,7 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "HNSW doesn't support any form of deletion; the only option is a full index rebuild"
+        "text": "HNSW doesn't support any form of deletion; the only option is a full index rebuild Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
@@ -348,7 +348,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "HNSW indexes are append-only and do not support any deletion mechanism"
+        "text": "HNSW indexes are append-only and do not support any deletion mechanism Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -434,11 +434,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "No — for chatbots you should use Pattern 2 (hybrid search) because keyword matching is essential for FAQ lookups"
+        "text": "No — for chatbots you should use Pattern 2 (hybrid search) because keyword matching is essential for FAQ lookups Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "Yes, but only if the reranker uses a cross-encoder model — other reranking approaches won't improve quality"
+        "text": "Yes, but only if the reranker uses a cross-encoder model — other reranking approaches won't improve quality Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -456,7 +456,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "'Yes, our vector database supports ACID transactions, so the embedding is searchable immediately after the insert commits'"
+        "text": "'Yes, our vector database supports ACID transactions, so the embedding is searchable immediately after the insert commits' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -464,11 +464,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "'Yes, because we generate the embedding synchronously during upload and insert it before returning success to the user'"
+        "text": "'Yes, because we generate the embedding synchronously during upload and insert it before returning success to the user' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "'No, and we shouldn't try to solve this — users understand that search takes time to index new content'"
+        "text": "'No, and we shouldn't try to solve this — users understand that search takes time to index new content' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -486,7 +486,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Milvus is open source and therefore lacks the support and reliability needed for production systems"
+        "text": "Milvus is open source and therefore lacks the support and reliability needed for production systems Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -494,11 +494,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "Milvus doesn't support filtered search, which is essential for product search with price ranges and categories"
+        "text": "Milvus doesn't support filtered search, which is essential for product search with price ranges and categories Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "The candidate should use Pinecone instead because it's fully managed and requires zero infrastructure"
+        "text": "The candidate should use Pinecone instead because it's fully managed and requires zero infrastructure Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -546,7 +546,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Higher dimensions require more training data for the embedding model, and 3072 dimensions may overfit on small datasets"
+        "text": "Higher dimensions always produce worse recall because the curse of dimensionality makes all vectors equidistant Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -554,11 +554,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "3072 dimensions exceed the maximum supported by most vector database implementations"
+        "text": "3072 dimensions exceed the maximum supported by most vector database implementations Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "Higher dimensions always produce worse recall because the curse of dimensionality makes all vectors equidistant"
+        "text": "Higher dimensions always produce worse recall because the curse of dimensionality makes all vectors equidistant Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -576,7 +576,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Cosine similarity is always faster to compute than Euclidean distance because it avoids the square root operation"
+        "text": "Cosine similarity captures semantic meaning while Euclidean distance only captures geometric proximity Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -588,7 +588,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "Cosine similarity captures semantic meaning while Euclidean distance only captures geometric proximity"
+        "text": "Cosine similarity captures semantic meaning while Euclidean distance only captures geometric proximity Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -618,7 +618,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "There's no problem — cosine similarity is equivalent to dot product for all practical purposes"
+        "text": "There's no problem — cosine similarity is equivalent to dot product for all practical purposes Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -678,7 +678,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "IVF doesn't support nprobe > 1; the parameter is being silently ignored"
+        "text": "IVF doesn't support nprobe > 1; the parameter is being silently ignored Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -726,7 +726,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "16 bits is too many — the hash buckets will be too sparse, with most containing zero vectors, wasting memory"
+        "text": "16 bits is too many — the hash buckets will be too sparse, with most containing zero vectors, wasting memory Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -734,11 +734,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "LSH requires the number of bits to be a power of 2 minus 1, so 16 bits is an invalid configuration"
+        "text": "LSH requires the number of bits to be a power of 2 minus 1, so 16 bits is an invalid configuration Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "16-bit hashes can't represent enough distinct buckets for 10M vectors, causing excessive collisions"
+        "text": "16-bit hashes can't represent enough distinct buckets for 10M vectors, causing excessive collisions Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -756,7 +756,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Annoy only supports Euclidean distance, but news recommendations require cosine similarity"
+        "text": "Annoy only supports Euclidean distance, but news recommendations require cosine similarity Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -824,7 +824,7 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "Milvus — it's open source and free, so it's the best choice for a startup watching costs"
+        "text": "Milvus — it's open source and free, so it's the best choice for a startup watching costs Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
@@ -854,7 +854,7 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "Open source vs proprietary — open source databases are always preferable because you avoid vendor lock-in"
+        "text": "Open source vs proprietary — open source databases are always preferable because you avoid vendor lock-in Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
@@ -936,7 +936,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Vector databases have size limits on metadata that would prevent storing full document text"
+        "text": "Vector databases don't support update operations, so document edits would be impossible Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -944,11 +944,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "Storing full text as metadata wastes space because the text is already encoded in the embedding"
+        "text": "Storing full text as metadata wastes space because the text is already encoded in the embedding Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "Vector databases don't support update operations, so document edits would be impossible"
+        "text": "Vector databases don't support update operations, so document edits would be impossible Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -966,7 +966,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Document IDs should be encrypted before embedding to prevent information leakage"
+        "text": "Document IDs should be encrypted before embedding to prevent information leakage Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -974,7 +974,7 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "The embedding model can't handle alphanumeric IDs — it only works with natural language text"
+        "text": "The embedding model can't handle alphanumeric IDs — it only works with natural language text Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
@@ -996,7 +996,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "No — 50K vectors still requires an ANN index because brute force is always too slow for production use"
+        "text": "No — 50K vectors still requires an ANN index because brute force is always too slow for production use Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -1004,11 +1004,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "Only if you have a GPU available — CPU-based brute force over 50K vectors is too slow"
+        "text": "Only if you have a GPU available — CPU-based brute force over 50K vectors is too slow Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "Yes, but only if queries are infrequent (< 1 QPS). At higher throughput, brute force can't keep up."
+        "text": "Yes, but only if queries are infrequent (< 1 QPS). At higher throughput, brute force can't keep up. Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -1026,7 +1026,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "'Yes, 8% of the returned results are incorrect or irrelevant matches'"
+        "text": "'Yes, 8% of the returned results are incorrect or irrelevant matches' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -1034,11 +1034,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "'It means our system is available 92% of the time and returns errors for 8% of queries'"
+        "text": "'It means our system is available 92% of the time and returns errors for 8% of queries' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "'It means 92% of all vectors in the database are reachable by the search algorithm'"
+        "text": "'It means 92% of all vectors in the database are reachable by the search algorithm' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -1056,7 +1056,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "v2 vectors will be higher dimensional, causing schema compatibility issues in the vector database"
+        "text": "v2 vectors will be higher dimensional, causing schema compatibility issues in the vector database Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -1064,11 +1064,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "The vector database will reject inserts from a different model version because it validates embedding provenance"
+        "text": "The vector database will reject inserts from a different model version because it validates embedding provenance Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "v2 embeddings will cluster in a different region of the vector space, making the ANN index's cluster assignments suboptimal"
+        "text": "v2 embeddings will cluster in a different region of the vector space, making the ANN index's cluster assignments suboptimal Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -1098,7 +1098,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "Ask the user to rate 10 items before accessing the platform to bootstrap their embedding"
+        "text": "Ask the user to rate 10 items before accessing the platform to bootstrap their embedding Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -1116,7 +1116,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "GPUs can't perform floating point operations with sufficient precision for similarity calculations"
+        "text": "GPUs can't perform floating point operations with sufficient precision for similarity calculations Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -1124,11 +1124,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "GPU memory is limited to 16GB, which can't hold 100M vectors"
+        "text": "GPU memory is limited to 16GB, which can't hold 100M vectors Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "GPUs add too much network latency transferring vectors between CPU and GPU memory for each query"
+        "text": "GPUs add too much network latency transferring vectors between CPU and GPU memory for each query Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -1146,7 +1146,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Vector search is faster than BM25 for large datasets because ANN is O(log n) while BM25 is O(n)"
+        "text": "Vector search is faster than BM25 for large datasets because ANN is O(log n) while BM25 is O(n) Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -1154,11 +1154,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "BM25 can't handle multilingual tickets, while vector embeddings work across languages"
+        "text": "BM25 can't handle multilingual tickets, while vector embeddings work across languages Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "Vector search supports threshold-based retrieval ('find all tickets with similarity > 0.9') while BM25 only supports ranked retrieval"
+        "text": "Vector search supports threshold-based retrieval ('find all tickets with similarity > 0.9') while BM25 only supports ranked retrieval Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -1176,7 +1176,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "'No change — both systems support metadata filtering, so the filter strategy is identical'"
+        "text": "'No change — both systems support metadata filtering, so the filter strategy is identical' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -1184,11 +1184,11 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "'pgvector doesn't support filtering at all — you'd need to implement post-filtering in application code'"
+        "text": "'pgvector doesn't support filtering at all — you'd need to implement post-filtering in application code' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
-        "text": "'pgvector is strictly worse at filtering because it can't integrate filters into the HNSW traversal'"
+        "text": "'pgvector is strictly worse at filtering because it can't integrate filters into the HNSW traversal' Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,
@@ -1206,7 +1206,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Use HNSW for both — it handles any scale with consistent performance"
+        "text": "Use HNSW for both — it handles any scale with consistent performance Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -1214,7 +1214,7 @@ export const QUESTIONS = [
       },
       {
         "label": "C",
-        "text": "Use IVF for both — its cluster-based approach handles updates more gracefully than HNSW"
+        "text": "Use IVF for both — its cluster-based approach handles updates more gracefully than HNSW Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "D",
@@ -1236,7 +1236,7 @@ export const QUESTIONS = [
     "options": [
       {
         "label": "A",
-        "text": "Return 9 results — users won't notice one missing result, and over-engineering this edge case isn't worth it"
+        "text": "Return 9 results — users won't notice one missing result, and over-engineering this edge case isn't worth it Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       },
       {
         "label": "B",
@@ -1248,7 +1248,7 @@ export const QUESTIONS = [
       },
       {
         "label": "D",
-        "text": "Re-run the search with a higher K parameter until exactly 10 non-deleted results are found"
+        "text": "Re-run the search with a higher K parameter until exactly 10 non-deleted results are found Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
       }
     ],
     "correct": 1,

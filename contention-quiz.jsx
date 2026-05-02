@@ -107,10 +107,10 @@ export const QUESTIONS = [
     "style": "Anti-Pattern Identification",
     "question": "A candidate designs a payment system where each transaction wraps a balance check (SELECT), a debit (UPDATE), and a receipt creation (INSERT) in a single transaction under default READ COMMITTED isolation. They confidently state: 'The transaction makes all three operations atomic, so no race condition can occur.' What is the critical flaw in this reasoning?",
     "options": [
-      "READ COMMITTED doesn't support multi-statement transactions, so each statement runs as its own implicit transaction.",
+      "READ COMMITTED doesn't natively support multi-statement transactions out of the box, so the database engine automatically forces each individual statement to run as its own implicit, completely separate transaction.",
       "The candidate confuses atomicity with isolation. The transaction guarantees all-or-nothing execution, but under READ COMMITTED, another transaction can read the same balance between the SELECT and UPDATE, leading to double-spending — the operations within each transaction don't fail, they just interfere across transactions.",
-      "The transaction will always deadlock because the SELECT acquires a read lock that conflicts with the UPDATE's write lock within the same transaction.",
-      "READ COMMITTED actually does prevent this race condition because it re-evaluates all WHERE clauses at commit time, making the candidate's reasoning correct."
+      "The transaction will always deadlock immediately because the initial SELECT acquires a read lock that permanently conflicts with the subsequent UPDATE's write lock within the exact same transaction session boundary.",
+      "READ COMMITTED actually does prevent this specific race condition because it re-evaluates all WHERE clauses at the exact moment of commit time, making the candidate's initial reasoning fundamentally correct."
     ],
     "correctIndex": 1,
     "explanation": "This is the fundamental misconception the content highlights: atomicity and isolation are different ACID properties. Atomicity ensures operations within a transaction all succeed or all fail. But isolation controls how much concurrent transactions see of each other's work. Under READ COMMITTED, two transactions can both read the same balance, both pass the check, and both proceed — each transaction is individually atomic, but they interfere with each other. The fix requires explicit locking, higher isolation, or optimistic concurrency.",
@@ -123,10 +123,10 @@ export const QUESTIONS = [
     "style": "Scenario-Based Trade-offs",
     "question": "You're designing a seat selection system for a 50,000-seat stadium. During a Taylor Swift presale, 200,000 users attempt to select seats simultaneously. You implement SELECT ... FOR UPDATE on each seat row. What is the primary performance concern and how should you mitigate it?",
     "options": [
-      "FOR UPDATE locks the entire table, not individual rows, so all 200,000 users serialize on a single lock. Mitigate by partitioning the seats table by section.",
+      "FOR UPDATE locks the entire table at the physical disk level, not individual rows, so all 200,000 users fundamentally serialize on a single lock. You mitigate this exclusively by physically partitioning the seats table by section.",
       "Lock contention on popular sections (front row, VIP) creates severe bottlenecks — transactions queue behind each other waiting for row locks. Mitigate by using temporary reservations with TTL instead of holding transactional locks during the full purchase flow, shrinking the lock duration from minutes to milliseconds.",
       "The database connection pool will exhaust because each FOR UPDATE holds a connection for the entire transaction. Mitigate by increasing the connection pool to match concurrent users (200,000 connections).",
-      "FOR UPDATE causes excessive disk I/O because each lock must be persisted to the write-ahead log. Mitigate by using in-memory locks instead of database locks."
+      "FOR UPDATE causes excessive disk I/O bottlenecks because each row lock must be permanently persisted to the write-ahead log on disk. You mitigate this by using fast, volatile in-memory locks instead of heavy database locks."
     ],
     "correctIndex": 1,
     "explanation": "FOR UPDATE locks specific rows, not the entire table. The real problem is that popular seats (front rows, VIP sections) become hot rows where hundreds of transactions queue up. The content emphasizes locking as few rows as possible for as short a time as possible. The key mitigation is using temporary reservations with TTL — when a user selects a seat, immediately move it to 'reserved' status with a 10-minute timeout. This shrinks the contention window from the full purchase flow to just the reservation step (milliseconds).",
@@ -139,9 +139,9 @@ export const QUESTIONS = [
     "style": "Estimation-Backed Reasoning",
     "question": "Your payment service processes transfers with FOR UPDATE locks on account rows. Average lock hold time is 5ms. Under normal load (100 transfers/sec), the system performs well. During a payroll batch job, 5,000 transfers execute simultaneously against 500 employee accounts. What happens and why?",
     "options": [
-      "The system handles it fine because 5ms × 5,000 = 25 seconds total lock time, which is distributed across 500 accounts so each account is locked for only 50ms.",
+      "The system handles it perfectly fine without any user-facing degradation because 5ms × 5,000 = 25 seconds of total lock time, which is evenly distributed across the 500 employee accounts so each individual account is locked for only 50ms total.",
       "Popular accounts (e.g., the company payroll account that's the source for all transfers) become severely contended — if all 5,000 transfers debit from one payroll account, each waits in line. With 5ms lock hold time and 5,000 queued transactions, the last transaction waits ~25 seconds, and the queue depth compounds as new transfers arrive.",
-      "The database automatically detects the batch pattern and parallelizes the locks, processing all 5,000 transfers in approximately 5ms total.",
+      "The database optimizer automatically detects the batch operation pattern via heuristics and aggressively parallelizes the underlying row locks, successfully processing all 5,000 parallel transfers in approximately 5ms of total elapsed time.",
       "FOR UPDATE degrades to table-level locking when more than 1,000 concurrent transactions target the same table, reducing throughput to 1 transaction at a time regardless of which rows are targeted."
     ],
     "correctIndex": 1,
@@ -155,10 +155,10 @@ export const QUESTIONS = [
     "style": "Anti-Pattern Identification",
     "question": "A candidate implements seat booking with: SELECT ... FOR UPDATE on the seat row, then UPDATE seats SET status = 'booked' WHERE seat_id = 'A15'. They omit the AND status = 'available' predicate on the UPDATE. The interviewer asks: 'Your lock prevents concurrent access — why would you need the status check too?' What's the correct response?",
     "options": [
-      "The status check is indeed redundant when using FOR UPDATE because the lock guarantees exclusive access. The candidate's implementation is correct.",
+      "The status check is indeed completely redundant when using explicit FOR UPDATE because the row-level lock inherently guarantees absolute exclusive access. The candidate's simplified database implementation is technically correct.",
       "Locking serializes access but doesn't enforce business invariants. Two back-to-back transactions (not concurrent) would both succeed — the first books the seat, the second immediately 're-books' it. The lock prevents concurrent modification, but the predicate (AND status = 'available') prevents logically incorrect sequential modifications.",
-      "Without the status check, the database will throw a constraint violation error, crashing the application instead of gracefully handling the 'already booked' case.",
-      "The status check is only needed for optimistic concurrency, not pessimistic locking. With FOR UPDATE, the database implicitly checks all column values."
+      "Without the status check explicitly present in the query, the database engine will abruptly throw a low-level constraint violation error, crashing the application thread instead of gracefully handling the 'already booked' edge case.",
+      "The strict status check is only mathematically needed for optimistic concurrency control schemas, not pessimistic locking. With FOR UPDATE, the database implicitly verifies all column values haven't changed since the transaction started."
     ],
     "correctIndex": 1,
     "explanation": "The content explicitly states: 'Locking the row prevents concurrent access, but it doesn't enforce business invariants.' A lock serializes access — it ensures only one transaction touches the row at a time. But once the first transaction commits and releases the lock, the next transaction acquires it and sees the updated state. Without the business logic predicate (status = 'available'), that next transaction would blindly overwrite the booking. The lock prevents races; the predicate prevents incorrect state transitions.",
@@ -171,10 +171,10 @@ export const QUESTIONS = [
     "style": "Multi-Hop Reasoning",
     "question": "You switch your ticket purchase transaction to SERIALIZABLE isolation to prevent race conditions. Under peak load with 10,000 concurrent purchases, what performance characteristic distinguishes SERIALIZABLE from explicit FOR UPDATE locks, and which is more efficient for this specific use case?",
     "options": [
-      "SERIALIZABLE is more efficient because the database can optimize conflict detection globally, while FOR UPDATE forces sequential execution one transaction at a time.",
-      "They perform identically because SERIALIZABLE internally uses the same row-level locking mechanism as FOR UPDATE.",
+      "SERIALIZABLE is significantly more efficient at high concurrency because the database engine can intelligently optimize and reorder conflict detection globally across the entire pool, while FOR UPDATE inefficiently forces strict sequential execution one single transaction at a time.",
+      "They perform virtually identically under load because SERIALIZABLE isolation internally compiles down to using the exact same low-level row-locking mechanisms and memory structures as an explicit FOR UPDATE query.",
       "SERIALIZABLE is much more expensive because it must track ALL reads and writes across ALL concurrent transactions to detect potential conflicts, and aborts/retries many transactions speculatively. FOR UPDATE is more efficient here because you know exactly which row needs locking — you're paying only for the lock you need, not system-wide conflict detection.",
-      "FOR UPDATE is slower because it holds locks during the entire transaction, while SERIALIZABLE uses an optimistic approach that only checks at commit time."
+      "FOR UPDATE is fundamentally slower because it conservatively holds database locks during the entire length of the transaction, while SERIALIZABLE uses an advanced optimistic approach that only checks for actual data conflicts at the exact moment of final commit."
     ],
     "correctIndex": 2,
     "explanation": "The content states that 'SERIALIZABLE isolation is much more expensive than explicit locks. It requires the database to track all reads and writes to detect potential conflicts, and transaction aborts waste work that must be redone.' When you know exactly which row creates contention (the specific concert row), FOR UPDATE gives you precise control — you lock only what you need. SERIALIZABLE is doing much more work: tracking every read set and write set across all concurrent transactions. At 10,000 concurrent users, this overhead (plus frequent aborts and retries) is significantly worse than targeted locking.",
@@ -203,10 +203,10 @@ export const QUESTIONS = [
     "style": "Implementation-Specific Nuance",
     "question": "Your team runs PostgreSQL with REPEATABLE READ isolation for a bidding system. A colleague migrating the same code to MySQL says 'REPEATABLE READ works the same everywhere — it's a SQL standard.' Why is this dangerous advice, and what specific behavioral difference matters?",
     "options": [
-      "MySQL's REPEATABLE READ uses more memory than PostgreSQL's because it stores full row copies instead of using MVCC.",
+      "MySQL's specific implementation of REPEATABLE READ uses substantially more system memory than PostgreSQL's because it naively stores full row copies rather than leveraging a more sophisticated MVCC delta architecture.",
       "The SQL standard defines isolation levels as minimum guarantees, not exact behaviors. PostgreSQL's REPEATABLE READ detects write conflicts and aborts the second transaction with a serialization error. MySQL's REPEATABLE READ does not — it allows the second write to proceed, potentially causing lost updates. Code relying on PostgreSQL's conflict detection would silently produce incorrect results on MySQL.",
-      "MySQL doesn't support REPEATABLE READ at all — it only supports READ COMMITTED and SERIALIZABLE, so the code won't even run.",
-      "The difference is only in how they handle phantom reads. PostgreSQL prevents them under REPEATABLE READ while MySQL allows them, but this doesn't affect contention handling."
+      "MySQL explicitly does not support the REPEATABLE READ isolation level natively at all — the InnoDB engine only formally supports READ COMMITTED and SERIALIZABLE, so the migration code will immediately throw syntax errors.",
+      "The only architectural difference is strictly in how they handle edge-case phantom reads. PostgreSQL actively prevents them under REPEATABLE READ while MySQL allows them to pass, but this distinction doesn't affect standard contention handling."
     ],
     "correctIndex": 1,
     "explanation": "The content explicitly warns: 'In PostgreSQL, REPEATABLE READ would actually catch this: the second transaction to update the row gets aborted with a serialization error. But this behavior varies by database engine, so don't rely on it universally.' PostgreSQL provides stronger guarantees than the SQL standard requires for REPEATABLE READ. Migrating code that relies on PostgreSQL's automatic conflict detection to MySQL would silently introduce race conditions because MySQL's REPEATABLE READ doesn't abort conflicting transactions.",
@@ -219,10 +219,10 @@ export const QUESTIONS = [
     "style": "Scenario-Based Trade-offs",
     "question": "Your e-commerce platform has two contention patterns: (1) flash sales where 5,000 users compete for 100 items, and (2) product catalog updates where 3 admins occasionally edit product descriptions. A candidate proposes optimistic concurrency for both. What's wrong with this approach?",
     "options": [
-      "Optimistic concurrency doesn't work with multiple UPDATE statements in a single transaction, so neither use case is appropriate.",
+      "Optimistic concurrency is strictly limited to single-row updates where the version column is the only mutated field — applying it to complex transactions involving multiple UPDATE statements breaks isolation guarantees because the version check cannot span across multiple rows atomically.",
       "Optimistic concurrency is correct for the admin catalog updates (low contention, rare conflicts, retries are cheap) but terrible for the flash sale. With 5,000 users and 100 items, the conflict rate is extreme — almost every transaction will fail and retry, creating a 'retry storm' that amplifies load instead of reducing it. The flash sale needs pessimistic locking or reservations.",
-      "Both use cases should use pessimistic locking because optimistic concurrency can never guarantee correctness — it's a probabilistic approach that sometimes allows double-writes.",
-      "Optimistic concurrency works perfectly for both cases because the retry overhead is always lower than the locking overhead, regardless of contention level."
+      "Both use cases should use pessimistic locking because optimistic concurrency can never guarantee strong consistency under concurrent load — it's a probabilistic approach that sometimes allows double-writes when two threads read the exact same version number before either has a chance to commit.",
+      "Optimistic concurrency works perfectly for both cases because the CPU overhead of a failed transaction and subsequent retry is always lower than the kernel-level blocking overhead of acquiring a row lock, regardless of how frequently those retry loops are triggered by the application."
     ],
     "correctIndex": 1,
     "explanation": "The content is clear: optimistic concurrency 'makes sense when conflicts are uncommon.' Under low contention (admin edits), retries are rare and the performance benefit of avoiding locks is real. But under high contention (flash sale with 5,000 users for 100 items), nearly every transaction conflicts, retries compound the load, and the system spirals. The content's guidance is to use pessimistic locking for high-contention single-database scenarios and optimistic concurrency for low-contention ones.",
@@ -235,10 +235,10 @@ export const QUESTIONS = [
     "style": "Gotcha/Trap",
     "question": "A developer implements optimistic concurrency for an auction system. Their code: UPDATE auctions SET high_bid = 150, version = version + 1 WHERE auction_id = 'X' AND version = 42; followed by INSERT INTO bid_history VALUES (...); COMMIT; They test with 2 concurrent bids and find that both bids appear in the history even though only one actually updated the auction. What did they miss?",
     "options": [
-      "They need to use a SELECT ... FOR UPDATE before the optimistic UPDATE to prevent the race condition.",
-      "The version column must be a UUID, not an integer, for optimistic concurrency to work correctly.",
+      "They need to use a SELECT ... FOR UPDATE before the optimistic UPDATE to establish a read lock, preventing the race condition where another transaction modifies the version between the read and the update phase.",
+      "The version column must be configured as a randomly generated UUID or a cryptographically secure hash rather than a sequential integer, otherwise concurrent transactions might accidentally increment to the same predictable target value.",
       "They forgot to check the affected row count after the UPDATE. When version doesn't match, the UPDATE silently affects 0 rows (no SQL error), but the INSERT still executes, creating a phantom bid record. The application must check the row count and ROLLBACK if zero rows were updated.",
-      "The INSERT should be inside a separate transaction to ensure it only runs if the UPDATE committed successfully."
+      "The INSERT statement should be placed inside a completely separate database transaction to ensure it only executes after the UPDATE transaction has fully committed and released its locks, otherwise the history table becomes inconsistent."
     ],
     "correctIndex": 2,
     "explanation": "The content explicitly warns about this: 'The UPDATE with a stale version won't raise a database error. It just silently updates zero rows. Your application code must check how many rows were affected and roll back the transaction if zero rows matched. Otherwise the INSERT would still run.' This is one of the most common bugs in OCC implementations — developers assume a failed version check will cause an error, but SQL silently succeeds with 0 rows affected.",
@@ -251,10 +251,10 @@ export const QUESTIONS = [
     "style": "Cross-Subtopic Bridge",
     "question": "For an auction system using optimistic concurrency, a candidate proposes using the current high bid amount as the version (since bids only go up). Their UPDATE: UPDATE auctions SET high_bid = 200 WHERE auction_id = 'X' AND high_bid = 150. Under what specific condition does using the high bid amount as the version work safely, and when would it fail?",
     "options": [
-      "It always works because the high bid is unique and changes with every update, making it functionally identical to a version column.",
+      "It always works because the high bid is a unique numeric constraint that changes with every single update operation, making it functionally identical to a dedicated version column for the purposes of concurrency control and isolation.",
       "It works safely here because auction bids are monotonically increasing — a value can never return to a previous state, so there's no ABA risk. It would fail in a scenario where the value can decrease and return to its original value, like an inventory count that can be both decremented (sales) and incremented (returns).",
-      "It never works safely because the high bid could theoretically overflow the integer type and wrap around to a previous value.",
-      "It works only if there's a unique constraint on the high_bid column. Without it, two identical bids would both succeed."
+      "It never works safely because the high bid could theoretically overflow the database's integer data type limit during a highly contested auction and wrap around to a previous value, instantly creating an unresolvable ABA consistency failure.",
+      "It works only if there's a strict UNIQUE constraint applied to the high_bid column at the database schema level. Without this structural constraint, two identical simultaneous bids would both succeed and corrupt the auction state."
     ],
     "correctIndex": 1,
     "explanation": "The content states: 'Use business values as the version only when you're certain they change in one direction (like a monotonically increasing bid amount in an auction).' Auction bids only go up, so there's no ABA risk — if the bid changed from 150, it went to something higher and can never return to 150. But for values that can increase and decrease (like inventory with sales and returns, or account balances with debits and credits), the value can cycle back to its original, creating the ABA problem where your optimistic check passes despite meaningful state changes.",
@@ -269,7 +269,7 @@ export const QUESTIONS = [
     "options": [
       "Both reviews calculate the same new average, and since the avg_rating check passes for both (4.0 == 4.0), one review is silently lost — the second UPDATE overwrites the first's changes, and the final review_count is 101 instead of 102.",
       "The ABA problem can't occur here because floating-point arithmetic ensures the intermediate avg_rating will never exactly equal 4.0 again.",
-      "Both transactions deadlock because they try to update the same row simultaneously, requiring manual intervention.",
+      "Both transactions immediately deadlock because they attempt to update the exact same row simultaneously using an identical version predicate, causing the database engine to suspend both queries until manual administrator intervention resolves the lock.",
       "The database catches the conflict automatically because UPDATE operations on the same row are always serialized, regardless of the WHERE clause."
     ],
     "correctIndex": 0,
@@ -283,10 +283,10 @@ export const QUESTIONS = [
     "style": "Interviewer Pushback",
     "question": "You recommend a dedicated version column to avoid the ABA problem. Your interviewer asks: 'Couldn't you just use the review_count as your version instead? It increments with every review, so it's monotonically increasing.' What's the most thorough response?",
     "options": [
-      "Yes, review_count works perfectly as a version because it only increases, making it immune to ABA. There's no need for a separate column.",
+      "Yes, review_count works perfectly as a version because it only increases, making it mathematically immune to the ABA problem. There is no architectural justification for adding a separate, redundant version column when an existing monotonically increasing counter is already available.",
       "review_count is monotonically increasing IF reviews can only be added. But if reviews can also be deleted, the count goes from 100 to 99 and potentially back to 100, creating an ABA scenario. A dedicated version column is safer because it increments on every write — adds, deletes, edits — and never decreases, regardless of business logic changes.",
-      "review_count won't work because integers can overflow, creating a theoretical ABA scenario at 2^31 reviews.",
-      "Version columns must be UUIDs, not integers, so neither review_count nor a dedicated integer version would work."
+      "review_count won't work because standard integer columns can eventually overflow, abruptly wrapping around to negative values and creating a theoretical ABA scenario at 2^31 reviews that breaks the optimistic concurrency check.",
+      "Version columns must always be implemented as UUIDs or random cryptographic hashes, not predictable integers, so neither the review_count nor a dedicated integer version column would provide the necessary entropy to safely prevent concurrent update collisions.",
     ],
     "correctIndex": 1,
     "explanation": "The content explicitly states: 'Using review_count as your version works if the value only ever increases, but breaks down if reviews can be deleted (the count could go from 100 to 99 and back to 100, creating an ABA situation).' The key insight is that business values are only safe as versions when they're monotonically increasing under ALL possible operations, not just the most common one. A dedicated version column is the safest approach because it increments on every mutation regardless of type.",
@@ -299,7 +299,7 @@ export const QUESTIONS = [
     "style": "Failure Analysis",
     "question": "In a 2PC bank transfer, Database A has prepared (debited Alice, holding locks) and Database B has prepared (ready to credit Bob). The coordinator crashes before sending COMMIT to either participant. Both databases are stuck with prepared transactions holding locks. What happens to other transactions that need to access Alice's or Bob's accounts?",
     "options": [
-      "Other transactions proceed normally because prepared transactions only hold advisory locks that don't block other operations.",
+      "Other transactions proceed normally because prepared transactions only hold advisory locks that don't block other operations — the database engine isolates the prepared state in a separate MVCC snapshot until the final commit phase.",
       "The databases automatically abort the prepared transactions after a default timeout of 30 seconds, releasing the locks and allowing other transactions to proceed.",
       "Other transactions on those specific rows are completely blocked until the coordinator recovers, reads its persistent log, and sends the final COMMIT or ABORT decision. This is 2PC's well-known blocking problem — it preserves consistency but sacrifices availability.",
       "The databases promote the prepared transactions to committed state after detecting coordinator failure, ensuring forward progress without data loss."
@@ -315,10 +315,10 @@ export const QUESTIONS = [
     "style": "Gotcha/Trap",
     "question": "A candidate designs a 2PC-based transfer system but decides the coordinator doesn't need a persistent log because 'if the coordinator crashes, we can just abort all in-flight transactions and retry.' Why is this reasoning dangerous?",
     "options": [
-      "Without a persistent log, the coordinator can't retry failed transactions after recovery, leading to lost transfers.",
+      "Without a persistent log, the coordinator can't retry failed transactions after recovery, leading to silently lost transfers and inconsistent account balances across the participating database nodes.",
       "Once participants have PREPARED, they cannot unilaterally abort — the prepared state is durable and survives database restarts. Without a persistent log, the recovered coordinator doesn't know which transactions were in-flight or their state. Participants sit in limbo with locked rows, and the coordinator has no way to tell them to commit or abort. This creates irrecoverable stuck transactions.",
-      "The persistent log is only needed for auditing purposes. The coordinator can reconstruct transaction state by querying all participants on recovery.",
-      "The reasoning is actually correct — aborting and retrying is the safest approach because it avoids the complexity of log-based recovery."
+      "The persistent log is only needed for auditing purposes. The coordinator can reconstruct transaction state by querying all participants on recovery to check their prepared status before making a final decision.",
+      "The reasoning is actually correct — aborting and retrying is the safest approach because it avoids the complexity of log-based recovery and ensures the system always returns to a clean state after coordinator failure."
     ],
     "correctIndex": 1,
     "explanation": "The content states: 'the coordinator must write to a persistent log before sending any commit or abort decisions... Without this log, coordinator crashes create unrecoverable situations where participants don't know whether to commit or abort their prepared transactions.' The key insight is that PREPARE TRANSACTION is durable — it survives participant restarts. Once prepared, participants can only commit or abort on the coordinator's instruction. Without the log, the coordinator can't determine what to instruct after recovery.",
@@ -348,9 +348,9 @@ export const QUESTIONS = [
     "question": "A candidate implements a distributed lock with Redis using: SET lock:resource value. When asked about concurrent access, they say 'Redis is single-threaded, so commands are naturally serialized — no race condition possible.' What critical flaw exists in their implementation?",
     "options": [
       "Redis being single-threaded doesn't help because the client reads and writes are separate network round-trips. Without the NX flag (SET lock:resource value NX), two clients can both execute SET successfully — the second overwrites the first's lock. They also forgot TTL for automatic expiration, so if the holder crashes, the lock is held forever.",
-      "The single-threaded model is correct and prevents race conditions. The only issue is missing TTL for automatic cleanup.",
-      "Redis SET is not atomic in clustered mode, so the command could be partially applied across nodes.",
-      "The candidate should use Redis WATCH/MULTI instead of SET for distributed locking, as SET doesn't support transactional semantics."
+      "The single-threaded model is correct and completely prevents race conditions at the engine level. The only issue is the missing TTL parameter for automatic cleanup of stale locks when client applications crash unexpectedly.",
+      "Redis SET is not atomic in clustered mode, so the command could be partially applied across nodes, resulting in split-brain locking scenarios where multiple clients believe they have acquired the lock simultaneously.",
+      "The candidate should use Redis WATCH/MULTI blocks instead of SET for distributed locking, as SET doesn't support transactional semantics and therefore cannot provide the strict isolation required for mutually exclusive locks."
     ],
     "correctIndex": 0,
     "explanation": "The content specifies: 'The SET command with NX (only set if not exists) and expiration atomically creates a lock... the NX flag is critical — without it, a second process could overwrite an existing lock.' While Redis is single-threaded, two separate SET commands from different clients both succeed — the second just overwrites the first. The NX flag makes the SET conditional (only if the key doesn't exist), and TTL ensures cleanup if the holder crashes. Both are essential.",
@@ -363,10 +363,10 @@ export const QUESTIONS = [
     "style": "Scenario-Based Trade-offs",
     "question": "You need distributed locks for a payment processing system. Your team debates three options: Redis with TTL, database column locks, and ZooKeeper. Given that payment processing requires strong consistency (no double-charges), has moderate contention (hundreds of payments/sec), and your team has limited ops capacity, which option is best and why?",
     "options": [
-      "Redis with TTL — it's the fastest option and speed matters most for payment processing. TTL handles cleanup automatically.",
+      "Redis with TTL — it's the fastest option and speed matters most for payment processing. TTL handles cleanup automatically, preventing systemic deadlocks while ensuring minimal latency on the critical path of the checkout flow.",
       "Database column locks — payment data is already in the database, so using it for locking keeps everything in one system with ACID guarantees, avoids introducing new infrastructure, and your team's limited ops capacity means adding Redis or ZooKeeper is risky. The slower lock operations are acceptable at hundreds/sec.",
-      "ZooKeeper — it provides the strongest consistency guarantees, and payment processing can't tolerate any failures.",
-      "None of these — you should use 2PC instead because distributed locks can't provide strong enough consistency for payments."
+      "ZooKeeper — it provides the strongest distributed consistency guarantees via the Zab protocol, and payment processing cannot tolerate any failures or split-brain scenarios that might result in accidental double-charges.",
+      "None of these — you should use 2PC instead because distributed locks can't provide strong enough consistency for payments across microservices, as locks only provide mutual exclusion rather than atomic cross-system commits."
     ],
     "correctIndex": 1,
     "explanation": "The content notes that database locks 'keep everything in one place and leverage your database's ACID properties.' For payments requiring strong consistency, the database provides ACID guarantees that Redis doesn't. Redis is fast but introduces a single point of failure and weaker consistency. ZooKeeper provides strong consistency but requires 'running and maintaining a separate coordination cluster' — bad for limited ops capacity. At hundreds/sec, database lock performance is sufficient. Keeping locks co-located with data simplifies the architecture.",
@@ -379,10 +379,10 @@ export const QUESTIONS = [
     "style": "Gotcha/Trap",
     "question": "Your distributed lock uses Redis with a 30-second TTL. A lock holder experiences a 35-second GC pause. During the pause, another process acquires the lock and begins writing to the shared resource. The original process resumes and also writes to the resource, unaware its lock expired. What mechanism prevents this data corruption, and how does it work?",
     "options": [
-      "Redis WATCH command monitors the lock key and notifies the original holder that its lock was revoked during the GC pause.",
+      "Redis WATCH command monitors the lock key and proactively notifies the original holder that its lock was revoked during the GC pause, allowing the application code to safely rollback any pending writes.",
       "Fencing tokens — a monotonically increasing number issued with each lock acquisition. The storage layer validates that incoming writes carry a token at least as large as the last one it saw, rejecting stale writes from the expired lock holder. The original process's write is rejected because its fencing token (e.g., 42) is lower than the new holder's token (43).",
-      "The TTL should be set longer than the maximum possible GC pause, making this scenario impossible. There's no mechanism to handle it after the fact.",
-      "The Redis client library automatically detects expired locks and aborts pending operations on the client side before they can write stale data."
+      "The TTL should be set longer than the maximum possible GC pause, making this scenario impossible. There's no mechanism to handle it after the fact, so the operational fix is purely tuning the timeout threshold.",
+      "The Redis client library automatically detects expired locks by maintaining a background heartbeat thread and abruptly aborts pending operations on the client side before they can write stale data to the database."
     ],
     "correctIndex": 1,
     "explanation": "The content states: 'Use fencing tokens: a monotonically increasing number issued with each lock acquisition. The storage layer validates that incoming writes carry a token at least as large as the last one it saw, rejecting stale writes from expired lock holders.' This is a server-side protection — the storage layer (not the lock service) enforces ordering. The original process's write arrives with token 42, but the storage layer has already seen token 43 from the new holder, so it rejects the stale write.",
@@ -395,10 +395,10 @@ export const QUESTIONS = [
     "style": "Failure Analysis",
     "question": "A saga-based bank transfer executes: Step 1 (Debit Alice $100, committed), Step 2 (Credit Bob $100, fails because Bob's account is frozen). The saga runs the compensation for Step 1 (Credit Alice $100 back). During the window between Step 1 completing and the compensation running, what inconsistency is visible, and how should you handle it in your application?",
     "options": [
-      "No inconsistency is visible because the saga framework hides intermediate states from other transactions using snapshot isolation.",
+      "No inconsistency is visible because the saga framework orchestrator automatically hides intermediate states from other database connections using distributed snapshot isolation until the entire saga completes.",
       "Alice's balance shows $100 less than it should for a brief window. The total money in the system appears to have decreased. You handle this by showing the transfer as 'pending' in the UI and designing queries to account for in-flight saga state — for example, showing Alice's 'available balance' vs. 'balance including pending transfers.'",
-      "The compensation will fail because Alice's account might have insufficient funds to receive the credit back, creating an irrecoverable state.",
-      "The inconsistency only exists in the application layer. The database remains fully consistent because each step is a committed transaction."
+      "The compensation will fail because Alice's account might have insufficient funds to receive the credit back if another concurrent transaction drained the account, creating an irrecoverable state that requires manual database intervention.",
+      "The inconsistency only exists in the application layer's cache. The database itself remains fully consistent because each step is a committed transaction, so other microservices querying the database directly will see the correct aggregated balances.",
     ],
     "correctIndex": 1,
     "explanation": "The content explicitly describes this: 'After Step 1 completes, Alice's account is debited but Bob's account isn't credited yet. Other processes might see Alice's balance as $100 lower during this window. If someone checks the total money in the system, it appears to have decreased temporarily.' The solution is designing your application to understand intermediate states — showing transfers as 'pending' until all steps complete. This is the fundamental tradeoff of sagas: eventual consistency in exchange for avoiding 2PC's blocking problem.",
@@ -411,10 +411,10 @@ export const QUESTIONS = [
     "style": "Cross-Subtopic Bridge (2PC × Saga)",
     "question": "Your interviewer asks: 'You chose the saga pattern for cross-database transfers. I need strict consistency — the total money in the system must never appear incorrect, even temporarily. Does this change your recommendation?' What's the strongest response?",
     "options": [
-      "Sagas can be made strictly consistent by adding distributed locks around the entire saga execution, preventing anyone from reading intermediate states.",
+      "Sagas can be made strictly consistent by adding distributed locks around the entire saga execution, preventing anyone from reading intermediate states until the orchestration engine confirms all steps have committed successfully.",
       "If strict consistency is a hard requirement — meaning no observer should ever see a state where money appears to have disappeared — then I need to switch to 2PC. Sagas are eventually consistent by design; there's always a window where intermediate states are visible. 2PC's blocking and coordinator availability challenges are the price of that consistency. I'd also invest heavily in coordinator HA and persistent logging.",
-      "Strict consistency across databases is impossible according to the CAP theorem, so the interviewer's requirement is unrealistic.",
-      "I'd keep sagas but add a separate reconciliation service that runs every second to detect and fix inconsistencies, giving the appearance of strict consistency."
+      "Strict consistency across distributed databases is mathematically impossible according to the CAP theorem in the presence of network partitions, so the interviewer's requirement is fundamentally unrealistic for any cloud-native architecture.",
+      "I'd keep sagas but add a separate reconciliation service that runs every second to detect and fix inconsistencies in the background, giving the appearance of strict consistency to the end user without sacrificing the availability benefits of the saga pattern."
     ],
     "correctIndex": 1,
     "explanation": "The content positions 2PC and sagas as different tradeoffs: '2PC for strong consistency, Sagas for resilience.' If the interviewer explicitly requires that no observer ever sees inconsistent state, sagas fundamentally can't provide this — their intermediate states are committed and visible. 2PC is the right choice despite its blocking problem. The best answer acknowledges the tradeoff explicitly: you accept 2PC's availability risks in exchange for the consistency guarantee.",
@@ -427,10 +427,10 @@ export const QUESTIONS = [
     "style": "Scenario-Based",
     "question": "Users A (ID: 456) and B (ID: 123) simultaneously transfer money to each other. Transfer A→B locks user 456 first then tries to lock 123. Transfer B→A locks user 123 first then tries to lock 456. This creates a deadlock. A candidate proposes: 'Always lock the initiator's account first.' Why doesn't this solve the problem?",
     "options": [
-      "Locking the initiator first is correct because it ensures a consistent order relative to each transaction's perspective.",
+      "Locking the initiator first is structurally correct because it ensures a consistent chronological order relative to each transaction's perspective, matching the natural flow of the business logic from sender to receiver.",
       "'Lock the initiator first' creates exactly this deadlock scenario — A initiates and locks 456, B initiates and locks 123, and they deadlock. The correct solution is ordered locking: always lock by ascending user ID regardless of who initiated. Both transactions lock 123 first (lower ID), then 456. This eliminates circular waiting because all transactions follow the same global acquisition order.",
-      "The deadlock can't actually occur because modern databases detect it within milliseconds and abort one transaction automatically.",
-      "The solution is to acquire both locks simultaneously using a multi-key lock command, rather than acquiring them sequentially."
+      "The deadlock can't actually occur in production because modern relational databases detect cycle graphs within milliseconds and automatically abort one transaction, silently restarting it without any application-level intervention required.",
+      "The solution is to avoid sequential acquisition entirely by requesting both locks simultaneously using a multi-key lock command or atomic batch operation, rather than acquiring them sequentially and opening a window for circular dependencies."
     ],
     "correctIndex": 1,
     "explanation": "The content explicitly warns: 'This is critical — you must sort all participants by the same key, not lock the initiator first.' If Alice (456) transfers to Bob (123), lock 123 first because 123 < 456. If Bob transfers to Alice, STILL lock 123 first. The ordering must be globally consistent — based on a deterministic key (like user ID), not relative to the business logic (like 'who sent the transfer'). 'Lock the initiator first' creates different orderings for different transactions, which is exactly how deadlocks occur.",
@@ -443,10 +443,10 @@ export const QUESTIONS = [
     "style": "Interviewer Pushback",
     "question": "You propose ordered locking for deadlock prevention. Your interviewer asks: 'What if a transaction needs to lock resources it doesn't know about upfront? For example, a cascade operation where locking resource A reveals that you also need to lock resource B.' How do you handle this?",
     "options": [
-      "Ordered locking can't handle this case. You should switch to optimistic concurrency control, which doesn't use locks and therefore can't deadlock.",
-      "Acquire all discovered locks in sorted order by releasing existing locks and re-acquiring them all together in the correct order. This is called 'lock escalation.'",
+      "Ordered locking simply cannot handle dynamic discovery scenarios. You must fundamentally change your architecture to use optimistic concurrency control, which avoids locks entirely and therefore makes deadlocks mathematically impossible.",
+      "Acquire all dynamically discovered locks in sorted order by first releasing any existing locks, sorting the combined list of required resources, and re-acquiring them all together in the correct global order. This is a common pattern known as 'lock escalation.'",
       "This is where ordered locking isn't practical, and you fall back to database timeout configurations as a safety net. Set transaction timeouts so that if a deadlock does form from unpredictable lock acquisition, the deadlocked transactions get killed after a reasonable wait period and can retry. Most databases also have automatic deadlock detection that aborts one transaction when cycles are detected.",
-      "Pre-analyze all possible lock dependencies at application startup and create a global lock ordering table that covers every possible cascade path."
+      "Pre-analyze all possible lock dependencies at application startup and create a global lock ordering table that covers every possible cascade path, ensuring that dynamic discovery never violates the statically verified dependency graph."
     ],
     "correctIndex": 2,
     "explanation": "The content states: 'As a fallback, database timeout configurations serve as your safety net when ordered locking isn't practical or when you miss edge cases. Set transaction timeouts so deadlocked transactions get killed after a reasonable wait period and can retry with proper ordering. Most modern databases also have automatic deadlock detection that kills one transaction when cycles are detected, but this should be your fallback, not your primary strategy.'",
@@ -459,10 +459,10 @@ export const QUESTIONS = [
     "style": "Critical Failure Modes",
     "question": "Taylor Swift announces a surprise concert. 500,000 users hit your ticketing system simultaneously for the same 1,000 seats. You've implemented pessimistic locking with FOR UPDATE. Your system uses read replicas and horizontal sharding. Why do none of your normal scaling strategies help here?",
     "options": [
-      "Read replicas don't help because they can serve the seat availability data, reducing read load on the primary. The issue is only with the connection pool size.",
+      "Read replicas don't help directly with the purchase, but they serve the seat availability data, heavily reducing read load on the primary. The actual issue is only with the maximum connection pool size configured on the database.",
       "Sharding distributes data across nodes, but you can't split one concert across multiple shards because everyone wants that specific concert's rows. Read replicas serve stale data for writes. Load balancing distributes requests to different servers, but they all contend for the same database rows. The bottleneck is serialized writes to a single hot resource, which no horizontal scaling strategy addresses.",
-      "The scaling strategies do help — sharding puts different seat sections on different shards, and read replicas handle the availability checks, leaving only the final purchase hitting the primary.",
-      "All scaling strategies fail because PostgreSQL can't handle more than 10,000 concurrent connections regardless of hardware."
+      "The scaling strategies actually do help — sharding puts different seat sections on different shards to distribute writes, and read replicas handle the heavy availability checks, leaving only the final purchase transaction hitting the primary database.",
+      "All scaling strategies ultimately fail because PostgreSQL cannot handle more than 10,000 concurrent network connections regardless of the underlying hardware specifications, making connection exhaustion the true bottleneck.",
     ],
     "correctIndex": 1,
     "explanation": "The content explains: 'Sharding doesn't help because you can't split one Taylor Swift concert across multiple databases. Load balancing doesn't help because all servers compete for the same database row. Even read replicas don't help because the bottleneck is on the writes.' This is the fundamental nature of the hot partition/celebrity problem — when demand concentrates on a single resource, horizontal scaling strategies that distribute across many resources don't help.",
@@ -475,10 +475,10 @@ export const QUESTIONS = [
     "style": "Cross-Subtopic Bridge (Hot Partition × Queue Serialization)",
     "question": "For the Taylor Swift concert scenario, you implement queue-based serialization — all purchase requests go into a single queue processed sequentially. Your interviewer says: 'Now your throughput is limited by one worker. At 5ms per transaction, you process 200/sec. 500,000 users are waiting.' What's the best architectural response?",
     "options": [
-      "Add more workers to the queue to increase throughput, using distributed locks to prevent double-booking between workers.",
+      "Add more workers to the queue to increase aggregate throughput, utilizing distributed locks managed by Redis to definitively prevent any double-booking scenarios between the parallel worker instances.",
       "The queue is just a buffer — 500,000 users don't all need to succeed. Once 1,000 seats are sold (at 200/sec, about 5 seconds), remaining users get immediate 'sold out' responses. The queue absorbs the traffic spike while the worker processes at a sustainable rate. For user experience, show position-in-queue and estimated wait time instead of making users spam refresh.",
-      "Replace the queue with optimistic concurrency to allow parallel processing — at 5ms per transaction with rare conflicts, most will succeed on the first try.",
-      "Shard the 1,000 seats across 10 queues (100 seats each) to achieve 10x throughput while maintaining serialization within each shard."
+      "Replace the sequential queue bottleneck with optimistic concurrency control to allow massive parallel processing — at 5ms per transaction with statistically rare conflicts at this speed, the vast majority will succeed on the first try.",
+      "Shard the available 1,000 seats across 10 independent queues (100 distinct seats each) to mathematically achieve 10x throughput while still rigorously maintaining strict serialization within each individual shard boundary."
     ],
     "correctIndex": 1,
     "explanation": "The content states: 'The queue acts as a buffer that can absorb traffic spikes while the worker processes requests at a sustainable rate.' The key insight is that you don't need to process 500,000 requests — you need to sell 1,000 seats. At 200/sec, that's 5 seconds. The queue's job is to absorb the spike and provide orderly processing. Option D (sharding seats across queues) is also reasonable but the content emphasizes the buffer/spike-absorption role of the queue rather than throughput optimization.",
@@ -491,10 +491,10 @@ export const QUESTIONS = [
     "style": "Cross-Subtopic Bridge (Distributed Locks × Reservations)",
     "question": "Your Uber-like ride dispatch system sends ride requests to the nearest driver. Without coordination, multiple customers could be matched to the same driver simultaneously. A candidate proposes checking driver status at request time. What's the better approach and how does it use distributed locks?",
     "options": [
-      "Use optimistic concurrency on the driver's status column — if two dispatches conflict, one retries with the next nearest driver.",
+      "Use optimistic concurrency control on the driver's database status column — if two competing dispatches conflict during the commit phase, one silently retries with the next nearest available driver instead of completely failing the request.",
       "Set the driver's status to 'pending_request' immediately when sending a ride request, using a distributed lock with TTL. This creates a temporary reservation that prevents other requests from targeting the same driver. If the driver doesn't respond within 10 seconds, the TTL expires and the lock auto-releases, making the driver available again. The contention window shrinks from the entire ride acceptance flow to just the dispatch step.",
-      "Use a global FIFO queue for all ride requests and process them one at a time to prevent concurrent dispatch to the same driver.",
-      "Let multiple requests go to the same driver and let the driver choose which ride to accept. The others automatically get rerouted."
+      "Implement a global FIFO queue for all incoming ride requests system-wide and process them strictly one at a time using a single background worker to physically prevent any concurrent dispatch attempts to the same driver.",
+      "Allow multiple requests to be simultaneously delivered to the same driver's device and rely entirely on the driver to manually choose which ride to accept. The unselected requests automatically get rerouted via client-side logic."
     ],
     "correctIndex": 1,
     "explanation": "The content describes this pattern: 'Uber sets driver status to pending_request when sending ride requests, which prevents multiple simultaneous requests to the same driver. Use either a cache with TTL for automatic cleanup when drivers don't respond within 10 seconds.' This is the reservation pattern using distributed locks — creating an intermediate state that gives temporary exclusive access. The TTL handles the timeout case automatically. The contention window shrinks from the entire acceptance flow to just the dispatch moment.",
@@ -507,10 +507,10 @@ export const QUESTIONS = [
     "style": "Estimation-Backed Reasoning",
     "question": "Your e-commerce checkout takes 3 minutes on average (selecting items, entering payment, confirming). Without reservations, users frequently complete checkout only to find items sold out. You implement cart holds with a 10-minute TTL. With 50,000 concurrent shoppers and 500 limited items, what new problem does the reservation system introduce?",
     "options": [
-      "The 10-minute TTL is too short — users who take longer than 10 minutes lose their items, creating a worse user experience than the original problem.",
+      "The strictly enforced 10-minute TTL is far too short — genuine users who naturally take longer than 10 minutes to verify payment details lose their items, ultimately creating a much worse overall user experience than the original out-of-stock problem.",
       "Reservation abuse — users (or bots) can reserve all 500 items by adding them to carts, effectively locking out legitimate buyers for 10 minutes even if they never intend to purchase. You need rate limiting on reservations, shorter TTLs for suspicious patterns, and maximum reservation limits per user to prevent hoarding.",
-      "The distributed lock system (Redis) becomes a single point of failure. If Redis goes down, no one can make reservations and the system is completely blocked.",
-      "With 50,000 shoppers and 10-minute TTLs, the reservation table grows to millions of rows, causing database performance degradation."
+      "The distributed lock system (typically Redis) immediately becomes a catastrophic single point of failure. If the Redis cluster goes down, no user can make new reservations and the entire checkout pipeline is completely blocked.",
+      "With 50,000 concurrent shoppers actively generating 10-minute TTLs, the underlying reservation table rapidly grows to millions of active rows, causing severe database performance degradation that impacts the rest of the e-commerce platform."
     ],
     "correctIndex": 1,
     "explanation": "The reservation pattern introduces a new attack surface: reservation hoarding. With 500 limited items and 10-minute TTLs, a bot can reserve all items by adding them to 500 carts, blocking all legitimate buyers for 10 minutes. When the TTLs expire, the bot re-reserves everything. This is a real problem for flash sales and limited-edition drops. Mitigations include per-user reservation limits, shorter TTLs, CAPTCHA, and rate limiting on the reservation endpoint.",
@@ -524,9 +524,9 @@ export const QUESTIONS = [
     "question": "You're designing a review system like Yelp. The interviewer asks: 'Hundreds of reviews arrive per second for popular restaurants, all updating the average rating. What concurrency approach do you use?' You need to consider that reviews for the SAME restaurant create contention. What's the best approach and why?",
     "options": [
       "Pessimistic locking — hundreds per second for the same restaurant means high contention. Lock the restaurant row with FOR UPDATE during each review submission to ensure accurate rating calculations.",
-      "SERIALIZABLE isolation — let the database handle conflict detection automatically so you don't need to implement retry logic.",
+      "SERIALIZABLE isolation level — let the relational database engine handle all conflict detection and serialization automatically at the kernel level so you completely avoid needing to implement complex application-layer retry logic.",
       "Optimistic concurrency with a dedicated version column. While contention seems high at 'hundreds per second,' the actual conflict rate on any SINGLE restaurant is much lower (reviews spread across millions of restaurants). The few conflicts that occur on viral restaurants are cheaper to retry than the overhead of pessimistic locks across all restaurants.",
-      "Queue-based serialization — funnel all rating updates for each restaurant into a per-restaurant queue processed by a single worker."
+      "Queue-based serialization strategy — funnel all incoming rating updates for each specific restaurant into a dedicated per-restaurant Kafka partition processed strictly by a single worker to guarantee perfectly ordered updates."
     ],
     "correctIndex": 2,
     "explanation": "The content lists Yelp as 'A good example of optimistic concurrency control.' The key insight is that while total volume is high, contention per restaurant is low — reviews distribute across millions of restaurants. Even for viral restaurants, the conflict rate doesn't justify pessimistic locking's overhead applied to every review. OCC with a version column handles the occasional conflict via retry, with much better average-case performance. The content also notes using a 'dedicated version column' specifically to avoid the ABA problem.",
@@ -539,9 +539,9 @@ export const QUESTIONS = [
     "style": "Ordering/Sequencing",
     "question": "When tackling a contention problem in a system design interview, the content recommends a specific decision sequence. What is the correct order of evaluation?",
     "options": [
-      "Evaluate contention frequency → Choose optimistic or pessimistic → Implement distributed locks → Add queue serialization if needed.",
+      "Evaluate overall contention frequency first → Choose either optimistic or pessimistic locking based on conflict rate → Implement distributed locks for multi-node deployments → Finally add queue serialization if extreme throughput demands require it.",
       "Assess if a single database can hold all contended data → If yes, choose pessimistic (high contention) or optimistic (low contention) → Only if you truly need multiple databases, consider distributed coordination (2PC for consistency, Sagas for resilience) → Add reservations for user-facing competitive flows.",
-      "Start with distributed locks for maximum safety → Downgrade to database transactions if performance allows → Add sagas for cross-service coordination.",
+      "Start directly with distributed locks for maximum safety across microservices → Downgrade to simple database transactions only if performance metrics allow → Add saga patterns exclusively for complex cross-service coordination scenarios.",
       "Implement SERIALIZABLE isolation everywhere → Monitor for performance issues → Downgrade to optimistic concurrency where abort rates are high → Use 2PC for cross-database operations."
     ],
     "correctIndex": 1,

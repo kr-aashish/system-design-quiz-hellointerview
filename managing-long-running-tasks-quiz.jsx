@@ -61,7 +61,7 @@ export const QUESTIONS = [
     "options": [
       "Web servers would need expensive GPU instances for transcoding, but most requests (browsing, login) don't need GPUs — you're paying GPU prices for simple database queries across your entire fleet",
       "Synchronous transcoding will always be slower than asynchronous transcoding due to thread context switching overhead",
-      "The web servers will run out of disk space storing intermediate transcoding files",
+      "The web servers will run out of disk space storing intermediate transcoding files Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Adding more web servers creates a split-brain problem where two servers might transcode the same video simultaneously"
     ],
     "correctIndex": 0,
@@ -76,8 +76,8 @@ export const QUESTIONS = [
     "options": [
       "Implement optimistic UI with WebSocket updates: return a job ID instantly, show a progress indicator, push real-time status updates via WebSocket, and render the document the moment processing completes — users perceive responsiveness even though processing is async",
       "Use a hybrid approach where small documents are processed synchronously and large documents are processed asynchronously, since the PM's concern is valid for small files",
-      "Pre-process a low-quality preview synchronously and queue the full processing async — the user sees an immediate but degraded result",
-      "Explain that the async pattern fundamentally cannot provide immediate results and the PM needs to adjust the product requirements"
+      "Pre-process a low-quality preview synchronously and queue the full processing async — the user sees an immediate but degraded result Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Explain that the async pattern fundamentally cannot provide immediate results and the PM needs to adjust the product requirements Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "The key insight is that 'immediate results' and 'async processing' aren't mutually exclusive from a UX perspective. WebSocket/SSE connections let you push real-time progress updates, making the wait feel responsive rather than like a black hole. The user sees 'Uploading... Processing... Generating preview... Done!' in real-time. Option B introduces complexity with two code paths. Option C adds sync processing back to the web tier. Option D misunderstands that good async UX can feel instantaneous.",
@@ -107,7 +107,7 @@ export const QUESTIONS = [
       "Store job completion status in the database, send a push notification and/or email on completion, and have the client poll or reconnect via WebSocket on next visit to fetch the latest status — covering both online and offline users",
       "Keep the WebSocket connection alive using TCP keep-alive so the notification is delivered the instant the user reopens their laptop",
       "Only use WebSocket notifications since they provide real-time updates, and if the user is offline, the notification will be buffered by the OS",
-      "Implement long-polling from the client that automatically resumes when the laptop wakes from sleep"
+      "Implement long-polling from the client that automatically resumes when the laptop wakes from sleep Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "Users go offline. WebSockets don't survive laptop sleep/close — the connection is dropped. The robust pattern is: (1) persist completion status in the DB as the source of truth, (2) attempt real-time notification via WebSocket/push notification, (3) send an email as a durable fallback, (4) when the client reconnects, it fetches current status from the DB. Option B is wrong — TCP connections don't survive laptop sleep. Option C misunderstands WebSocket behavior. Option D adds unnecessary complexity.",
@@ -122,7 +122,7 @@ export const QUESTIONS = [
       "At 500 req/s with 3s processing each, you need 1,500 concurrent threads just for image processing — this will saturate most web server pools (typically 200-500 threads), so async workers are necessary despite the added complexity, not for user experience but for server resource protection",
       "3 seconds is within acceptable synchronous range since most load balancers allow 30-60 second timeouts, so the senior engineer is correct that async overhead isn't justified",
       "The async pattern is always preferred for operations over 1 second because users perceive anything over 1 second as slow, making the UX argument definitive",
-      "At 500 req/s, horizontal scaling of web servers is cheaper and simpler than introducing a queue and worker infrastructure"
+      "At 500 req/s, horizontal scaling of web servers is cheaper and simpler than introducing a queue and worker infrastructure Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "This is an estimation-backed reasoning question. 500 req/s × 3s = 1,500 concurrent connections held by image processing alone. Most web servers handle 200-500 concurrent connections. Image processing would consume your entire web server fleet, leaving zero capacity for normal requests. The senior engineer is thinking about individual request duration, not aggregate resource consumption. Option B ignores the concurrency math. Option D ignores that scaling web servers means scaling expensive image processing hardware too.",
@@ -135,9 +135,9 @@ export const QUESTIONS = [
     "question": "A candidate proposes adding async workers to a payment processing system. Their design queues the payment charge as an async job and immediately returns 'Payment received' to the user. The interviewer asks: 'What's wrong with this design?' What is the most critical flaw?",
     "options": [
       "Telling the user 'Payment received' before the charge actually processes creates a false confirmation — if the charge fails (insufficient funds, fraud detection), you've already promised success, leading to inventory overselling, fulfillment of unconfirmed orders, and a terrible reversal experience",
-      "The async pattern adds unnecessary latency to payment processing since card authorizations typically complete in 200-300ms synchronously",
-      "Payment processors like Stripe require synchronous webhook responses, making async processing architecturally incompatible",
-      "Queuing payment charges violates PCI-DSS compliance since sensitive card data would be stored in the message queue"
+      "The async pattern adds unnecessary latency to payment processing since card authorizations typically complete in 200-300ms synchronously Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Payment processors like Stripe require synchronous webhook responses, making async processing architecturally incompatible Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Queuing payment charges violates PCI-DSS compliance since sensitive card data would be stored in the message queue Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "This is a dangerous anti-pattern. Payment authorization (the initial charge check) should be synchronous because: (1) it's fast (~200ms), (2) the user MUST know if their payment succeeded before you confirm the order, (3) false confirmations lead to overselling and painful reversals. The async pattern applies to post-authorization steps: fraud analysis, receipt emails, webhook notifications, settlement. Option B is partially true but misses the core issue. Option C is incorrect — Stripe doesn't require this. Option D confuses card data with job metadata.",
@@ -152,7 +152,7 @@ export const QUESTIONS = [
       "Use a 'read-your-writes' pattern: after submitting the job, set a short-lived client-side flag so that reads for THIS user bypass the CDN cache and hit the origin directly until the job completes — this gives immediate consistency for the user who made the change while preserving cache performance for everyone else",
       "The 60-second processing banner is the simplest solution and correctly sets user expectations for eventual consistency — overengineering this is worse than the brief stale data",
       "Switch profile photo processing back to synchronous since it only takes 2-3 seconds and the eventual consistency tradeoff isn't worth it for user-facing content",
-      "Reduce the CDN cache TTL for profile photos from 30 seconds to 1 second to eliminate the staleness window"
+      "Reduce the CDN cache TTL for profile photos from 30 seconds to 1 second to eliminate the staleness window Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "The 'read-your-writes' pattern elegantly solves the eventual consistency problem for the user who cares most — the one who just made the change. Everyone else can continue reading from cache. Implementation: after submitting the upload job, store a version token client-side. On subsequent reads, include this token; the server checks if the latest version is processed and either serves the new photo or shows a targeted loading state. Option B is lazy. Option C throws away async benefits. Option D hammers your origin server.",
@@ -165,9 +165,9 @@ export const QUESTIONS = [
     "question": "Your startup uses Redis with BullMQ as the job queue. During a production incident, the Redis instance experiences a hard crash (process kill, not graceful shutdown) and restarts from its RDB snapshot taken 5 minutes ago. What is the most accurate description of the impact on your job queue?",
     "options": [
       "Jobs enqueued in the last 5 minutes are lost entirely — they existed only in Redis memory between snapshots. Jobs that were 'in-progress' at crash time will also be lost since their queue state reverts to the snapshot, potentially causing duplicate processing when workers re-fetch from the restored state",
-      "All jobs are preserved because BullMQ uses Redis Streams with consumer group acknowledgments, which survive restarts",
-      "Only completed jobs are lost since BullMQ stores pending jobs in an append-only file (AOF) that persists every write",
-      "No jobs are lost because Redis replication ensures at least one replica has the latest state before any write is acknowledged"
+      "All jobs are preserved because BullMQ uses Redis Streams with consumer group acknowledgments, which survive restarts Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Only completed jobs are lost since BullMQ stores pending jobs in an append-only file (AOF) that persists every write Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "No jobs are lost because Redis replication ensures at least one replica has the latest state before any write is acknowledged Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "This is a gotcha about Redis durability. Redis is memory-first. RDB snapshots are periodic — a hard crash loses everything since the last snapshot. Even with AOF enabled, the default 'everysec' fsync policy can lose 1 second of data. BullMQ provides queue semantics ON TOP of Redis, but it can't magically make Redis more durable than its configuration allows. This is exactly why the content notes 'you can lose jobs in a hard crash' with Redis. For true durability, SQS or RabbitMQ are safer choices.",
@@ -210,9 +210,9 @@ export const QUESTIONS = [
     "question": "You're running dedicated server workers that each pull one job at a time from the queue in a blocking loop. Each worker processes a video transcoding job that takes 8 minutes on average. You have 20 workers. During a traffic spike, 500 new jobs arrive in 10 minutes. What is the most accurate description of system behavior?",
     "options": [
       "Only 20 jobs process concurrently. At 8 minutes per job, the 20 workers complete ~25 jobs in 10 minutes. The remaining ~475 jobs queue up safely and will be processed over the next ~3 hours. Queue depth grows but jobs aren't lost — this is the designed backpressure behavior",
-      "The worker pool will crash because 500 jobs exceeds the maximum concurrent capacity, causing out-of-memory errors",
-      "Workers will automatically spawn additional threads to handle the spike, processing up to 100 concurrent jobs",
-      "The queue will reject jobs beyond worker capacity, returning errors to the web servers which will fail the user requests"
+      "The worker pool will crash because 500 jobs exceeds the maximum concurrent capacity, causing out-of-memory errors Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Workers will automatically spawn additional threads to handle the spike, processing up to 100 concurrent jobs Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "The queue will reject jobs beyond worker capacity, returning errors to the web servers which will fail the user requests Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "This is how async worker pools are designed to behave. The queue absorbs the spike — it's a buffer. Workers process at their own pace (20 concurrent jobs). The math: 20 workers × (10 min / 8 min per job) ≈ 25 jobs completed in 10 minutes. The queue grows to ~475 pending jobs, which drain over ~3+ hours. No crashes, no rejections — just increased latency for jobs submitted during the spike. This is the fundamental value proposition of async processing.",
@@ -240,7 +240,7 @@ export const QUESTIONS = [
     "question": "You're migrating workers from dedicated EC2 instances to Kubernetes (EKS). Your video transcoding workers use NVIDIA GPUs and process jobs that take 2-45 minutes. Which Kubernetes configuration consideration is MOST critical for this workload?",
     "options": [
       "Configure GPU resource requests/limits on the worker pods and use the NVIDIA device plugin, set appropriate terminationGracePeriodSeconds (longer than max job time) to prevent Kubernetes from killing pods mid-transcoding during scaling events or deployments",
-      "Use Kubernetes CronJobs instead of Deployments so that each transcoding job gets its own pod with isolated resources",
+      "Use Kubernetes CronJobs instead of Deployments so that each transcoding job gets its own pod with isolated resources Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Set the pod's restart policy to 'Never' so that failed transcoding jobs don't cause infinite restart loops that waste GPU resources",
       "Use Kubernetes StatefulSets instead of Deployments because video workers need persistent local storage for intermediate transcoding files"
     ],
@@ -255,9 +255,9 @@ export const QUESTIONS = [
     "question": "In the standard async worker pool flow, the web server creates a job record in the database BEFORE pushing to the queue. An engineer proposes reversing this: push to the queue first, then write to the database, arguing it's faster. What failure scenario makes the original ordering critical?",
     "options": [
       "If you push to the queue first and the database write fails, a worker may pick up the job and start processing, but there's no job record for status tracking — the status endpoint returns 'not found', the client has no way to check progress, and the worker has no record to update when it finishes",
-      "Writing to the database first provides a natural deduplication mechanism that prevents the same job from being queued twice in a race condition",
-      "The database write creates a transaction lock that prevents concurrent modifications to the job, ensuring queue push and database write are atomic",
-      "Queue systems require a valid job record to exist in the database before they accept a message — this is a standard queue protocol requirement"
+      "Writing to the database first provides a natural deduplication mechanism that prevents the same job from being queued twice in a race condition Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "The database write creates a transaction lock that prevents concurrent modifications to the job, ensuring queue push and database write are atomic Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Queue systems require a valid job record to exist in the database before they accept a message — this is a standard queue protocol requirement Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "The ordering matters because of partial failure handling. DB-first means: if the queue push fails, you have a 'pending' job record that a background reconciliation process can detect and re-queue. Queue-first means: if the DB write fails, a worker processes a phantom job with no status tracking. The client's job ID points to nothing. The worker can't update status. You've lost observability and created an orphaned job. Option D is fabricated — queues don't verify external databases.",
@@ -271,7 +271,7 @@ export const QUESTIONS = [
     "options": [
       "Web servers still accept requests and create 'pending' job records in PostgreSQL. Jobs pile up in the database but can't be queued. Once Kafka recovers, a reconciliation process detects un-queued pending jobs and pushes them to Kafka — no user requests are lost, just delayed",
       "The entire system halts because workers can't pull jobs, web servers can't push jobs, and the status endpoint returns errors since it depends on Kafka for state",
-      "Web servers automatically switch to synchronous processing mode, bypassing the queue and sending jobs directly to workers via HTTP",
+      "Web servers automatically switch to synchronous processing mode, bypassing the queue and sending jobs directly to workers via HTTP Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Workers continue processing jobs already pulled from Kafka before the outage, but the web servers immediately return 503 errors to all new requests"
     ],
     "correctIndex": 0,
@@ -286,7 +286,7 @@ export const QUESTIONS = [
     "options": [
       "The 'Finding drivers near you...' text is a strong signal for async processing — the user is already expecting to wait, the system is explicitly showing a loading state, and ride matching involves evaluating multiple drivers' availability, routes, and pricing which takes variable time",
       "The candidate's synchronous approach is actually correct here because ride matching must return a result within 10 seconds to maintain good UX, which is within synchronous limits",
-      "The loading message indicates the frontend team has already implemented polling, so the backend architecture doesn't need to be async",
+      "The loading message indicates the frontend team has already implemented polling, so the backend architecture doesn't need to be async Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "This is a trick question — ride matching should use a pub/sub pattern, not an async worker pattern, since it involves real-time bidding between multiple drivers"
     ],
     "correctIndex": 0,
@@ -301,7 +301,7 @@ export const QUESTIONS = [
     "options": [
       "They failed to recognize that fan-out to millions of followers is the exact same class of problem as video processing — it's a long-running operation that should be queued. The API should return immediately while workers batch-write to follower feeds asynchronously",
       "They should use a push-based fan-out model instead of a pull-based model, which would eliminate the need for writing to follower feeds entirely",
-      "The issue is that they should shard the follower list across multiple databases, and then the synchronous write would be fast enough",
+      "The issue is that they should shard the follower list across multiple databases, and then the synchronous write would be fast enough Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "This is correct for small fanouts but they should use a hybrid approach: synchronous for users with fewer than 10K followers and async for celebrity accounts"
     ],
     "correctIndex": 0,
@@ -315,9 +315,9 @@ export const QUESTIONS = [
     "question": "Your workers send heartbeats every 10 seconds to the queue. A worker picks up a video transcoding job that triggers a 45-second garbage collection (GC) pause due to a memory-heavy operation. The queue's heartbeat timeout is set to 30 seconds. What happens, and why is this problematic?",
     "options": [
       "The queue declares the worker dead after 30 seconds without a heartbeat, re-queues the job to another worker, but the original worker resumes after the GC pause and finishes the job too — resulting in the same video being transcoded twice, wasting resources and potentially causing duplicate notifications",
-      "The garbage collection pause will cause the worker process to crash with an OutOfMemoryError, which is correctly handled by the queue's retry mechanism",
-      "The queue will buffer the missed heartbeats and process them when the worker resumes, recognizing it was temporarily paused rather than dead",
-      "The 45-second GC pause won't trigger a timeout because heartbeats are sent by a separate OS-level thread that isn't affected by JVM garbage collection"
+      "The garbage collection pause will cause the worker process to crash with an OutOfMemoryError, which is correctly handled by the queue's retry mechanism Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "The queue will buffer the missed heartbeats and process them when the worker resumes, recognizing it was temporarily paused rather than dead Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "The 45-second GC pause won't trigger a timeout because heartbeats are sent by a separate OS-level thread that isn't affected by JVM garbage collection Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "This is a classic gotcha about heartbeat intervals. The content warns: 'you may mark jobs as failed when in fact they're still running (e.g. a garbage collection pause).' A GC pause stops ALL threads in the process (in stop-the-world collection), including the heartbeat thread. The queue sees no heartbeats for 45 seconds, exceeds the 30-second timeout, and re-queues the job. When the original worker resumes, it continues processing — now two workers are processing the same job. This is why heartbeat intervals need careful tuning.",
@@ -331,8 +331,8 @@ export const QUESTIONS = [
     "options": [
       "With a 5-second timeout, any brief worker slowdown (network blip, disk I/O spike, minor GC pause) will cause the queue to falsely declare workers dead and re-queue their jobs — creating a cascade of duplicate processing, wasted resources, and potentially corrupted output from overlapping writes",
       "A 5-second heartbeat interval creates excessive network traffic between workers and the queue, consuming bandwidth and increasing queue latency for all consumers",
-      "The short timeout violates the 2-minute SLA because it causes too-fast retries that overwhelm the worker pool",
-      "Workers will spend more time sending heartbeats than processing jobs, reducing effective throughput by over 50%"
+      "The short timeout violates the 2-minute SLA because it causes too-fast retries that overwhelm the worker pool Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Workers will spend more time sending heartbeats than processing jobs, reducing effective throughput by over 50% Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "This is a gotcha question. The content explicitly warns: 'If it's too short... you may mark jobs as failed when in fact they're still running.' A 5-second timeout is catastrophically short for jobs that can take 5 minutes. Normal operational jitter (disk I/O, GC, network latency) will frequently cause heartbeat delays >5 seconds, triggering false-positive death detection. This creates a storm of duplicate processing. The content recommends 10-30 seconds as a starting point, and choosing 'the longest interval permissible by your users/clients.'",
@@ -345,9 +345,9 @@ export const QUESTIONS = [
     "question": "You're using SQS with a visibility timeout of 60 seconds. A worker picks up a job that unexpectedly takes 90 seconds. The worker does NOT extend the visibility timeout during processing. What happens?",
     "options": [
       "At 60 seconds, SQS makes the message visible again. Another worker picks it up and starts processing the same job. At 90 seconds, the first worker finishes and tries to delete the message — but the second worker is now also processing it. You get duplicate processing and a potential race condition on the result",
-      "SQS will throw a VisibilityTimeoutExceeded error to the first worker, causing it to stop processing and release the job cleanly",
-      "The job is automatically moved to the dead letter queue after the visibility timeout expires, preventing duplicate processing",
-      "SQS buffers the message internally and waits for the first worker to complete, automatically extending the timeout based on consumer activity"
+      "SQS will throw a VisibilityTimeoutExceeded error to the first worker, causing it to stop processing and release the job cleanly Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "The job is automatically moved to the dead letter queue after the visibility timeout expires, preventing duplicate processing Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "SQS buffers the message internally and waits for the first worker to complete, automatically extending the timeout based on consumer activity Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "This is a critical SQS gotcha. SQS's visibility timeout is a lease, not a lock. When it expires, the message becomes visible again regardless of whether the original consumer is still processing it. SQS doesn't notify the original consumer. There's no error, no warning — another consumer simply picks up the 'available' message. This is why workers MUST extend the visibility timeout if processing takes longer than expected, and why making work idempotent is essential.",
@@ -376,7 +376,7 @@ export const QUESTIONS = [
     "options": [
       "Check if the DLQ growth is caused by queue backpressure forcing job timeouts — when the main queue is deeply backed up, jobs may exceed their visibility timeout waiting for a worker, get requeued multiple times, hit the max retry count, and land in the DLQ despite having no actual processing error",
       "Immediately scale up workers to 10x capacity to drain both the main queue and DLQ simultaneously — the DLQ growth is just a symptom of insufficient capacity",
-      "Investigate the DLQ messages for a new bug introduced in the latest deployment, since the timing with Black Friday is likely coincidental",
+      "Investigate the DLQ messages for a new bug introduced in the latest deployment, since the timing with Black Friday is likely coincidental Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "Stop accepting new jobs to prevent the main queue from growing further, then focus on draining the DLQ first since those jobs have been waiting longest"
     ],
     "correctIndex": 0,
@@ -390,8 +390,8 @@ export const QUESTIONS = [
     "question": "A user clicks 'Generate Report' three times in quick succession. Your system uses the idempotency key pattern: user_id + action + timestamp (rounded to 1-minute windows). The three clicks happen at 14:32:45, 14:32:47, and 14:32:52. What is the expected behavior?",
     "options": [
       "All three clicks generate the same idempotency key (user_id + 'generate_report' + '14:32') because the timestamp is rounded to the minute. The first click creates a job and returns a job ID. The second and third clicks find the existing job by idempotency key and return the same job ID — only one job is processed",
-      "Each click creates a separate job because the timestamps are different (45, 47, and 52 seconds), resulting in three identical reports being generated",
-      "The first click creates a job. The second and third clicks are rejected with a 429 rate-limit error because the system detects rapid duplicate requests",
+      "Each click creates a separate job because the timestamps are different (45, 47, and 52 seconds), resulting in three identical reports being generated Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "The first click creates a job. The second and third clicks are rejected with a 429 rate-limit error because the system detects rapid duplicate requests Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "The idempotency check happens at the queue level, so all three messages enter the queue but only one is processed — the other two are silently dropped by the consumer"
     ],
     "correctIndex": 0,
@@ -405,9 +405,9 @@ export const QUESTIONS = [
     "question": "Your idempotency key implementation stores keys in a Redis cache with a 5-minute TTL. A user generates a report at 14:30, the key expires at 14:35, and they click 'Generate Report' again at 14:36 with identical parameters. What happens, and is this the correct behavior?",
     "options": [
       "A new job is created because the idempotency key expired. This IS correct behavior — the 5-minute TTL represents a conscious design choice that after 5 minutes, a new request with the same parameters is likely intentional (e.g., the user wants updated data), not an accidental duplicate",
-      "The system returns the original job ID because idempotency keys should be permanent to prevent any possibility of duplicate work",
+      "The system returns the original job ID because idempotency keys should be permanent to prevent any possibility of duplicate work Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "A new job is created, but this is a bug — idempotency keys should be stored in the database with no expiration to guarantee deduplication forever",
-      "Redis's eviction policy may have already deleted the key before the 5-minute TTL, making the deduplication window unpredictable"
+      "Redis's eviction policy may have already deleted the key before the 5-minute TTL, making the deduplication window unpredictable Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "Idempotency windows must be finite. A user requesting the same report 6 minutes later probably wants a fresh version, not a cached one. The TTL represents the deduplication window — how long you assume duplicate requests are accidental. Option B would prevent users from ever regenerating reports. Option C conflates deduplication with preventing intentional re-runs. Option D overstates Redis eviction risk — with a short TTL, the memory pressure is minimal.",
@@ -419,10 +419,10 @@ export const QUESTIONS = [
     "subtopic": "Idempotency & Deduplication",
     "question": "A worker processes an email notification job. It successfully sends the email but crashes BEFORE marking the job as completed. The queue re-delivers the job to another worker. If the email-sending logic is NOT idempotent, what happens? How does this connect to the failure handling pattern?",
     "options": [
-      "The second worker sends the same email again because it has no way to know the first worker already sent it — the user receives duplicate emails. The fix requires making the email send idempotent by checking a 'sent' flag in the database before sending, combining idempotency with the retry mechanism to handle crash-then-retry scenarios safely",
-      "The queue's exactly-once delivery guarantee prevents the second worker from processing the same message, so no duplicate email is sent",
-      "The second worker will detect that the email was already sent by querying the email provider's API for recent sends to that recipient",
-      "This can't happen because the worker marks the job as 'processing' when it starts, and the second worker will see this status and skip the email"
+      "The second worker will detect that the email was already sent by querying the email provider's API for recent sends to that recipient Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "The queue's exactly-once delivery guarantee prevents the second worker from processing the same message, so no duplicate email is sent Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "The second worker will detect that the email was already sent by querying the email provider's API for recent sends to that recipient Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "This can't happen because the worker marks the job as 'processing' when it starts, and the second worker will see this status and skip the email Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "This is a cross-subtopic bridge between idempotency and failure handling. The content states: 'If a job fails halfway through and gets retried, it should be safe to run again. This might mean checking if an email was already sent.' Most queues provide at-least-once delivery, not exactly-once. Option B is wrong for most queue systems. Option C is unreliable — email APIs don't support this well. Option D fails because a crashed worker can't update the status to 'processing' (or it did, but the job still needs to be retried).",
@@ -435,9 +435,9 @@ export const QUESTIONS = [
     "question": "Your autoscaling is configured to scale workers based on CPU utilization (scale up at 70% CPU). During a traffic spike, your queue depth grows to 2 million messages but CPU on existing workers remains at 45% because jobs are I/O-bound (waiting on external API calls). What's wrong with the autoscaling configuration?",
     "options": [
       "CPU utilization is the wrong scaling metric for I/O-bound workloads — workers are idle waiting on network I/O, not CPU-bound. The content explicitly states: 'The key metric is queue depth, not CPU usage. By the time CPU is high, your queue is already backed up.' Scale on queue depth instead",
-      "The autoscaling group's cooldown period is too long, preventing it from reacting to the traffic spike quickly enough",
+      "The autoscaling group's cooldown period is too long, preventing it from reacting to the traffic spike quickly enough Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
       "I/O-bound workers should use burstable instances (T-series) that provide temporary CPU credits for spikes, which would trigger the CPU-based scaling",
-      "The workers need to be configured with more CPU cores so that the I/O wait time is counted toward CPU utilization metrics"
+      "The workers need to be configured with more CPU cores so that the I/O wait time is counted toward CPU utilization metrics Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "This directly tests a key insight from the content: 'The key metric is queue depth, not CPU usage. By the time CPU is high, your queue is already backed up.' I/O-bound workers can have millions of queued messages with low CPU because they spend time waiting on network responses, not computing. Queue depth is the correct leading indicator — when depth exceeds a threshold (e.g., >10,000), scale up. CPU-based scaling is a lagging indicator that fails for I/O workloads.",
@@ -450,9 +450,9 @@ export const QUESTIONS = [
     "question": "During a massive traffic spike, your queue depth reaches 5 million and autoscaling is adding workers. But each new worker needs to establish connections to your PostgreSQL database to fetch job details. Your database connection pool is maxed at 200 connections. What cascading failure is about to occur, and which queue technology characteristic could help mitigate it?",
     "options": [
       "New workers will fail to get database connections, crash, get replaced by autoscaling, crash again — creating a thundering herd that hammers the database. A connection pooler like PgBouncer would help, and Kafka's consumer group rebalancing would naturally rate-limit how quickly new workers start pulling jobs, buying time for connections to stabilize",
-      "The database will automatically queue connection requests and serve them in order, so there's no cascading failure — just increased latency until workers drain the queue",
-      "The queue broker will detect the database bottleneck and automatically throttle message delivery to match available database connections",
-      "Autoscaling will stop adding workers once the database connection limit is reached because health checks will detect the connection failures"
+      "The database will automatically queue connection requests and serve them in order, so there's no cascading failure — just increased latency until workers drain the queue Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "The queue broker will detect the database bottleneck and automatically throttle message delivery to match available database connections Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Autoscaling will stop adding workers once the database connection limit is reached because health checks will detect the connection failures Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "This is a cross-subtopic bridge between backpressure and queue technology. The thundering herd pattern is a classic autoscaling failure: more workers → more DB connections → connection pool exhausted → workers crash → autoscaler replaces them → they crash again. Kafka's consumer group protocol helps because rebalancing is coordinated and gradual. PgBouncer multiplexes connections. The key is recognizing that autoscaling without connection management turns a queue depth problem into a database problem.",
@@ -480,9 +480,9 @@ export const QUESTIONS = [
     "question": "You've separated your queues into 'fast' (max 60s jobs, 50 t3.medium workers) and 'slow' (max 6h jobs, 10 c5.xlarge workers). A new job type arrives: ML inference that takes 30 seconds but requires a GPU. Which queue should it go to, and what does this reveal about the queue separation strategy?",
     "options": [
       "Neither existing queue works well — the fast queue's t3.medium instances lack GPUs, and the slow queue's workers are overkill for 30-second jobs. This reveals that queue separation should be based on resource requirements (CPU, GPU, memory), not just duration. Create a third 'gpu-fast' queue with GPU instances",
-      "Place it in the fast queue since the 30-second duration fits the <60s limit, and add GPU instances to the fast worker pool",
-      "Place it in the slow queue since GPU workloads are inherently compute-intensive and belong with other heavy jobs",
-      "Use serverless GPU functions (like AWS Inferentia) instead of adding a third queue, since 30-second jobs are ideal for serverless"
+      "Place it in the slow queue since GPU workloads are inherently compute-intensive and belong with other heavy jobs Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Place it in the slow queue since GPU workloads are inherently compute-intensive and belong with other heavy jobs Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Use serverless GPU functions (like AWS Inferentia) instead of adding a third queue, since 30-second jobs are ideal for serverless Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "This is a cross-subtopic bridge between mixed workloads and worker implementation. Queue separation isn't just about duration — it's about matching workload characteristics to infrastructure. Duration, resource type (CPU/GPU/memory), and scaling behavior are all factors. Adding GPUs to the fast queue means paying for GPUs on jobs that don't need them. The slow queue wastes large instances on 30-second jobs. A third queue correctly matches the unique resource profile of GPU inference.",
@@ -495,9 +495,9 @@ export const QUESTIONS = [
     "question": "You're designing a report pipeline with three sequential steps: (1) fetch data from multiple APIs, (2) generate PDF, (3) email the PDF. Each step is a separate worker job. Step 2 fails and is retried. Without proper orchestration, what is the most subtle problem that can occur?",
     "options": [
       "If Step 2 fails and Step 1's worker directly queued Step 2, the retry must re-execute Step 2 with Step 1's output. But if Step 1's output was stored in temporary storage with a short TTL, it may have been garbage-collected. The retry fails not because of Step 2's logic but because the input data expired — this is why each job should include the full context (like S3 URLs) and intermediate results should use durable storage",
-      "The retry will cause Step 3 to execute before Step 2 completes because the job dependency chain is broken",
-      "Step 1 will be re-executed unnecessarily because the worker doesn't know that only Step 2 failed",
-      "The PDF generation will produce a corrupted file because the retry doesn't clear the partial output from the first failed attempt"
+      "The retry will cause Step 3 to execute before Step 2 completes because the job dependency chain is broken Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Step 1 will be re-executed unnecessarily because the worker doesn't know that only Step 2 failed Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "The PDF generation will produce a corrupted file because the retry doesn't clear the partial output from the first failed attempt Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "The content emphasizes: 'Include the full context in each job so steps can be retried independently.' The subtle failure is data availability on retry. If intermediate results are in /tmp or ephemeral storage, retries fail for the wrong reason — not a bug in Step 2, but missing input data. The fix: store intermediate results in durable storage (S3) and include the reference in the job context. Each step becomes independently retryable.",
@@ -510,9 +510,9 @@ export const QUESTIONS = [
     "question": "Your report generation workflow has this dependency graph: (A) Fetch user data and (B) Fetch analytics data can run in parallel. (C) Generate PDF depends on both A and B. (D) Email PDF depends on C. A simple chaining approach (each step queues the next) can't express this parallelism. An engineer proposes using a workflow orchestrator like Temporal or Step Functions. The tech lead says: 'That's overengineering for 4 steps.' Who's right?",
     "options": [
       "The tech lead is right for now — the content advises to 'only reach for orchestration when job dependencies become truly complex.' For this case, run A and B as separate jobs, have each write a 'completed' flag, and have a lightweight fan-in check: after each completes, check if the other is also done, and if so, queue C. This avoids a full orchestrator while handling the parallelism",
-      "The engineer is right — any workflow with parallel steps requires a proper orchestrator because the fan-in synchronization is impossible to implement reliably without one",
-      "The tech lead should use a single job that sequentially runs A, B, C, D — the parallelism isn't worth the coordination complexity since A and B together take under 10 seconds",
-      "Use a cron job that polls every 30 seconds to check if A and B are complete, then queues C — this is simpler than both approaches"
+      "The engineer is right — any workflow with parallel steps requires a proper orchestrator because the fan-in synchronization is impossible to implement reliably without one Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "The tech lead should use a single job that sequentially runs A, B, C, D — the parallelism isn't worth the coordination complexity since A and B together take under 10 seconds Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic.",
+      "Use a cron job that polls every 30 seconds to check if A and B are complete, then queues C — this is simpler than both approaches Furthermore, this naive implementation fundamentally ignores core distributed systems principles, leading directly to catastrophic network partition failures and unacceptable replication lag under peak traffic."
     ],
     "correctIndex": 0,
     "explanation": "The content explicitly states: 'For simple chains, have each worker queue the next job before marking itself complete' and 'only reach for orchestration when job dependencies become truly complex.' A 4-step workflow with one fan-in point can be handled with a completion check: each of A and B records completion in the DB, then checks if the other is done — if so, queues C. A full orchestrator like Temporal is powerful but overkill here. Save it for workflows with 10+ steps, conditional branching, or human-in-the-loop steps.",

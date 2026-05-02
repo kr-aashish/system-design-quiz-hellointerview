@@ -124,10 +124,10 @@ export const QUESTIONS = [
     "style": "Anti-pattern identification",
     "question": "A junior engineer proposes: 'Let's denormalize everything — cache user data, cache product data, cache counts. It's faster than joins.' Why is this 'denormalize everything' approach naive?",
     "options": [
-      "Caching is inferior to denormalization",
-      "Denormalization eliminates the need for caching",
+      "Caching is an inferior alternative to denormalization because caches introduce their own consistency problems (cache invalidation, TTL tuning, thundering herd on cache miss) that are at least as complex as denormalization's write amplification, and denormalization provides guaranteed sub-millisecond reads directly from the database without the operational overhead of a separate caching layer like Redis or Memcached",
+      "Denormalization eliminates the need for caching entirely because the denormalized data is already co-located with the query path, so reads hit the database directly at the same speed a cache would provide — adding a cache on top of denormalized data is redundant and adds unnecessary infrastructure complexity",
       "Denormalization of frequently-changing data (like counts) creates consistency nightmares: you must synchronize writes across many places, and stale data is unavoidable. Caching is a better approach: the source of truth stays normalized and consistent, caches expire independently",
-      "Modern databases are fast enough that denormalization is unnecessary"
+      "Modern databases with columnar storage engines and adaptive query optimizers are fast enough that denormalization is unnecessary for any workload under approximately 100,000 QPS — the performance difference between a normalized join and a denormalized read is negligible until you hit extreme scale, so the junior engineer's instinct is correct but premature"
     ],
     "correctIndex": 2,
     "explanation": "The article explicitly advises: 'Cache as alternative to denormalization.' Denormalization and caching serve similar goals (speed) but differently. Denormalization embeds data in multiple places, creating sync problems. Caching keeps the source of truth normalized and separate, letting each cache expire independently. For frequently-changing data (like counts or user balances), caching is far superior: the count updates in one place (database), caches invalidate, and consistency is maintained at the source. Denormalizing counts means updating many rows whenever a count changes.",
@@ -140,10 +140,10 @@ export const QUESTIONS = [
     "style": "Scenario-based reasoning",
     "question": "You're designing a user service handling 100,000 QPS across 1 million users. Your primary query is 'get user by user_id.' You decide to shard by user_id (e.g., shard = user_id % num_shards). After launch, your traffic profile evolves: celebrity influencers gain millions of followers. Reading their follower lists (filtering by user_id and following_id) is now a hot shard. What's the core problem?",
     "options": [
-      "Sharding by user_id is the wrong choice",
-      "Sharding always creates hot shards and there's no solution",
+      "Sharding by user_id is the wrong choice for this workload because user_id-based sharding creates chronologically imbalanced shards — earlier-registered users accumulate more data over time, so lower user_id shards become disproportionately large. A hash-based approach on a time-bucketed key would distribute data more evenly across the cluster",
+      "Sharding always creates hot shards due to the power-law distribution of real-world access patterns, and there's no practical solution — you can mitigate with caching or rate limiting at the application layer, but the fundamental skew is inherent to any shard key derived from user behavior and cannot be eliminated by choosing a different key",
       "Your shard key (user_id) aligns with the original access pattern ('get user by ID') but doesn't match the new pattern ('list followers'). For follower lists, you might need a composite shard key like (user_id, follower_id) or separate followers table sharded differently, introducing cross-shard complexity",
-      "You should use a NoSQL database instead"
+      "You should use a NoSQL database instead of sharded SQL because NoSQL databases like DynamoDB and Cassandra handle hot partitions automatically through adaptive capacity rebalancing, which detects skewed access patterns and redistributes data in real time without requiring manual shard key redesign"
     ],
     "correctIndex": 2,
     "explanation": "The article warns: 'Shard by primary access pattern... shard key choice is often permanent.' Your initial shard key (user_id) is optimal for 'get user' but suboptimal for 'list followers' — a different access pattern that emerges later. The real lesson: shard key selection depends on your dominant query pattern. Once chosen, changing it is extremely painful. For a social graph, you might need separate sharding strategies for different tables (users sharded by user_id, followers sharded by followed_user_id). This creates cross-shard complexity but prevents hot shards.",
@@ -156,10 +156,10 @@ export const QUESTIONS = [
     "style": "Gotcha question",
     "question": "You design a time-series events system for IoT sensors. You decide to shard by timestamp: shard = (date % num_shards). This distributes events evenly across shards. You then receive a query: 'Find all events for sensor_id=42 in the last 7 days.' Why does this query become expensive?",
     "options": [
-      "Time-series data can't be queried across shards",
+      "Time-series data inherently requires cross-shard queries because any meaningful analysis spans multiple time windows, so no shard key can avoid scatter-gather — the issue isn't the shard key choice but rather the lack of a pre-aggregation layer that computes per-sensor summaries before they're sharded",
       "Your shard key (timestamp) doesn't match the query pattern (sensor_id + date range). Finding events for one sensor requires querying ALL shards, since the sensor's events are scattered across every shard by timestamp. This is a cross-shard query that's expensive to execute and merge",
-      "You should use a graph database instead",
-      "Sharding by timestamp is the best approach for time-series data"
+      "You should use a graph database for IoT sensor data because the relationships between sensors, their locations, and their readings form a natural graph structure that enables efficient traversal-based queries like 'find all sensors in building X that reported anomalies in the last 7 days'",
+      "Sharding by timestamp is actually the best approach for time-series data because it enables efficient time-range pruning — a 7-day query only needs to touch 7 shards rather than scanning the entire dataset, and the sensor_id filter can be applied as a secondary index within each shard, which is faster than the alternative of scanning a sensor_id-sharded table across all time ranges"
     ],
     "correctIndex": 1,
     "explanation": "The article explicitly warns: 'Time-range sharding anti-pattern (hot shard).' While time-range sharding avoids hot shards (events distribute evenly), it creates a different problem: queries by entity ID become cross-shard queries. Your query 'sensor_id=42, last 7 days' must hit every shard, collect results, and merge them. For a better approach, shard by sensor_id (or sensor_id + bucket), accepting that some sensors might have more events, but keeping sensor-specific queries fast and local to one shard.",
@@ -172,10 +172,10 @@ export const QUESTIONS = [
     "style": "Anti-pattern identification",
     "question": "A team over-designs their sharding strategy: they shard users by user_id, but then also shard orders by order_id, and fulfill-ment by fulfillment_id. Each table uses a different shard key. A 'create order' transaction must check user balance, create an order, and trigger fulfillment. Why is this sharding strategy problematic?",
     "options": [
-      "Different shard keys ensure data is distributed evenly",
-      "Cross-shard transactions are impossible in any distributed system",
+      "Different shard keys ensure data is distributed evenly across the cluster, which is the primary goal of sharding — co-locating related data on the same shard creates hotspots because some users place more orders than others, and the uneven distribution defeats the purpose of horizontal scaling",
+      "Cross-shard transactions are impossible in any distributed system because distributed consensus protocols (2PC, 3PC, Paxos) can only coordinate reads across shards, not writes — once data is sharded, multi-entity writes must be handled asynchronously through event sourcing or saga patterns, not through synchronous transactions",
       "Different shard keys mean related data (user, order, fulfillment) live on different shards. A single transaction now requires coordinating across multiple shards — expensive, complex, and prone to consistency issues. A better approach: use user_id as the shard key for all tables so related data stays together",
-      "You should avoid sharding entirely"
+      "You should avoid sharding entirely and instead use vertical scaling with read replicas — modern cloud database instances support up to 128 vCPUs and 4TB of RAM, which can handle the described workload without the operational complexity of cross-shard coordination, and the cost premium of a larger instance is offset by reduced engineering effort"
     ],
     "correctIndex": 2,
     "explanation": "The article emphasizes: 'Shard key choice is often permanent.' While choosing different shard keys might seem smart for load balancing, it violates locality: related entities (user, orders, fulfillments) end up on different shards. Transactions then require distributed consensus (2-phase commit or similar), which is slow and unreliable. A better approach: use a common shard key (user_id) across tables, accepting that some shards might be busier, then handle hot shards with caching or exponential backoff. Co-locating related data is worth more than perfect load distribution.",
@@ -188,10 +188,10 @@ export const QUESTIONS = [
     "style": "Scenario-based reasoning",
     "question": "You're building a content management system where document schemas change frequently: some articles have authors, tags, categories, and multimedia; others are bare-bones. You consider MongoDB for schema flexibility. What's the key trade-off you're accepting?",
     "options": [
-      "MongoDB has better performance than SQL",
+      "MongoDB provides better raw performance than SQL for read-heavy workloads because document databases store data in a binary serialization format (BSON) that maps directly to application objects without the row-to-object impedance mismatch that relational databases impose, reducing deserialization overhead per query",
       "Flexible schemas mean you lose structural validation. MongoDB won't prevent you from storing invalid data (article without author, tags as string instead of array). You must enforce consistency in application code, which is error-prone and hard to audit",
-      "SQL databases don't support schema changes",
-      "MongoDB automatically validates schema across all documents"
+      "SQL databases don't support schema changes without full table locks and data migration scripts — adding a column to a table with 100 million rows requires hours of downtime for the ALTER TABLE operation, while MongoDB handles schema evolution transparently because each document is self-describing and can have different fields without any migration step",
+      "MongoDB automatically validates schema correctness across all documents using its built-in JSON Schema validation feature, which enforces field types, required fields, and custom validation rules at the database level — giving you the same structural guarantees as SQL foreign keys but with the added flexibility of per-collection schema evolution"
     ],
     "correctIndex": 1,
     "explanation": "The article states: 'Document databases... flexible schemas... only when schema changes frequently.' The flexibility is real, but the cost is real too: structural validation moves from the database to application code. In a relational database, columns enforce types (string, integer, date). In MongoDB, a field might be a string in one document and an array in another — unless your code prevents it. For genuinely schema-agnostic workloads (like logs or user-generated content), this is fine. For business-critical data (CMS articles that must have certain fields), you might want the database enforcing constraints. MongoDB is not a 'free schema flexibility' — it's a trade-off.",
@@ -204,10 +204,10 @@ export const QUESTIONS = [
     "style": "Anti-pattern identification",
     "question": "A team chooses MongoDB because 'documents are just like objects in our code — we can map application objects directly to documents.' They embed related entities aggressively: a user document embeds all user preferences, all address history, all payment methods. Queries and updates become slow. What's the flaw?",
     "options": [
-      "Embedding is always wrong in MongoDB",
-      "Object-to-document mapping is a good pattern",
+      "Embedding is always wrong in MongoDB because it violates normalization principles — the correct approach is to use separate collections with $lookup references for all relationships, which gives you the flexibility of MongoDB's schema model while maintaining the same relational separation that SQL enforces",
+      "Object-to-document mapping is a good design pattern that should be followed consistently across the entire data model, because the primary advantage of document databases is eliminating the object-relational impedance mismatch, and selectively breaking this mapping by using references undermines the architectural coherence of the document model",
       "Embedding everything creates large documents, which slows down deserialization, indexing, and updates. Not all relationships should be embedded — only tightly coupled, infrequently-updated data. The seductive 'object = document' mental model ignores the cost of large, mutable documents",
-      "MongoDB doesn't support references"
+      "MongoDB doesn't support references between documents, so embedding is the only option for modeling relationships — the $lookup aggregation stage is a server-side join that's prohibitively expensive at scale and should only be used for ad-hoc analytics queries, not for production read paths"
     ],
     "correctIndex": 2,
     "explanation": "The article warns: 'embed related data [but] only when schema changes frequently.' The seductive mental model is 'my User object has Preferences, so I'll embed preferences in the user document.' But embedded documents create performance problems: a user with 10 addresses and 20 payment methods is a 50KB+ document. Every query loads the entire document. Every update rewrites the whole document. MongoDB supports references and JOINs (via $lookup), which are the right choice for 1:N and N:M relationships. Embedding is only optimal for tightly-coupled 1:1 data that changes rarely.",
@@ -220,10 +220,10 @@ export const QUESTIONS = [
     "style": "Use-case identification",
     "question": "You're designing a session store for a web application. User sessions are accessed via session_id, updated on every request, and expire after 30 minutes of inactivity. Why is Redis (a key-value store) more appropriate than PostgreSQL for this workload?",
     "options": [
-      "PostgreSQL is too slow for sessions",
+      "PostgreSQL is too slow for session workloads because its MVCC (Multi-Version Concurrency Control) architecture creates version bloat for frequently-updated rows like sessions, requiring aggressive autovacuum settings that compete with session reads for I/O bandwidth at high concurrency",
       "Redis provides in-memory storage (extremely fast), TTL (automatic expiration), and simple key-value operations that match the access pattern. PostgreSQL's complex query engine and ACID guarantees are unnecessary overhead for a workload that just needs 'get', 'set', and 'expire'",
-      "Key-value stores are always faster than SQL databases",
-      "PostgreSQL doesn't support the required queries"
+      "Key-value stores are always faster than SQL databases for any workload because they skip query parsing, plan optimization, and transaction management entirely — the overhead of SQL's query planner alone adds 2-5ms per query, which is unacceptable for session lookups that need sub-millisecond latency",
+      "PostgreSQL doesn't support the required TTL-based expiration queries natively — you'd need to implement expiration via a background cron job that periodically scans and deletes expired sessions, which is operationally fragile and creates lock contention during cleanup sweeps at scale"
     ],
     "correctIndex": 1,
     "explanation": "The article states: 'Key-Value Stores... simple lookups by key... For caching, session storage.' Sessions are the ideal key-value workload: every operation is a simple get/set by session_id, no complex queries, and data expires automatically. Redis's in-memory engine and TTL feature are perfectly matched to this pattern. PostgreSQL would work but it's overkill — you're paying for transaction overhead, query optimization, and persistence that you don't need. This is how you choose databases: match the access pattern to the database capability.",
@@ -236,10 +236,10 @@ export const QUESTIONS = [
     "style": "Scenario-based trade-offs",
     "question": "You use Redis as a cache alongside PostgreSQL. Your cache key format is 'user:{user_id}:profile'. When a user updates their profile, you must delete the cache entry, then update the database. A race condition: the cache entry is deleted but the database update fails. The user's profile is now missing from both cache and database. How would you avoid this?",
     "options": [
-      "Cache invalidation is impossible; accept inconsistency",
+      "Cache invalidation is fundamentally impossible to get right in a distributed system due to the CAP theorem — you must accept inconsistency between cache and database as an inherent property of any caching architecture and design your application to tolerate stale reads",
       "Use write-through pattern: update the database first, then update the cache. If the cache update fails, the database is still correct and the cache will be repopulated on the next read",
-      "Delete the cache first, then update the database",
-      "Use a key-value store that supports transactions"
+      "Delete the cache first, then update the database — this is the correct order because it ensures that any concurrent readers will miss the cache and read directly from the database, getting the freshest data possible, whereas updating the database first risks a window where the cache serves stale data before it's updated",
+      "Use a key-value store that supports native transactions between cache and database operations, such as Redis with its MULTI/EXEC command block, which provides atomic cache-and-persist semantics that eliminate the race condition entirely by treating the cache write and database write as a single atomic unit"
     ],
     "correctIndex": 1,
     "explanation": "The article addresses cache-database consistency: cache-aside (delete then update) creates the race condition you described. Write-through (update database first, then cache) is safer: if the cache update fails, the database is the source of truth and the cache is simply repopulated on the next read. Alternatively, cache-behind (update database first, then update cache asynchronously) is similar but allows async updates. The key insight: never delete the source of truth (database) before updating the cache. Always treat the database as authoritative.",
@@ -252,10 +252,10 @@ export const QUESTIONS = [
     "style": "Framework question",
     "question": "You're designing a data model for a video streaming platform. Before choosing between SQL, NoSQL, or specialized databases, what are the three critical requirements questions you should ask first?",
     "options": [
-      "How much data will we store? What programming language are we using? Will we need caching?",
+      "How much data will we store? What programming language is our backend using? Will we need caching? These three factors determine the database choice because storage volume drives cost, language compatibility determines ORM support and driver maturity, and caching needs determine whether you need a dedicated cache layer or can rely on the database's built-in query cache",
       "What's the data volume? What are the primary access patterns? What are the consistency requirements? These three factors drive database selection more than any other consideration",
-      "Should we use PostgreSQL or MongoDB? Should we shard? Should we denormalize?",
-      "How much money do we have for infrastructure?"
+      "Should we use PostgreSQL or MongoDB? Should we shard? Should we denormalize? These are the three concrete architectural decisions that define the data layer, and answering them first forces you to think through the implementation constraints before getting bogged down in abstract requirements gathering",
+      "How much money do we have for infrastructure? This is the primary constraint because database licensing costs, managed service pricing, and cloud storage fees vary dramatically between options, and the budget determines the feasibility of choices like Spanner (expensive but strong) versus PostgreSQL (cheap but requires more operational effort) before any technical analysis begins"
     ],
     "correctIndex": 1,
     "explanation": "The article states: 'Three key factors: data volume, access patterns (most important), consistency requirements. Tie schema choices back to these factors explicitly.' Data volume determines whether a single server suffices or you need distributed storage. Access patterns determine database type (SQL for complex queries, key-value for simple lookups, document for flexible schemas). Consistency requirements determine whether you need ACID transactions or can tolerate eventual consistency. These three anchor all downstream decisions about sharding, denormalization, and caching. Skipping this analysis leads to technology choices that don't match your actual needs.",
@@ -268,10 +268,10 @@ export const QUESTIONS = [
     "style": "Scenario-based reasoning",
     "question": "You're designing a real-time stock trading system. Data volume: 10 million stock prices updated every second. Access pattern: (1) get latest price by ticker; (2) get price history for a 30-day window. Consistency requirement: reads must reflect writes within 100ms for regulatory compliance. Why does this consistency requirement change your database choice?",
     "options": [
-      "You should use MongoDB because it's faster",
-      "You can't meet sub-100ms consistency with any distributed database",
+      "You should use MongoDB because its document model handles variable-frequency data (prices change every second, metadata rarely) better than PostgreSQL's rigid row structure, and MongoDB's built-in sharding automatically distributes high-volume writes across the cluster without manual partition management",
+      "You can't meet sub-100ms consistency with any distributed database because network latency between data centers typically exceeds 50ms round-trip, and adding consensus protocol overhead (Raft leader election, quorum acknowledgment) pushes total write-to-read visibility beyond 100ms regardless of the database engine",
       "Sub-100ms consistency rules out eventually-consistent distributed systems (like Cassandra). You need strong consistency with minimal replication lag. PostgreSQL with read replicas and careful replication setup, or a single high-performance instance (vertical scaling first) is more appropriate than Cassandra's eventual consistency model",
-      "Consistency requirements don't affect database choice"
+      "Consistency requirements don't affect database choice because consistency is a property of the replication topology, not the database engine — any database can achieve strong consistency with synchronous replication, and any database will be eventually consistent with asynchronous replication, so the choice between PostgreSQL and Cassandra should be based on write throughput and query flexibility rather than consistency semantics"
     ],
     "correctIndex": 2,
     "explanation": "The article emphasizes: 'consistency requirements [are one of] three key factors.' Eventual consistency (where replicas might lag by seconds) is incompatible with trading regulations requiring <100ms consistency. Strong consistency systems like PostgreSQL with synchronous replication, or read replicas with replication lag monitoring, are necessary. This is how requirements drive architecture: regulatory constraints eliminate entire database categories (eventual-consistency systems), leaving you with strong-consistency options. A candidate who chooses Cassandra for this workload is ignoring the consistency requirement.",
@@ -284,10 +284,10 @@ export const QUESTIONS = [
     "style": "Scenario-based reasoning",
     "question": "You're designing a bank account system. Your schema has `accounts(account_id, balance, ...)` and `transactions(transaction_id, account_id, amount, ...)`. You define account_id as a foreign key in transactions with ON DELETE CASCADE. A user accidentally deletes their account. What happens, and why is this dangerous?",
     "options": [
-      "The account is deleted but transactions remain — no danger",
-      "Transactions stay and the foreign key reference breaks — you'd see referential integrity violations",
+      "The account is deleted but transactions remain as orphaned records with a dangling foreign key reference — there's no danger because the transactions table's foreign key becomes a soft reference that the application can check and display as 'deleted user' in audit reports",
+      "Transactions stay in the database but the foreign key reference breaks, causing referential integrity violations that surface as query errors whenever the application tries to JOIN transactions with accounts — this is the primary danger because it creates silent data corruption that only manifests during reporting queries",
       "All transactions for that account are automatically deleted. This permanently erases transaction history needed for auditing, tax records, and regulatory compliance. Cascading deletes are dangerous for audit logs",
-      "The account can't be deleted due to foreign key constraints"
+      "The account can't be deleted due to the foreign key constraint — PostgreSQL's default ON DELETE behavior is RESTRICT, which prevents deletion of any parent row that still has dependent child rows, so the DELETE statement would fail with a constraint violation error and the account and transactions would both remain intact"
     ],
     "correctIndex": 2,
     "explanation": "The article discusses 'referential integrity vs write performance trade-off.' While ON DELETE CASCADE maintains referential integrity (no orphaned rows), it's semantically wrong for audit-critical data. Bank transactions are immutable history; deleting a transaction is a compliance violation. Better approach: use ON DELETE RESTRICT (prevents deletion if transactions exist) or soft deletes (mark account as deleted but don't remove it). The lesson: foreign key constraints have different semantics — choosing the right one matters for correctness, not just referential integrity.",
@@ -300,10 +300,10 @@ export const QUESTIONS = [
     "style": "Gotcha question",
     "question": "You're modeling a many-to-many relationship: students can enroll in courses, and courses have many students. Your schema has `enrollments(student_id, course_id, grade)` where both student_id and course_id are foreign keys and together form the primary key. A student re-enrolls in the same course with a new grade. What happens when you insert the duplicate (student_id, course_id) pair?",
     "options": [
-      "The database allows duplicate enrollments",
+      "The database allows duplicate enrollments because composite primary keys only enforce uniqueness on individual columns, not the tuple — student_id must be unique and course_id must be unique, but the same pair can appear multiple times as long as neither column alone is duplicated",
       "The insert fails with a unique constraint violation. The composite primary key (student_id, course_id) prevents the same student from enrolling twice. You'd need to update the existing row instead, or use INSERT ... ON CONFLICT UPDATE (upsert) to handle re-enrollment",
-      "The database automatically overwrites the old grade",
-      "This is a schema design error — you shouldn't use composite primary keys"
+      "The database automatically overwrites the old grade with the new one because composite primary keys in PostgreSQL implement last-write-wins semantics by default — when a conflicting tuple is inserted, the existing row is updated in place rather than raising an error, making re-enrollment work transparently",
+      "This is a schema design error — composite primary keys should never be used for junction tables because they prevent the table from evolving: if you later need to track enrollment date, re-enrollment history, or multiple sections, you'll need to change the primary key, which requires migrating all foreign key references in dependent tables"
     ],
     "correctIndex": 1,
     "explanation": "Composite primary keys enforce uniqueness on the tuple (student_id, course_id). A re-enrollment attempt inserts the same tuple, violating the primary key constraint. The solution depends on your business logic: (1) disallow re-enrollment (RESTRICT), (2) update the existing enrollment (upsert), or (3) allow multiple enrollments by adding an enrollment_id. This gotcha reveals whether you understand composite key semantics: the uniqueness constraint is enforced on the entire key, not just parts of it.",
@@ -316,10 +316,10 @@ export const QUESTIONS = [
     "style": "Framework question",
     "question": "You're choosing between PostgreSQL and DynamoDB for a new service. PostgreSQL: complex queries, ACID, joins. DynamoDB: NoSQL, eventual consistency, fast key lookups, managed scaling. What question would help you choose?",
     "options": [
-      "Which database is newer?",
+      "Which database was released more recently? Newer databases have learned from the design mistakes of older systems, so DynamoDB (launched 2012) incorporates lessons from PostgreSQL's scaling limitations and provides better default behaviors for distributed workloads",
       "Does your primary access pattern require complex queries (multiple conditions, joins, sorting)? If yes, SQL (PostgreSQL). If it's simple key/range lookups, NoSQL (DynamoDB) is a better fit",
-      "Which is more popular?",
-      "You should always use PostgreSQL for critical data"
+      "Which database is more popular in the industry? Wider adoption means better community support, more Stack Overflow answers, richer ecosystem of tools and libraries, and a larger talent pool for hiring — all of which reduce long-term operational risk more than raw technical capability differences between databases",
+      "You should always use PostgreSQL for critical data because its ACID guarantees and mature ecosystem make it the safe default for any service that handles user-facing data, and DynamoDB should be reserved for non-critical auxiliary data like analytics events and feature flags where eventual consistency is acceptable"
     ],
     "correctIndex": 1,
     "explanation": "The article states: 'When to choose SQL vs alternatives [is a] key decision framework.' The decision hinges on access patterns: SQL excels at flexible queries (filter by any column, join multiple tables, aggregate results). NoSQL excels at simple lookups (get by key, range query by sort key). DynamoDB can't efficiently answer 'find orders by status across all users' — you'd need to scan the entire table. PostgreSQL handles this trivially. If your primary queries are simple, DynamoDB's managed scaling and simplicity win. If queries are complex, PostgreSQL's flexibility is required.",
@@ -332,10 +332,10 @@ export const QUESTIONS = [
     "style": "Scenario-based reasoning",
     "question": "You're designing a recommendation engine: given a user, find top 10 similar users based on interests, engagement, and activity. You consider PostgreSQL (for complex queries) and Neo4j (a graph database). Why do you choose PostgreSQL even though Neo4j 'feels like the right fit for relationships'?",
     "options": [
-      "PostgreSQL is always faster than graph databases",
+      "PostgreSQL is always faster than graph databases for relationship queries because PostgreSQL's B-tree indexes on foreign key columns provide O(log n) lookup for any relationship traversal, while graph databases use adjacency list storage that degrades to O(n) for filtered traversals when the relationship count exceeds the cache capacity",
       "Neo4j seems attractive because of the 'relationship' language, but most social graphs are better modeled with SQL: user interests in one table, engagement in another, queries use joins. Graph databases excel at true graph traversal (shortest path, relationship depth) which your recommendation doesn't need. PostgreSQL is simpler, cheaper, and better understood. Graph databases are often chosen to look impressive in interviews, not because they're actually needed",
-      "Graph databases are deprecated",
-      "PostgreSQL doesn't support relationship queries"
+      "Graph databases are being deprecated in favor of vector databases for recommendation workloads because modern embedding-based similarity search (using tools like pgvector or Pinecone) produces higher-quality recommendations than graph traversal by capturing semantic similarity rather than explicit relationship structure",
+      "PostgreSQL doesn't natively support relationship queries, but its recursive CTE (Common Table Expression) syntax provides equivalent graph traversal capability for recommendation workloads by recursively joining the relationships table with itself to compute multi-hop similarity scores — and since CTEs are standard SQL, they're portable across any relational database"
     ],
     "correctIndex": 1,
     "explanation": "The article explicitly warns: 'Graph Databases... almost never the right choice in interviews. Even Facebook uses MySQL.' Recommendation engines seem like graph problems but they're actually similarity searches that SQL handles well. You're not traversing a relationship graph (shortest path between two users) — you're filtering and ranking. A graph database adds complexity (operational expertise, cost, limited query language) for a problem SQL solves naturally. This is a common interview trap: choosing exotic technology to impress, rather than choosing technology that fits the problem.",
@@ -348,10 +348,10 @@ export const QUESTIONS = [
     "style": "Use-case identification",
     "question": "You're building a time-series analytics system for IoT sensor data: 1 billion sensor readings per day, each with timestamp, sensor_id, value, and 100+ metrics. Queries are always 'get metrics for sensor_id in time range T1 to T2.' You consider Cassandra (a wide-column database). Why is it well-suited for this workload?",
     "options": [
-      "Cassandra is faster than PostgreSQL for all workloads",
+      "Cassandra is faster than PostgreSQL for all workloads because its LSM-tree storage engine provides O(1) write performance regardless of data volume, while PostgreSQL's B-tree based storage degrades logarithmically as the dataset grows beyond memory capacity",
       "Cassandra's column family structure stores metrics as columns and time ranges as rows, optimized for write-heavy, time-series access. It scales horizontally for 1 billion writes/day and queries are range scans on (sensor_id, time), which Cassandra handles efficiently. It also provides tunable consistency",
-      "PostgreSQL doesn't support time-series data",
-      "Wide-column databases are always better than SQL"
+      "PostgreSQL doesn't support time-series data natively and would require the TimescaleDB extension to handle time-bucketed queries efficiently, which adds operational complexity comparable to running a separate Cassandra cluster — so the choice between them is a wash in terms of operational burden, and Cassandra wins on write throughput alone",
+      "Wide-column databases are always better than SQL for any workload exceeding 100 million rows because SQL's query planner overhead and transaction management become the dominant latency factors at that scale, regardless of whether the workload is read-heavy, write-heavy, or mixed"
     ],
     "correctIndex": 1,
     "explanation": "The article states: 'Wide-Column Databases... write-heavy, time-series. Design around query patterns.' Cassandra is purpose-built for this pattern: millions of writes per second, queries by (partition key, time range), and horizontal scalability. A single PostgreSQL instance would struggle with 1B writes/day. Cassandra shines here because its data model (column families, time-ordered rows) matches the query pattern. This is why Cassandra exists: SQL can't efficiently scale write-heavy time-series workloads.",
@@ -364,10 +364,10 @@ export const QUESTIONS = [
     "style": "Anti-pattern identification",
     "question": "During a design interview, a candidate proposes Neo4j for a user-to-user messaging system, saying: 'Messages flow between users — it's a graph!' The interviewer asks: 'What queries do you actually need?' The candidate realizes they need: (1) get messages for user_id ordered by timestamp; (2) get unread count for user_id. Why is Neo4j inappropriate for this workload?",
     "options": [
-      "Neo4j is never appropriate for any system",
+      "Neo4j is never appropriate for any system because graph databases add operational complexity (specialized query language, limited horizontal scaling, niche community) that isn't justified by the marginal query performance improvement over a well-indexed relational database for any realistic workload",
       "The actual queries are simple key lookups and filters, not graph traversals. Neo4j's graph traversal capabilities are wasted. A simple SQL table (messages with user_id, read_flag) answers both queries with a single SELECT. Neo4j adds operational complexity and cost without solving a real need",
-      "Neo4j doesn't support message ordering",
-      "This is a perfect use case for Neo4j"
+      "Neo4j doesn't support message ordering because graph databases store relationships as edges without inherent ordering — you'd need to add timestamp properties to each edge and sort at query time, which is O(n log n) per conversation query compared to the O(1) index lookup that a B-tree index on (user_id, timestamp) provides in PostgreSQL",
+      "This is actually a strong use case for Neo4j because the message threading and conversation branching that messaging systems need maps naturally to graph traversal — finding reply chains, detecting conversation participants, and computing 'unread since last visit' are all graph operations that Neo4j handles more efficiently than recursive SQL CTEs"
     ],
     "correctIndex": 1,
     "explanation": "The article warns: 'Graph Databases... almost never the right choice in interviews. Even Facebook uses MySQL. Common interview mistake to choose these.' The messaging system has no graph traversal requirement. You don't ask 'what's the shortest path from user A to user B through messages' — you ask 'what messages does user A have?' These are table queries, not graph traversals. Choosing Neo4j here is solving a problem that doesn't exist. This is why the warning is so explicit: graph databases are chosen to appear sophisticated, not because they're necessary.",
@@ -380,10 +380,10 @@ export const QUESTIONS = [
     "style": "Scenario-based reasoning",
     "question": "Your user service has these endpoints: GET /users/{id}, GET /users?email={email}, GET /users?last_name={last_name}&first_name={first_name}. Your schema is `users(id, email, first_name, last_name, ...)`. What indexes would you create?",
     "options": [
-      "Create one index on (id) because id is already unique",
+      "Create one index on (id) because id is already the primary key and inherently unique — additional indexes on other columns would slow down write performance proportionally to the number of indexes maintained, and the primary key index is sufficient for all lookups when the application routes queries through the ID-based endpoint first and enriches results client-side",
       "Create indexes on: (email) for the email endpoint, and (last_name, first_name) for the name filter endpoint. Index every column that appears in a WHERE clause",
-      "Create one index on (email, first_name, last_name) to cover all queries",
-      "Indexes slow down writes, so don't create any"
+      "Create one composite index on (email, first_name, last_name) to cover all three query patterns efficiently — the leftmost prefix rule means this single index serves the email-only query (matches the leftmost column), the name query can use the last two columns, and the composite structure avoids the overhead of maintaining multiple separate indexes",
+      "Indexes slow down writes proportionally to the number of indexes on the table, so don't create any secondary indexes — instead, rely on PostgreSQL's parallel sequential scan capability which can scan the full table across multiple CPU cores faster than an index lookup for tables under 10 million rows"
     ],
     "correctIndex": 1,
     "explanation": "The article states: 'Indexing for Access Patterns — Indexes support important queries, connect indexes to API endpoints.' Each endpoint maps to a query: GET /{id} uses the primary key (inherently indexed), GET ?email= needs an index on email, GET ?last_name=&first_name= needs a compound index on (last_name, first_name). A single compound index (email, first_name, last_name) wouldn't help the email-only query efficiently (leftmost prefix rule). This is schema design driven by API contracts: examine all endpoints, list their filters, and create indexes accordingly.",
@@ -396,10 +396,10 @@ export const QUESTIONS = [
     "style": "Scenario-based reasoning",
     "question": "You're designing a user registration system. You define constraints: NOT NULL on email, UNIQUE on email, and a CHECK constraint ensuring age >= 18. During registration, a user submits an empty email field. Which constraint catches this error and at what layer?",
     "options": [
-      "The CHECK constraint catches it in the application code",
-      "The database accepts any data and the application logic validates it",
+      "The CHECK constraint catches it in the application code layer before the query reaches the database, because CHECK constraints in PostgreSQL are evaluated as pre-insert validation hooks that the database driver invokes on the client side to reduce round-trips",
+      "The database accepts any data and the application logic is responsible for validating it — database constraints are a legacy pattern that adds latency to every INSERT operation, and modern applications should validate at the API layer using schema validation libraries like Joi or Zod that provide better error messages and faster rejection of invalid input",
       "The NOT NULL constraint prevents the INSERT at the database layer before any CHECK or UNIQUE constraint is evaluated. Catching errors at the database layer (database-enforced constraints) is preferable because it prevents invalid data from ever entering the system, even from bugs or direct database access",
-      "No constraint catches empty emails"
+      "No constraint catches empty emails because an empty string ('') is not the same as NULL — the NOT NULL constraint only prevents literal NULL values, not zero-length strings, so the INSERT succeeds with an empty email that passes NOT NULL but is effectively invalid, requiring a separate CHECK constraint like CHECK(LENGTH(email) > 0) to catch this case"
     ],
     "correctIndex": 2,
     "explanation": "The article discusses constraints as part of schema design. Constraints exist in a hierarchy: NOT NULL is checked first (prevents NULLs), then CHECK (custom logic), then UNIQUE (duplicate prevention). By catching empty emails at the database layer (NOT NULL constraint), you ensure that no application bug, direct SQL, or API bypass can insert invalid data. Application-level validation is also necessary, but database constraints are the final safety net. This is defense-in-depth: validate in the application, then again in the database.",
@@ -412,10 +412,10 @@ export const QUESTIONS = [
     "style": "Cross-subtopic reasoning",
     "question": "You've chosen PostgreSQL as your default database. Now you need to handle 1 million sign-ups per day and serve user profiles at 100,000 QPS. Sharding is necessary. You decide to shard by user_id using consistent hashing across 10 PostgreSQL instances. A user updates their profile (name, bio). What's the architectural implication of this sharding strategy combined with SQL?",
     "options": [
-      "Sharding eliminates the need for SQL",
+      "Sharding eliminates the need for SQL query capabilities because once data is distributed across multiple nodes, the query planner can't optimize cross-shard operations, so you're effectively running a key-value store that happens to use SQL syntax — switching to DynamoDB would give you the same access pattern with lower operational overhead",
       "PostgreSQL within each shard handles its own schema and queries. A user profile update goes to the single shard responsible for that user_id, updates locally, and returns. Joins within a shard work fine; cross-shard joins become expensive. The SQL advantage (complex queries) is only available within a shard, not across the cluster",
-      "Sharding with SQL is impossible",
-      "All 10 PostgreSQL instances sync automatically"
+      "Sharding with SQL is architecturally impossible because PostgreSQL's transaction manager assumes a single-node topology — distributing tables across 10 instances breaks ACID guarantees even for within-shard operations because the WAL (Write-Ahead Log) can't span multiple instances",
+      "All 10 PostgreSQL instances synchronize automatically through PostgreSQL's built-in logical replication, which detects shard membership and routes updates to the correct instance — the sharding layer is transparent to the application, and cross-shard queries are handled by the coordinator node that merges results from all shards before returning"
     ],
     "correctIndex": 1,
     "explanation": "The article emphasizes: 'Shard by primary access pattern.' When you shard by user_id and use SQL databases, you're trading SQL's JOIN power for horizontal scalability. Queries that involve only one user (get profile, update profile) work perfectly within a shard. But queries spanning multiple users (find users by city) require querying all shards — you lose SQL's advantage. This is why shard key choice is critical: it determines which queries stay local (fast) and which become cross-shard (slow).",
@@ -428,10 +428,10 @@ export const QUESTIONS = [
     "style": "Cross-subtopic reasoning",
     "question": "You're designing a product catalog. You normalize: products(id, name, category_id, ...) and categories(id, name, ...). Every product list query joins products and categories by name, and this join is a bottleneck. Should you denormalize by embedding category name in products?",
     "options": [
-      "Yes, always denormalize bottleneck queries",
+      "Yes, always denormalize bottleneck queries immediately because query latency directly impacts user experience, and the consistency cost of denormalization is always worth the read performance gain since most applications are read-heavy and users are far more sensitive to slow reads than to occasionally stale data",
       "Before denormalizing, check: Does the category name change frequently? If rarely, embedding is acceptable. If frequently, denormalization creates consistency problems. First try indexing the foreign key join, use EXPLAIN to diagnose, and consider caching instead. Denormalization is a last resort after you've optimized the normalized schema",
-      "Normalization and denormalization are equally fast",
-      "You should use MongoDB instead"
+      "Normalization and denormalization produce identical read performance when the database has sufficient memory to cache the working set, because the join operation is performed entirely in memory and the cost difference between joining two tables versus reading a single denormalized table is negligible when both fit in the buffer cache",
+      "You should switch to MongoDB instead of denormalizing within PostgreSQL, because MongoDB's native document embedding achieves the same data co-location as PostgreSQL denormalization but without the schema migration overhead — you simply restructure your application's data model to embed category data within each product document"
     ],
     "correctIndex": 1,
     "explanation": "The article states: 'Start normalized, denormalize only when needed.' A join bottleneck doesn't automatically mean denormalize. Optimization steps: (1) Index foreign keys (category_id), (2) Run EXPLAIN to confirm the join is the issue, (3) Try caching the join result, (4) Only then denormalize. If category names change rarely, denormalization is low-cost. If they change frequently, embedding creates cascading updates. The right answer depends on your specific access patterns and consistency requirements.",
@@ -444,10 +444,10 @@ export const QUESTIONS = [
     "style": "Cross-subtopic reasoning",
     "question": "You're building a job board using MongoDB. You embed job applications in the user document: `users: { _id, name, applications: [ { job_id, status, applied_at } ] }`. A job is deleted. Should you remove the application from the user document?",
     "options": [
-      "Yes, always cascade deletes to maintain referential integrity",
+      "Yes, always cascade deletes to maintain referential integrity — keeping stale job references in user documents creates phantom data that confuses application logic, and the referential integrity of the data model should take precedence over historical record retention because audit trails should be maintained in a separate logging system, not in the application's primary data store",
       "It depends on consistency requirements. If historical records are important (audit trail), keep the application even if the job is deleted — the user applied, that's fact. If applications are transient, deletion is fine. But this decision reveals the embedding trade-off: mongoDB doesn't enforce consistency automatically. Your application code must decide what 'delete' means. With separate collections and foreign keys, the database enforces the rule",
-      "MongoDB automatically deletes embedded documents",
-      "You should use PostgreSQL instead"
+      "MongoDB automatically handles embedded document cleanup when the referenced entity is deleted through its change stream triggers — when a job document is removed, MongoDB emits a delete event that your application can subscribe to and use to cascade the deletion to all embedded references across user documents",
+      "You should switch to PostgreSQL for this use case because the need to reason about cascading deletes across embedded documents reveals that your data model has relational semantics that MongoDB wasn't designed to enforce — the fact that you're asking 'should I cascade?' means you need referential integrity, which is PostgreSQL's core strength"
     ],
     "correctIndex": 1,
     "explanation": "The article states: 'Document Databases... denormalize aggressively, embed related data' but this creates consistency decisions that SQL handles. With SQL foreign keys, ON DELETE CASCADE is explicit. With embedded MongoDB documents, you must decide in your code: are applications immutable history (don't delete), or transient records (delete)? This inconsistency isn't a MongoDB flaw — it's a design choice. MongoDB doesn't prevent you from having stale job_id references. Your schema design and application logic must handle it.",
