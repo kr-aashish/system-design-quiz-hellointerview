@@ -354,13 +354,173 @@
       "retryCount": 0
     },
     {
-      "category": "LLD",
+      "category": "In a Hurry",
+      "name": "Introduction",
+      "path": "/learn/low-level-design/in-a-hurry/introduction",
+      "slug": "lld-in-a-hurry-introduction",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "In a Hurry",
+      "name": "Delivery Framework",
+      "path": "/learn/low-level-design/in-a-hurry/delivery",
+      "slug": "lld-in-a-hurry-delivery",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "In a Hurry",
       "name": "Design Principles",
-      "path": "/learn/lld/in-a-hurry/design-principles",
+      "path": "/learn/low-level-design/in-a-hurry/design-principles",
       "slug": "lld-design-principles",
       "status": "pending",
       "lastAttempt": null,
       "outputFile": "lld-design-principles-quiz.jsx",
+      "retryCount": 0
+    },
+    {
+      "category": "In a Hurry",
+      "name": "OOP Concepts",
+      "path": "/learn/low-level-design/in-a-hurry/oop-concepts",
+      "slug": "lld-in-a-hurry-oop-concepts",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "In a Hurry",
+      "name": "Design Patterns",
+      "path": "/learn/low-level-design/in-a-hurry/patterns",
+      "slug": "lld-in-a-hurry-patterns",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Concurrency",
+      "name": "Introduction",
+      "path": "/learn/low-level-design/concurrency/intro",
+      "slug": "lld-concurrency-introduction",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Concurrency",
+      "name": "Correctness",
+      "path": "/learn/low-level-design/concurrency/correctness",
+      "slug": "lld-concurrency-correctness",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Concurrency",
+      "name": "Coordination",
+      "path": "/learn/low-level-design/concurrency/coordination",
+      "slug": "lld-concurrency-coordination",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Concurrency",
+      "name": "Scarcity",
+      "path": "/learn/low-level-design/concurrency/scarcity",
+      "slug": "lld-concurrency-scarcity",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Problem Breakdowns",
+      "name": "Connect Four",
+      "path": "/learn/low-level-design/problem-breakdowns/connect-four",
+      "slug": "lld-problems-connect-four",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Problem Breakdowns",
+      "name": "Amazon Locker",
+      "path": "/learn/low-level-design/problem-breakdowns/amazon-locker",
+      "slug": "lld-problems-amazon-locker",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Problem Breakdowns",
+      "name": "Elevator",
+      "path": "/learn/low-level-design/problem-breakdowns/elevator",
+      "slug": "lld-problems-elevator",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Problem Breakdowns",
+      "name": "Parking Lot",
+      "path": "/learn/low-level-design/problem-breakdowns/parking-lot",
+      "slug": "lld-problems-parking-lot",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Problem Breakdowns",
+      "name": "File System",
+      "path": "/learn/low-level-design/problem-breakdowns/file-system",
+      "slug": "lld-problems-file-system",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Problem Breakdowns",
+      "name": "Movie Ticket Booking",
+      "path": "/learn/low-level-design/problem-breakdowns/bookmyshow",
+      "slug": "lld-problems-bookmyshow",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Problem Breakdowns",
+      "name": "Rate Limiter",
+      "path": "/learn/low-level-design/problem-breakdowns/rate-limiter",
+      "slug": "lld-problems-rate-limiter",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
+      "retryCount": 0
+    },
+    {
+      "category": "Problem Breakdowns",
+      "name": "Inventory Management",
+      "path": "/learn/low-level-design/problem-breakdowns/inventory-management",
+      "slug": "lld-problems-inventory-management",
+      "status": "pending",
+      "lastAttempt": null,
+      "outputFile": null,
       "retryCount": 0
     }
   ]

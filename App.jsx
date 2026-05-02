@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { HashRouter, Routes, Route, Link } from 'react-router-dom';
-import { ChevronDown, ChevronRight, CheckCircle2, LayoutGrid, BookOpen, ExternalLink, PlayCircle, Trash2, XCircle, RotateCcw, Clock, AlertTriangle, Cloud, UploadCloud, DownloadCloud, RefreshCw } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle2, LayoutGrid, BookOpen, ExternalLink, PlayCircle, Trash2, XCircle, RotateCcw, Clock, AlertTriangle, Cloud, UploadCloud, DownloadCloud, RefreshCw, Layers, Boxes } from 'lucide-react';
 import quizState from './quiz-state.json';
 import quizDataCatalog from './quiz-data.json';
 import { getQuizSummaries, clearQuizProgress, clearAllProgress, PROGRESS_CHANGED_EVENT } from './quizProgressStore';
@@ -338,17 +338,28 @@ function Index() {
     });
   };
 
-  const topicsByCategory = quizState.topics.reduce((acc, topic) => {
+  const isLldTopic = (t) => t.path.startsWith('/learn/low-level-design');
+  const groupByCategory = (topics) => topics.reduce((acc, topic) => {
     if (!acc[topic.category]) acc[topic.category] = [];
     acc[topic.category].push(topic);
     return acc;
   }, {});
-  const categoryEntries = Object.entries(topicsByCategory);
-  const orderedCategoryEntries = [
-    ...categoryEntries.filter(([category]) => category === 'In a Hurry'),
-    ...categoryEntries.filter(([category]) => category !== 'In a Hurry' && category !== 'Advanced Topics'),
-    ...categoryEntries.filter(([category]) => category === 'Advanced Topics'),
+
+  const sdTopics = quizState.topics.filter(t => !isLldTopic(t));
+  const lldTopics = quizState.topics.filter(isLldTopic);
+
+  const sdCategoryEntries = Object.entries(groupByCategory(sdTopics));
+  const orderedSdEntries = [
+    ...sdCategoryEntries.filter(([c]) => c === 'In a Hurry'),
+    ...sdCategoryEntries.filter(([c]) => c !== 'In a Hurry' && c !== 'Advanced Topics'),
+    ...sdCategoryEntries.filter(([c]) => c === 'Advanced Topics'),
   ];
+
+  const lldCategoryEntries = Object.entries(groupByCategory(lldTopics));
+  const lldOrder = ['In a Hurry', 'Concurrency', 'Problem Breakdowns'];
+  const orderedLldEntries = lldOrder
+    .map(c => lldCategoryEntries.find(([cat]) => cat === c))
+    .filter(Boolean);
 
   const hasAnyProgress = Object.keys(summaries).length > 0;
 
@@ -358,7 +369,7 @@ function Index() {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-slate-100 flex items-center gap-3">
             <BookOpen className="text-teal-500" />
-            System Design Learning Paths
+            Hello Interview Learning Paths
           </h1>
           <div className="flex items-center gap-2">
             {hasAnyProgress && (
@@ -387,17 +398,26 @@ function Index() {
         
         <ProgressStats summaries={summaries} quizTopics={quizState.topics} />
         
-        <div className="space-y-4 bg-[#232a3b] p-6 rounded-xl border border-[#2d3748] shadow-2xl">
-          {orderedCategoryEntries.map(([category, items]) => (
-            <CategorySection 
-              key={category} 
-              category={category} 
-              items={items} 
-              summaries={summaries}
-              onClearQuiz={handleClearQuiz}
-              defaultOpen
-            />
-          ))}
+        <TrackSection
+          title="Learn System Design"
+          subtitle="Distributed systems, scaling patterns, and core infrastructure"
+          icon={Layers}
+          accent="teal"
+          entries={orderedSdEntries}
+          summaries={summaries}
+          onClearQuiz={handleClearQuiz}
+        />
+
+        <div className="mt-6">
+          <TrackSection
+            title="Learn Low Level Design"
+            subtitle="Object-oriented design, concurrency, and interview problem breakdowns"
+            icon={Boxes}
+            accent="violet"
+            entries={orderedLldEntries}
+            summaries={summaries}
+            onClearQuiz={handleClearQuiz}
+          />
         </div>
       </div>
       
@@ -408,6 +428,65 @@ function Index() {
           onCancel={() => setConfirmDialog(null)}
         />
       )}
+    </div>
+  );
+}
+
+const TRACK_ACCENTS = {
+  teal: {
+    iconBg: 'bg-teal-500/15',
+    iconColor: 'text-teal-400',
+    title: 'text-teal-300',
+    border: 'border-teal-500/20',
+    glow: 'from-teal-500/10 via-cyan-500/5 to-transparent',
+  },
+  violet: {
+    iconBg: 'bg-violet-500/15',
+    iconColor: 'text-violet-400',
+    title: 'text-violet-300',
+    border: 'border-violet-500/20',
+    glow: 'from-violet-500/10 via-fuchsia-500/5 to-transparent',
+  },
+};
+
+function TrackSection({ title, subtitle, icon: Icon, accent = 'teal', entries, summaries, onClearQuiz }) {
+  const a = TRACK_ACCENTS[accent] || TRACK_ACCENTS.teal;
+  const totalArticles = entries.reduce((sum, [, items]) => sum + items.length, 0);
+  const quizCount = entries.reduce(
+    (sum, [, items]) => sum + items.filter(i => quizDataBySlug[i.slug]).length,
+    0,
+  );
+
+  return (
+    <div className={`relative bg-[#232a3b] p-6 rounded-xl border ${a.border} shadow-2xl overflow-hidden`}>
+      <div className={`pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${a.glow}`} />
+      <div className="relative flex items-start justify-between mb-5 pb-4 border-b border-[#2d3748]">
+        <div className="flex items-center gap-3">
+          <div className={`w-11 h-11 rounded-xl ${a.iconBg} flex items-center justify-center`}>
+            <Icon className={`w-5 h-5 ${a.iconColor}`} />
+          </div>
+          <div>
+            <h2 className={`text-xl font-bold ${a.title}`}>{title}</h2>
+            {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
+          </div>
+        </div>
+        <div className="text-right text-[11px] text-slate-500 shrink-0 max-sm:hidden">
+          <div>{totalArticles} articles</div>
+          <div>{quizCount} {quizCount === 1 ? 'quiz' : 'quizzes'}</div>
+        </div>
+      </div>
+      <div className="relative space-y-2">
+        {entries.map(([category, items]) => (
+          <CategorySection
+            key={category}
+            category={category}
+            items={items}
+            summaries={summaries}
+            onClearQuiz={onClearQuiz}
+            defaultOpen
+          />
+        ))}
+      </div>
     </div>
   );
 }
