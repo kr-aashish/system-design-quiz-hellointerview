@@ -10,8 +10,8 @@
       "slug": "patterns-realtime-updates",
       "status": "completed",
       "lastAttempt": "2026-03-27T00:00:00Z",
-      "outputFile": "real-time-updates-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/patterns/realtime-updates.json"
     },
     {
       "category": "Patterns",
@@ -20,8 +20,8 @@
       "slug": "patterns-dealing-with-contention",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "contention-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/patterns/dealing-with-contention.json"
     },
     {
       "category": "Patterns",
@@ -30,8 +30,8 @@
       "slug": "patterns-multi-step-processes",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "multi-step-processes-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/patterns/multi-step-processes.json"
     },
     {
       "category": "Patterns",
@@ -40,8 +40,8 @@
       "slug": "patterns-scaling-reads",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "scaling-reads-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/patterns/scaling-reads.json"
     },
     {
       "category": "Patterns",
@@ -50,8 +50,8 @@
       "slug": "patterns-scaling-writes",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "scaling-writes-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/patterns/scaling-writes.json"
     },
     {
       "category": "Patterns",
@@ -60,8 +60,8 @@
       "slug": "patterns-large-blobs",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "handling-large-blobs-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/patterns/large-blobs.json"
     },
     {
       "category": "Patterns",
@@ -70,8 +70,8 @@
       "slug": "patterns-long-running-tasks",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "managing-long-running-tasks-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/patterns/long-running-tasks.json"
     },
     {
       "category": "Core Concepts",
@@ -80,8 +80,8 @@
       "slug": "core-concepts-networking-essentials",
       "status": "completed",
       "lastAttempt": "2026-03-28T00:00:00Z",
-      "outputFile": "networking-essentials-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/core-concepts/networking-essentials.json"
     },
     {
       "category": "Core Concepts",
@@ -90,8 +90,8 @@
       "slug": "core-concepts-api-design",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "api-design-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/core-concepts/api-design.json"
     },
     {
       "category": "Core Concepts",
@@ -100,8 +100,8 @@
       "slug": "core-concepts-data-modeling",
       "status": "completed",
       "lastAttempt": "2026-03-28T00:00:00Z",
-      "outputFile": "data-modeling-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/core-concepts/data-modeling.json"
     },
     {
       "category": "Core Concepts",
@@ -110,8 +110,8 @@
       "slug": "core-concepts-db-indexing",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "database-indexing-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/core-concepts/db-indexing.json"
     },
     {
       "category": "Core Concepts",
@@ -120,8 +120,8 @@
       "slug": "core-concepts-caching",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "caching-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/core-concepts/caching.json"
     },
     {
       "category": "Core Concepts",
@@ -130,8 +130,8 @@
       "slug": "core-concepts-sharding",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "sharding-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/core-concepts/sharding.json"
     },
     {
       "category": "Core Concepts",
@@ -140,8 +140,8 @@
       "slug": "core-concepts-consistent-hashing",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "consistent-hashing-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/core-concepts/consistent-hashing.json"
     },
     {
       "category": "Core Concepts",
@@ -150,8 +150,8 @@
       "slug": "core-concepts-cap-theorem",
       "status": "completed",
       "lastAttempt": "2026-03-28T00:00:00Z",
-      "outputFile": "cap-theorem-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/core-concepts/cap-theorem.json"
     },
     {
       "category": "Core Concepts",
@@ -160,8 +160,8 @@
       "slug": "core-concepts-numbers-to-know",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "numbers-to-know-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/core-concepts/numbers-to-know.json"
     },
     {
       "category": "Advanced Topics",
@@ -170,8 +170,8 @@
       "slug": "advanced-data-structures-big-data",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "big-data-structures-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/advanced-topics/data-structures-for-big-data.json"
     },
     {
       "category": "Advanced Topics",
@@ -180,8 +180,8 @@
       "slug": "advanced-vector-databases",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "vector-database-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/advanced-topics/vector-databases.json"
     },
     {
       "category": "Advanced Topics",
@@ -190,8 +190,8 @@
       "slug": "advanced-time-series-databases",
       "status": "completed",
       "lastAttempt": "2026-03-28T00:00:00Z",
-      "outputFile": "time-series-databases-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/advanced-topics/time-series-databases.json"
     },
     {
       "category": "Key Technologies",
@@ -200,8 +200,8 @@
       "slug": "key-tech-redis",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "redis-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/key-technologies/redis.json"
     },
     {
       "category": "Key Technologies",
@@ -210,8 +210,8 @@
       "slug": "key-tech-elasticsearch",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Key Technologies",
@@ -220,8 +220,8 @@
       "slug": "key-tech-kafka",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Key Technologies",
@@ -230,8 +230,8 @@
       "slug": "key-tech-api-gateway",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Key Technologies",
@@ -240,8 +240,8 @@
       "slug": "key-tech-cassandra",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Key Technologies",
@@ -250,8 +250,8 @@
       "slug": "key-tech-dynamodb",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Key Technologies",
@@ -260,8 +260,8 @@
       "slug": "key-tech-postgres",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Key Technologies",
@@ -270,8 +270,8 @@
       "slug": "key-tech-flink",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Key Technologies",
@@ -280,8 +280,8 @@
       "slug": "key-tech-zookeeper",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "In a Hurry",
@@ -290,8 +290,8 @@
       "slug": "in-a-hurry-introduction",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "in-a-hurry-introduction-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/in-a-hurry/introduction.json"
     },
     {
       "category": "In a Hurry",
@@ -300,8 +300,8 @@
       "slug": "in-a-hurry-how-to-prepare",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "how-to-prepare-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/in-a-hurry/how-to-prepare.json"
     },
     {
       "category": "In a Hurry",
@@ -310,8 +310,8 @@
       "slug": "in-a-hurry-delivery",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "delivery-framework-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/in-a-hurry/delivery.json"
     },
     {
       "category": "In a Hurry",
@@ -320,8 +320,8 @@
       "slug": "in-a-hurry-core-concepts",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "core-concepts-overview-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/in-a-hurry/core-concepts.json"
     },
     {
       "category": "In a Hurry",
@@ -330,8 +330,8 @@
       "slug": "in-a-hurry-key-technologies",
       "status": "completed",
       "lastAttempt": "2026-04-27T00:00:00Z",
-      "outputFile": "key-technologies-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/in-a-hurry/key-technologies.json"
     },
     {
       "category": "In a Hurry",
@@ -340,8 +340,8 @@
       "slug": "in-a-hurry-patterns",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "common-patterns-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/system-design/in-a-hurry/patterns.json"
     },
     {
       "category": "In a Hurry",
@@ -350,8 +350,8 @@
       "slug": "in-a-hurry-problem-breakdowns",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "In a Hurry",
@@ -360,8 +360,8 @@
       "slug": "lld-in-a-hurry-introduction",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "In a Hurry",
@@ -370,8 +370,8 @@
       "slug": "lld-in-a-hurry-delivery",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "In a Hurry",
@@ -380,8 +380,8 @@
       "slug": "lld-design-principles",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": "lld-design-principles-quiz.jsx",
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": "data/quizzes/low-level-design/in-a-hurry/design-principles.json"
     },
     {
       "category": "In a Hurry",
@@ -390,8 +390,8 @@
       "slug": "lld-in-a-hurry-oop-concepts",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "In a Hurry",
@@ -400,8 +400,8 @@
       "slug": "lld-in-a-hurry-patterns",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Concurrency",
@@ -410,8 +410,8 @@
       "slug": "lld-concurrency-introduction",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Concurrency",
@@ -420,8 +420,8 @@
       "slug": "lld-concurrency-correctness",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Concurrency",
@@ -430,8 +430,8 @@
       "slug": "lld-concurrency-coordination",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Concurrency",
@@ -440,8 +440,8 @@
       "slug": "lld-concurrency-scarcity",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Problem Breakdowns",
@@ -450,8 +450,8 @@
       "slug": "lld-problems-connect-four",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Problem Breakdowns",
@@ -460,8 +460,8 @@
       "slug": "lld-problems-amazon-locker",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Problem Breakdowns",
@@ -470,8 +470,8 @@
       "slug": "lld-problems-elevator",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Problem Breakdowns",
@@ -480,8 +480,8 @@
       "slug": "lld-problems-parking-lot",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Problem Breakdowns",
@@ -490,8 +490,8 @@
       "slug": "lld-problems-file-system",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Problem Breakdowns",
@@ -500,8 +500,8 @@
       "slug": "lld-problems-bookmyshow",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Problem Breakdowns",
@@ -510,8 +510,8 @@
       "slug": "lld-problems-rate-limiter",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     },
     {
       "category": "Problem Breakdowns",
@@ -520,8 +520,8 @@
       "slug": "lld-problems-inventory-management",
       "status": "pending",
       "lastAttempt": null,
-      "outputFile": null,
-      "retryCount": 0
+      "retryCount": 0,
+      "quizDataPath": null
     }
   ]
 }

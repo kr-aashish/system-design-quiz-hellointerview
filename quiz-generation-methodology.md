@@ -12,7 +12,7 @@
 2. **Exhaustive coverage.** Every concept, distinction, gotcha, and implication in the source content must be covered by at least one question. Coverage is *enforced*, not aspirational — see Section 4.
 3. **Difficulty climbs, never jumps.** Within each Part, the learner sees L1 (warm-up) before L5 (extreme). The learner is never demotivated by the hardest question first.
 4. **Hardest realistic SDE2/Senior/Staff questions are included.** No skipping the extremes. L5 questions follow the canon in Section 5.
-5. **Match the existing quiz file structure** (`contention-quiz.jsx`, `caching-quiz.jsx`, etc.). Schema additions are additive and backward compatible.
+5. **Store quiz content as JSON only.** There are no per-quiz JSX files. New quizzes must be written under `data/quizzes/<track>/<section>/<article>.json` and referenced from `quiz-state.json` via `quizDataPath`.
 6. **Every question is gradable against the 16-point rubric** in `principles-of-learning.md` Section 9. No exceptions.
 
 ---
@@ -199,72 +199,99 @@ Write each question using the schema in Section 3. Every question must answer:
 
 ---
 
-## 2. File structure (output)
+## 2. Data Structure (Output)
 
-Each quiz is a single `.jsx` file matching the existing pattern (e.g. `caching-quiz.jsx`). Naming: `<topic-slug>-quiz.jsx`.
+Each quiz is a single JSON data file. Naming and location follow the article hierarchy:
 
-Top of file: **the Coverage Manifest** (a comment block). It is *the* enforcement mechanism. Format:
+- High-level/System Design: `data/quizzes/system-design/<section>/<article>.json`
+- Low-Level Design: `data/quizzes/low-level-design/<section>/<article>.json`
 
-```jsx
-// === COVERAGE MANIFEST ===
-// Source: <article URL or filename>
-// Total questions: 35 across 6 parts
-//
-// PART A — What system design interviews are
-//   Concept A1 (definition of SD interview): q1 (L1), q4 (L3)
-//   Concept A2 (no single right answer): q2 (L1), q9 (L4)
-//   Concept A3 (level-by-level weighting): q3 (L2), q11 (L3)
-//   Ladder: L1[q1,q2] L2[q3] L3[q4,q11] L4[q9] L5[q15]
-//
-// PART B — Types of system design interviews
-//   Concept B1 (Product vs Infrastructure): q5 (L1), q12 (L3)
-//   ...
-//   Ladder: L1[q5,q6] L2[q7] L3[q12] L4[q18] L5[q22]
-//
-// CROSS-PART: q9 (A×C), q22 (B×F)
-// L5 PATTERN COVERAGE:
-//   - framing-is-wrong: q15
-//   - two-levels-of-indirection: q22
-//   - adversarial pushback: q28
-//   - trade-off inversion: q31
-//   - implementation-specific gotcha: q33
-//   - estimation-backed scenario: q22
-//   - future-proofing: q35
-// ============================
+Examples:
+
+- `data/quizzes/system-design/core-concepts/caching.json`
+- `data/quizzes/system-design/patterns/scaling-reads.json`
+- `data/quizzes/low-level-design/in-a-hurry/design-principles.json`
+
+Top-level field: **`coverageManifest`**. It is *the* enforcement mechanism. JSON does not support comments, so never put the manifest in a comment block. Store it as structured JSON:
+
+```json
+{
+  "coverageManifest": {
+    "source": "<article URL or filename>",
+    "totalQuestions": 35,
+    "parts": [
+      {
+        "id": "A",
+        "name": "What system design interviews are",
+        "concepts": [
+          {
+            "id": "A1",
+            "description": "definition of SD interview",
+            "questions": ["q1", "q4"]
+          },
+          {
+            "id": "A2",
+            "description": "no single right answer",
+            "questions": ["q2", "q9"]
+          }
+        ],
+        "ladder": {
+          "L1": ["q1", "q2"],
+          "L2": ["q3"],
+          "L3": ["q4", "q11"],
+          "L4": ["q9"],
+          "L5": ["q15"]
+        }
+      }
+    ],
+    "crossPart": ["q9", "q22"],
+    "l5PatternCoverage": {
+      "framing-is-wrong": ["q15"],
+      "two-levels-of-indirection": ["q22"],
+      "adversarial-pushback": ["q28"],
+      "trade-off-inversion": ["q31"],
+      "implementation-specific-gotcha": ["q33"],
+      "estimation-backed-scenario": ["q22"],
+      "future-proofing": ["q35"]
+    }
+  }
+}
 ```
 
-Then imports, then the `QUESTIONS` array in **ladder order** (Part A: L1→L5, Part B: L1→L5, …), then the `SUBTOPICS_ORDER` / `PARTS_ORDER` constant, then the engine component (existing pattern).
+Then store metadata and the `questions` array in **ladder order** (Part A: L1→L5, Part B: L1→L5, …). `partsOrder`, `subtopicsOrder`, and `difficultyTiers` are optional top-level arrays.
 
-The file must be plug-compatible with `App.jsx`'s `componentsMap` — register the new file there and add the topic to `quiz-state.json`.
+The file must be referenced by the matching article in `quiz-state.json` using `quizDataPath`. Do **not** create a JSX component, import it in `App.jsx`, or register it in any `componentsMap`. `App.jsx` renders directly from `quiz-state.json` plus the nested quiz JSON files.
 
 ---
 
 ## 3. Question schema (the only schema we use)
 
-```js
+```json
 {
-  id: "intro_C_q07",                // <quizSlug>_<partLetter>_q<n> — globally unique within file
-  part: "C — Interviewer Rubric",   // human-readable Part label (matches manifest)
-  subtopic: "Communication & Collaboration", // existing field — keep for engine compat
-  difficulty: "L4",                 // L1 | L2 | L3 | L4 | L5 — NEW required field
-  style: "Interviewer Pushback",    // see Section 6
-  conceptIds: ["C5", "C8"],         // refs to concept inventory entries — NEW
-  l5Pattern: null,                  // for L5 only: one of Section 5 pattern names
-  question: "Your interviewer says: 'I see strong tech content but I'm having trouble following your design.' …",
-  options: [
+  "id": "intro_C_q07",
+  "part": "C — Interviewer Rubric",
+  "subtopic": "Communication & Collaboration",
+  "difficulty": "L4",
+  "style": "Interviewer Pushback",
+  "conceptIds": ["C5", "C8"],
+  "l5Pattern": null,
+  "question": "Your interviewer says: 'I see strong tech content but I'm having trouble following your design.' ...",
+  "options": [
     "Solution Design + Technical Excellence — add more concrete tech choices.",
-    "Communication + Solution Design — pause, redraw the high-level architecture …",
+    "Communication + Solution Design — pause, redraw the high-level architecture ...",
     "Communication only — speak more slowly and use simpler vocabulary.",
     "Problem Navigation — go back to gathering requirements."
   ],
-  correctIndex: 1,
-  explanation: "…why this is right and the others aren't, with reference to the source content quote…",
-  interviewScript: "In your interview, say: '…'",
-  proTip: "…optional pro tip; null if none…"
+  "correctIndex": 1,
+  "explanation": "...why this is right and the others aren't, with reference to the source content quote...",
+  "interviewScript": "In your interview, say: '...'",
+  "proTip": "...optional pro tip; null if none..."
 }
 ```
 
-**Existing engine compat note.** The engine reads `subtopic` for grouping in Sequential mode. Keep using it. `part` is additive; the new Ladder mode (Section 7) sorts by `part` then `difficulty`.
+`id` is `<quizSlug>_<partLetter>_q<n>` or another stable unique ID within the quiz JSON. `difficulty` is required for new quizzes: `L1 | L2 | L3 | L4 | L5`. `conceptIds` reference the concept inventory. `l5Pattern` is `null` except for L5 questions, where it must be one of Section 5's pattern names.
+
+**Engine compat note.** The engine reads `subtopic` for grouping in Sequential mode. Keep using it. `part` is additive; Ladder mode sorts by `part` then `difficulty`.
 
 **Distractors are first-class — see Section 0.6.** When writing the `options` array, do not treat the three wrong options as filler. Every distractor must be length-matched (within ~15% character count of the correct option), share its vocabulary register, and reflect a real misconception a moderately-prepared SDE2 candidate could plausibly pick. Run the discrimination check from Section 0.6 on every MCQ before moving on. Also vary `correctIndex` across the file — never let the correct answer's position become predictable.
 
@@ -316,17 +343,17 @@ Reuse these labels for the `style` field — the engine renders them as chips. N
 
 ---
 
-## 7. QuizEngine extensions (additive, do not break existing files)
+## 7. QuizEngine extensions (additive, do not break existing JSON)
 
 Add to the engine when the first new quiz is generated:
 
 1. **`difficulty` chip** rendered on each question card. Color: L1 emerald, L2 cyan, L3 blue, L4 amber, L5 red.
-2. **New play mode: "Ladder"** — sorts by `part` (alphabetical by Part letter) then by `difficulty` (L1→L5). Becomes the **default mode** for any quiz that has the `difficulty` field. Existing quizzes (which lack `difficulty`) continue to default to Shuffled.
+2. **New play mode: "Ladder"** — sorts by `part` (alphabetical by Part letter) then by `difficulty` (L1→L5). Becomes the **default mode** for any quiz that has the `difficulty` field. Quiz JSON that lacks `difficulty` continues to default to Shuffled.
 3. **Per-question timer respects difficulty:** L1=60s, L2=90s, L3=90s, L4=120s, L5=150s. Falls back to existing 90s for legacy questions.
 4. **Results screen** — adds an "Accuracy by Tier" breakdown (e.g. L1: 4/4, L2: 3/4, L3: 5/6, L4: 2/4, L5: 1/4 → "Drill L4-L5"). Adds a "Coverage map" diagram showing which concept-inventory entries the learner missed.
 5. **Resume / retake by tier.** A "Retake L4-L5 only" button on the results screen. This is the spaced-repetition primitive — re-attempt only the hard tier without re-doing the warm-up.
 
-All five extensions must remain **fully backward-compatible** with the existing 19 quiz files that have no `difficulty` field.
+All five extensions must remain **fully backward-compatible** with existing quiz JSON that has no `difficulty` field or optional metadata.
 
 ---
 
@@ -381,8 +408,8 @@ Given source content + this methodology + `principles-of-learning.md`:
    - For every Part: write L1 questions → L2 → L3 → L4 → L5.
    - Tag every question with `id, part, subtopic, difficulty, style, conceptIds, l5Pattern`.
    - For L5 questions: explicitly note which canon pattern is used and why other patterns wouldn't fit.
-5. **Build the Coverage Manifest** at the top of the file. Verify every concept ID in the inventory has ≥1 question. Verify every L5 pattern slot is filled (where surface allows).
-6. **Emit** the `.jsx` file matching the existing pattern. Register in `App.jsx` and `quiz-state.json`.
+5. **Build the Coverage Manifest** in the top-level `coverageManifest` field. Verify every concept ID in the inventory has ≥1 question. Verify every L5 pattern slot is filled (where surface allows).
+6. **Emit** the JSON file under `data/quizzes/<track>/<section>/<article>.json`. Add or update the matching `quiz-state.json` article with `quizDataPath`. Run `npm run build:quiz-data` to validate the referenced quiz JSON. Do not edit `App.jsx` for per-quiz registration.
 7. **Coverage report** to the user: "X concepts × Y questions; ladder coverage per Part; N cross-Part bridges; M/7 L5 patterns used."
 8. **Verification step** (mandatory). Re-read the source content; cross-check that no paragraph is unrepresented. Output a "spot-check" listing 3 random source sentences and the question(s) that cover them.
 
@@ -399,10 +426,12 @@ Given source content + this methodology + `principles-of-learning.md`:
 - [ ] Every Part has a complete L1-L5 ladder for its most important concepts.
 - [ ] At least 2 cross-Part bridge questions.
 - [ ] At least 4 of 7 L5 canon patterns used (all 7 if surface allows).
-- [ ] Coverage Manifest at top of file is complete and accurate.
+- [ ] Coverage Manifest in `coverageManifest` is complete and accurate.
 - [ ] Each question passes the 16-point rubric in `principles-of-learning.md`.
 - [ ] Engine extensions in place (Ladder mode, difficulty chip, per-tier timer, by-tier results).
-- [ ] File registered in `App.jsx` componentsMap and `quiz-state.json`.
+- [ ] Quiz JSON file exists under `data/quizzes/<track>/<section>/<article>.json`.
+- [ ] Matching `quiz-state.json` topic has the correct `quizDataPath`.
+- [ ] `npm run build:quiz-data` completed successfully.
 - [ ] Spot-check report produced (3 random source sentences → covering question IDs).
 
 ---

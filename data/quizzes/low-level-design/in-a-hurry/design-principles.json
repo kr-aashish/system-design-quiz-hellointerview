@@ -1,0 +1,1020 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "part": "A — KISS",
+      "subtopic": "KISS — Keep It Simple",
+      "difficulty": "L2",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": [
+        "A1",
+        "A2"
+      ],
+      "l5Pattern": null,
+      "question": "An interviewer asks you to design a parking lot. The current requirements list three vehicle sizes (motorcycle, car, truck) with fixed flat-rate pricing. A candidate immediately introduces a Strategy interface for pricing with three concrete pricing strategies, plus an abstract VehicleType class with three subclasses, plus a Factory to construct vehicles from input strings. The pricing logic in each strategy is a single multiplication. Why is this a weaker design than a flat Vehicle class with a `size` enum and a switch on size for pricing?",
+      "options": [
+        "The pattern-based design is actually stronger — using Strategy and Factory is the textbook approach for vehicle systems and signals object-oriented maturity to the interviewer.",
+        "The pattern-based design adds inheritance and indirection that the problem doesn't justify; the simpler enum-and-switch shape is faster to read, easier to test, and equally easy to extend if a fourth size shows up. Adding patterns to a problem that doesn't need them is the most common failure mode interviewers flag.",
+        "The pattern-based design fails because Strategy is meant for runtime-swappable algorithms, while pricing here is a property of the vehicle — the candidate should have used the Decorator pattern instead, which would correctly attach pricing as a wrappable concern around each vehicle type.",
+        "The pattern-based design is incorrect because Factory and Strategy don't compose well in OO systems; the candidate would hit a known GoF conflict where the Factory cannot return Strategy-wrapped objects without violating type covariance constraints in the language."
+      ],
+      "correctIndex": 1,
+      "explanation": "The flat-rate pricing across three fixed sizes is a one-liner. Wrapping it in Strategy + Factory + abstract base classes adds indirection and reading-cost without buying any flexibility the requirements ask for. Interviewers grade *match between problem complexity and solution complexity*; over-engineering signals you can't tell when sophistication is warranted. The right move is to start with the enum-and-switch and refactor to Strategy only if pricing rules diverge meaningfully (tiered, time-of-day, dynamic).",
+      "interviewScript": "In your interview, say: 'For three sizes with flat pricing, I'd start with a Vehicle class holding a size enum and a single price() method that switches on size. If pricing rules later diverge — peak hours, EV surcharge, valet — that's when Strategy earns its complexity. Adding it now would be over-engineering for a one-line pricing rule.'",
+      "proTip": "When you reach for a pattern in an LLD interview, say *out loud* what concrete future requirement makes the pattern worth its complexity. If you can't name one, you're over-engineering."
+    },
+    {
+      "id": "q2",
+      "part": "A — KISS",
+      "subtopic": "KISS — Keep It Simple",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": [
+        "A1",
+        "A3"
+      ],
+      "l5Pattern": null,
+      "question": "You're designing an in-memory rate limiter. The first requirement is exactly one rule: 'no user can do more than 10 actions per minute.' You implement it as a single class with a `Map<userId, slidingWindow>`. The interviewer then adds: 'Now we want different limits per endpoint, configurable from a YAML file, with a fallback to the global default.' What is the right next move under KISS?",
+      "options": [
+        "Refactor immediately to a full Strategy + Decorator + Builder stack so the design can absorb every limit shape that might ever appear — including burst limits, token buckets, and IP-based throttles — before writing any of the new code, because retrofitting later is more expensive than designing for the general case now.",
+        "Reject the new requirement on KISS grounds and tell the interviewer that adding per-endpoint rules complicates the design beyond what one class should handle, so the rate limiter should remain global and per-endpoint limiting should be moved to a separate service.",
+        "Extract a small Limit struct (name, scope, max, window) and a LimitResolver that picks the right Limit for a given (user, endpoint) pair, defaulting to the global one. Keep the sliding-window mechanics in the single class. KISS doesn't mean 'don't change the design' — it means 'add only the structure the new requirement actually demands.'",
+        "Replace the in-memory Map with Redis right away, because once limits become configurable, the design must be ready for distributed deployment — the storage swap is the architecturally honest response to the new requirement and avoids a second rewrite later."
+      ],
+      "correctIndex": 2,
+      "explanation": "KISS is not 'never change the design' and not 'add everything you might ever need'. It is 'add the *minimum* structure the new requirement demands and stop there.' The new requirement introduces variability in *which limit applies*, not in *how the sliding window works*, so the right structural addition is a Limit struct + a resolver — nothing more. Option A over-engineers for unstated requirements. Option B refuses the requirement, which is not a KISS move. Option D conflates a storage decision with the structural one being asked.",
+      "interviewScript": "In your interview, say: 'I'd extract a small Limit value object — name, scope, max, window — and a resolver that picks the right one for the request, defaulting to the global limit. The sliding-window mechanics stay where they are. That's the smallest change the new requirement actually forces. If burst rules or token buckets come later, that's when I introduce a Strategy.'",
+      "proTip": "KISS is a *response curve*, not a static rule. As requirements grow, structure grows — but only the structure the new requirements force, never speculative structure."
+    },
+    {
+      "id": "q3",
+      "part": "A — KISS",
+      "subtopic": "KISS — Keep It Simple",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": [
+        "A2",
+        "A4"
+      ],
+      "l5Pattern": null,
+      "question": "You've designed a chess engine using a single `Game` class that holds the board state, validates moves, and tracks turn history. The interviewer says: 'This feels too monolithic — shouldn't you split it up?' Two candidates respond differently. Candidate X immediately agrees and starts decomposing into Board, MoveValidator, History, GameState, and TurnManager. Candidate Y pauses and asks: 'What specifically is the concern — testability, future variants like Chess960, or readability?' Why does Y's response carry more senior signal even though X's decomposition is technically defensible?",
+      "options": [
+        "X's decomposition is wrong because the Game class is the canonical aggregate root for chess and breaking it apart violates DDD principles; Y is correct only because they implicitly preserve the aggregate boundary by asking for clarification before splitting.",
+        "Y's response shows that complexity is added *in response to a stated need*, not in response to interviewer pressure. X capitulates to the pushback by adding structure without knowing which problem the structure is meant to solve, which is the same anti-pattern as over-engineering up front — except triggered by anxiety rather than enthusiasm.",
+        "Y is correct because the interviewer's question is a trick — the Game class is fine as-is and any decomposition would violate KISS regardless of which subsystem is broken out. X loses points for accepting the premise that a split is needed at all when the right answer is to defend the monolithic design.",
+        "Y's response is preferable mainly because it slows the interview down and gives both parties time to think; the actual decomposition X proposes is reasonable, and the only real difference is pacing — which is a communication preference rather than a technical one."
+      ],
+      "correctIndex": 1,
+      "explanation": "Over-engineering under interviewer pressure is structurally identical to over-engineering up front: in both cases, structure is added without a concrete problem it solves. Y's clarifying question routes the decomposition to whatever the interviewer actually cares about — if it's testability, MoveValidator might be enough; if it's variants, an abstract RuleSet is the move; if it's just readability, a few well-named private methods may be all that's needed. The senior signal is 'I add structure to solve named problems', not 'I add structure when challenged'. Option C is wrong because the interviewer's pushback is legitimate input the candidate must engage with, not a trap to defend against.",
+      "interviewScript": "In your interview, say: 'Before I split this up, can I check what's driving the concern — is it that the class is hard to test, that it won't extend to variants like Chess960, or that the methods are getting hard to read? The right decomposition depends on which of those is biting, and I don't want to add structure that doesn't solve the actual problem.'",
+      "proTip": "When an interviewer challenges your design, the wrong response is to immediately change it. The right response is to surface *which problem* the change is meant to solve, then make the smallest change that solves it."
+    },
+    {
+      "id": "q4",
+      "part": "A — KISS",
+      "subtopic": "KISS — Keep It Simple",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": [
+        "A3",
+        "A4",
+        "B5",
+        "C2"
+      ],
+      "l5Pattern": "two-levels-of-indirection",
+      "question": "A team's `Order` class has grown to 800 lines. Half the methods are tax calculation logic, copied with minor variations from the `Quote` class. A new engineer proposes splitting tax logic into a `TaxEngine` shared by both classes, and adopting a Strategy pattern internally so jurisdiction-specific rules (US states, EU VAT, Indian GST) plug in cleanly. The team lead pushes back: 'KISS — start simple. We can always extract later.' Which response best captures the senior-level move?",
+      "options": [
+        "The lead is right — the duplication has been tolerable so far, so YAGNI applies: extract only when a concrete jurisdiction is actually being added. Premature extraction risks designing the wrong abstraction, and Strategy specifically is hard to refactor away once consumers depend on it.",
+        "The new engineer is right — 800-line classes with cross-class duplication are a signal that 'starting simple' has already failed twice (size of class, duplication of logic). KISS does not mean 'never refactor'; it means 'match structure to current needs', and current needs now include a third jurisdiction. The lead is invoking KISS to defend the status quo, which is a different thing.",
+        "Both are wrong — the right move is to leave Order as-is but introduce a TaxCalculator utility called from both classes, avoiding both the 800-line problem and the new abstraction. This is the only option that satisfies KISS, DRY, and YAGNI simultaneously without committing to a Strategy implementation.",
+        "The lead is right on KISS but wrong on timing — the extraction should happen, but only after the third jurisdiction's code is written and the duplication becomes textual rather than just conceptual; abstracting before the third instance produces a Strategy interface that doesn't fit the third case and has to be rewritten."
+      ],
+      "correctIndex": 1,
+      "explanation": "The two-levels-of-indirection trap here is misreading 'KISS' as 'don't refactor.' The actual signal is that the existing class has crossed two real thresholds: a 500-1000 line size (the article's own example) and cross-class duplication (the article's DRY example). KISS is supposed to *grow* structure as requirements grow; using KISS to defend an already-failed design is a misapplication. Option A invokes YAGNI in the wrong direction (the requirement to handle new jurisdictions is real, not hypothetical). Option C is the 'rule of three' canard — by the time you have 800 lines + 2-class duplication + a third jurisdiction incoming, you're past the threshold the article itself names. Option D delays the refactor for a fourth instance that's not needed to validate the abstraction. The senior insight: KISS is a *response curve*, and ignoring the size/duplication signals to invoke it as a slogan is the failure mode.",
+      "interviewScript": "In your interview, say: 'KISS doesn't mean don't refactor — it means match structure to current needs. Right now we have an 800-line class, the same logic duplicated across two classes, and a third jurisdiction landing. Each of those is a signal the article uses to say *now* extract. The TaxEngine extraction is paying down debt that already exists, not speculating about the future.'",
+      "proTip": "When someone invokes KISS to block a refactor, ask: 'has the simple version actually stayed simple?' If the class is already large or the logic is already duplicated, KISS is the *reason* to refactor, not the reason to delay."
+    },
+    {
+      "id": "q5",
+      "part": "B — DRY",
+      "subtopic": "DRY — Don't Repeat Yourself",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": [
+        "B1",
+        "B2"
+      ],
+      "l5Pattern": null,
+      "question": "Three classes — `User`, `Invoice`, and `SupportTicket` — each have an internal method that validates an email address with the same regex and the same null/empty/length-cap checks. A bug in the regex (it accepts `..@..`) is reported. What does DRY predict about the cost and risk of fixing this bug, and what is the structural recommendation that reduces both?",
+      "options": [
+        "Cost is low because all three classes use the same regex string, so a global find-and-replace fixes it; the structural recommendation is to keep the duplication and rely on lint rules to enforce consistency across copies.",
+        "Cost is high and risk-asymmetric because each class must be located, reviewed, and tested separately; structurally, an EmailValidator (utility, value object, or static method on a shared module) holds the rule once so the fix touches one place and every caller benefits at once.",
+        "Cost is low because email validation is one of those textbook utilities that every modern language ships in its standard library; the structural recommendation is to delete the in-class methods entirely and call the standard-library validator inline at every site.",
+        "Cost is high but the structural recommendation under DRY is to merge the three classes into a single `Validatable` base class that owns the email validation, so all three subclasses inherit the corrected behavior automatically without an explicit refactor."
+      ],
+      "correctIndex": 1,
+      "explanation": "The maintenance asymmetry is the whole DRY argument: writing the regex three times costs little, but every change after that costs three times as much *and* risks one location being missed. The structural fix is to put the rule in one place — class, module, or function, choice depends on the language. Option D over-corrects by introducing inheritance to share a validation method; that creates artificial coupling between unrelated entities (User, Invoice, Ticket) for the sake of one shared utility. Option C assumes the standard library covers your validation rules, which it usually doesn't (most projects layer their own constraints). Option A is technically possible for *this* fix but doesn't generalize — the next change might be only in two of the three call sites.",
+      "interviewScript": "In your interview, say: 'Three identical validations is the canonical DRY case. I'd extract an EmailValidator — utility class or static method, depending on the language — and have each of the three callers delegate to it. The bug fix becomes one change that propagates everywhere, and there's no risk of a stale copy. I would *not* introduce a shared base class just to share a validation method — that would couple unrelated entities.'",
+      "proTip": "DRY for *utilities* (validation, formatting, conversion) is almost always a win. DRY via *inheritance* for unrelated entities is almost always a mistake — that's coupling masquerading as reuse."
+    },
+    {
+      "id": "q6",
+      "part": "B — DRY",
+      "subtopic": "DRY — Don't Repeat Yourself",
+      "difficulty": "L3",
+      "style": "Gotcha/Trap",
+      "conceptIds": [
+        "B3",
+        "B4"
+      ],
+      "l5Pattern": null,
+      "question": "A developer notices that the `OrderService.calculateTotal()` and `RefundService.calculateTotal()` methods have nearly identical structure — both iterate line items, multiply by unit price, sum, then apply a percentage adjustment. They extract a shared `calculateLineSum(items, adjustmentPercent)` helper used by both. Six months later, accounting requires that *order* totals must include shipping in the line sum but *refund* totals must not, while also requiring that *refund* totals must round each line down before summing while orders should round at the end. What is the most accurate critique of the original DRY extraction?",
+      "options": [
+        "The extraction was correct in principle but should have used a Template Method pattern from the start, with `calculateLineSum` as the abstract method and OrderService/RefundService overriding it. The accounting changes would then have been routine subclass overrides instead of a refactor.",
+        "The extraction was wrong because `calculateTotal` violated SRP by mixing line-item iteration with adjustment application; the right fix six months ago was to split each method into two phases per class (iterate, adjust) rather than share code across classes — and then the accounting change would only touch the specific phase that diverged.",
+        "The extraction was wrong because it merged two pieces of code that *looked* similar but represented different business concepts. Order totals and refund totals share textual shape but obey different policies; collapsing them produced artificial coupling, so the accounting change now requires either branching inside the helper (defeating the extraction) or unwinding it.",
+        "The extraction was correct and the accounting change should be absorbed by adding a `Policy` parameter to `calculateLineSum` that encapsulates the shipping rule and rounding rule; the helper stays, the call sites stay, and the policy object captures the divergence — this is the canonical evolution of a shared utility under new requirements."
+      ],
+      "correctIndex": 2,
+      "explanation": "The article's core DRY warning is exactly this: *textual* similarity is not *conceptual* sameness. Order totals and refund totals serve different business purposes — they will diverge as policies diverge, and the original code's similarity was incidental. Forcing them to share a helper created artificial coupling, so when the accounting policies legitimately diverged the shared helper became the wrong abstraction. Option A doubles down on the wrong abstraction (Template Method makes the coupling formal). Option B is plausible-sounding but wrong: the SRP angle isn't the issue — the issue is conflating two business concepts that happened to compute similarly. Option D is the seductive 'just add a parameter' move — once you start passing policy flags into a shared helper, it's no longer a shared helper, it's a thin if/else with two callers; the abstraction has paid no real maintenance dividend.",
+      "interviewScript": "In your interview, say: 'These two methods looked alike but they're not the same concept — order total and refund total are different business operations that happened to have similar structure. Sharing the code coupled them artificially, so when their policies diverged the shared helper became the wrong abstraction. I'd unwind it: each service owns its own calculation, and we accept the duplication as the honest signal that these are two different things.'",
+      "proTip": "Before extracting a helper, ask: 'do these two pieces of code change for the same reasons?' If they change for *different* reasons, leaving the duplication is correct — that's not a DRY violation, that's two distinct concepts sharing an accident of shape."
+    },
+    {
+      "id": "q7",
+      "part": "B — DRY",
+      "subtopic": "DRY — Don't Repeat Yourself",
+      "difficulty": "L4",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": [
+        "B3",
+        "B4",
+        "B5"
+      ],
+      "l5Pattern": null,
+      "question": "You're designing an e-commerce checkout. Three places need to format prices for display: the cart subtotal, the line-item display, and the email receipt. All three currently call `String.format(\"$%.2f\", amount)`. A junior on your team wants to extract `formatPrice()`. You say 'not yet — leave the duplication for now.' The interviewer asks why. What is the most defensible justification?",
+      "options": [
+        "Three duplications is below the rule-of-three threshold for extraction, so DRY does not apply at this count; once a fourth call site appears, the helper becomes mandatory under standard refactoring practice.",
+        "The three call sites might diverge — receipts may need a currency code, cart may need locale-aware formatting, line items may need promotional strikethrough — and extracting now would either collapse those divergences into a single helper with a flag soup or force a painful refactor when the first divergence appears. Leaving the duplication keeps each site free to evolve, and the cost of three identical one-liners is genuinely low.",
+        "DRY does not apply to formatting code as a category; standard-library calls like `String.format` are by convention exempt from DRY because they're already abstracted by the language, and wrapping them in a helper adds no maintenance value at any scale.",
+        "Extracting `formatPrice()` would couple the cart, line item, and email modules through a shared dependency, violating Separation of Concerns and creating a circular import risk in many language ecosystems; DRY in this case yields to the layering principle and the duplication is the price of clean module boundaries."
+      ],
+      "correctIndex": 1,
+      "explanation": "The senior move is to *predict* whether the three call sites will evolve together or apart. For prices on a checkout, they're likely to diverge: receipts often need ISO currency codes for international users, carts need locale-aware decimal separators, line items may have promotional formatting. Extracting now risks the same trap as q6 — three sites that *look* the same but obey different policies. The honest tradeoff is: cost of duplication (three call sites of one line each) vs cost of premature abstraction (a `formatPrice(amount, options...)` whose options keep growing). Option A is the rule-of-three as a slogan, not a thinking tool. Option C invents an exemption that doesn't exist. Option D invents a coupling problem that wouldn't actually arise — a one-line utility doesn't break SoC.",
+      "interviewScript": "In your interview, say: 'I expect these three sites to drift — receipts probably want a currency code, the cart probably wants locale-aware formatting, line items might need promotional styling. If I extract now I'll either bake those divergences into a flag soup or unwind the helper later. The cost of three one-line duplicates is genuinely lower than the cost of the wrong abstraction, so I'd leave it. The article makes the same call about email validation in the User class — start in place, extract once duplication keeps recurring.'",
+      "proTip": "When choosing whether to DRY a small utility, predict the *evolution paths* of each call site. If they're likely to diverge, the duplication is the honest answer. If they'll move together, extract now."
+    },
+    {
+      "id": "q8",
+      "part": "B — DRY",
+      "subtopic": "DRY — Don't Repeat Yourself",
+      "difficulty": "L5",
+      "style": "Interviewer Pushback",
+      "conceptIds": [
+        "B5"
+      ],
+      "l5Pattern": "adversarial-pushback",
+      "question": "An interviewer says: 'You've left the email-validation logic duplicated in three classes. Isn't that a clear DRY violation?' You answered earlier that you wanted to start with the duplication. The interviewer follows up with: 'Wouldn't a senior engineer extract this immediately? You're cutting corners.' Which response best preserves senior signal?",
+      "options": [
+        "'You're right — let me extract it now. I should have caught it the first time.' (Concedes immediately; quickly extracts the validator before continuing the design.)",
+        "'I'd push back gently — I made an explicit tradeoff between DRY and KISS, and chose to leave the duplication until I saw it propagate. If you want me to extract it now, I'm happy to, but the original choice wasn't an oversight — it was a deferral with a concrete trigger condition: extract when the same logic shows up a third time, or when the first variation appears in any of the three sites. The duplication itself isn't a defect; an unmonitored duplication would be.'",
+        "'DRY is overrated in modern codebases — most teams I've worked with prefer duplication over premature abstraction, and my approach reflects that consensus. The interviewer's framing assumes a 2010s view of code quality that the industry has largely moved past.'",
+        "'The duplication is fine because email validation is a stable rule that's unlikely to change; DRY only applies to logic that evolves frequently, and email regexes have been the same since RFC 5322 — the standard's stability makes the principle inapplicable here.'"
+      ],
+      "correctIndex": 1,
+      "explanation": "This is the article's exact senior-vs-junior distinction: 'showing you understand this tradeoff is what separates senior candidates.' Option B does three senior things at once — (1) names the principles in tension (DRY vs KISS), (2) makes the deferral *explicit and conditional* ('extract on the third occurrence or on first divergence'), (3) distinguishes a *managed* duplication from an *unmonitored* one. Option A capitulates; a senior engineer doesn't agree just because the interviewer pushed. Option C dismisses the principle, which signals lack of judgment rather than judgment. Option D invents a category exemption that's not real — email validation rules *do* evolve (deliverability checks, internationalized email, deny-lists). The deeper insight: under pushback, the senior signal is to defend a *named tradeoff with a trigger condition*, not to defend or abandon a position rigidly.",
+      "interviewScript": "In your interview, say: 'I'd push back gently — I made an explicit DRY-vs-KISS tradeoff and deferred extraction with a trigger: pull it out when the same logic shows up a third time or when any one of the three call sites needs to diverge. The duplication wasn't an oversight, it was a managed deferral. If you'd like me to do it now I'm happy to, but I want to be clear it wasn't a missed catch.'",
+      "proTip": "Interviewers test whether you're driven by principles (junior) or by tradeoffs (senior) by pushing back. The senior response defends a named tradeoff with a concrete trigger, neither caving nor digging in."
+    },
+    {
+      "id": "q9",
+      "part": "C — YAGNI",
+      "subtopic": "YAGNI — You Aren't Gonna Need It",
+      "difficulty": "L2",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": [
+        "C1"
+      ],
+      "l5Pattern": null,
+      "question": "Designing a parking lot, the requirements explicitly say: 'flat hourly rate, three vehicle sizes, single entry/exit.' A candidate's design includes: a `PaymentGateway` interface with implementations for credit card, PayPal, crypto, and Apple Pay; an `EVChargingStation` subclass of ParkingSpot; a `ValetMode` strategy hooked into the entry flow; and a `MultiTenantOperator` class to support running the lot under different brand names. Why is this design weaker than one that implements only the stated requirements?",
+      "options": [
+        "The design correctly anticipates standard parking lot features — most real lots offer EV charging, valet, and multiple payment options, so the candidate is showing realistic domain awareness rather than over-engineering.",
+        "Each unrequested feature represents a guess about future requirements that adds code, surface area, and maintenance burden today; the most likely outcome is that real future requirements will look *different* from what was guessed (different payment processor, different EV charging API, different brand-licensing model), making the speculative code dead on arrival.",
+        "The design is weaker because it adds the right abstractions in the wrong order — the candidate should have defined a `Configurable` mixin first and derived all feature toggles from it, rather than instantiating each feature as a top-level class hierarchy that's hard to disable.",
+        "The design is weaker because it violates SOLID's DIP principle — `EVChargingStation` and `ValetMode` introduce concrete dependencies into the entry flow that should have been injected through interfaces from the start."
+      ],
+      "correctIndex": 1,
+      "explanation": "The whole YAGNI argument compressed: each speculative feature carries certain present cost (code to read, test, maintain) for uncertain future benefit. The article's specific point is that *guesses are usually wrong* — when EV charging actually arrives the API will be from a vendor you didn't anticipate, when valet arrives the workflow will be different from your `ValetMode`. The dead code then has to be unwound and replaced. Option A romanticizes 'domain awareness' as a substitute for satisfying the requirements actually given. Options C and D substitute one over-engineering critique (wrong abstraction shape) for the actual problem (wrong abstractions present at all).",
+      "interviewScript": "In your interview, say: 'The requirements say flat-rate, three sizes, single entry/exit. EV charging, valet, multi-tenancy, four payment processors — none of those are asked for. I'd implement what's specified. If the interviewer asks how I'd extend for EV charging, that's the cue to discuss design — but not to have already built it. Pre-built abstractions for unrequested features almost always end up the wrong shape when the requirements actually land.'",
+      "proTip": "In an LLD interview, treat unrequested features as forbidden until the interviewer explicitly raises them. 'How would you extend this?' is the cue for discussion, not for retroactive justification."
+    },
+    {
+      "id": "q10",
+      "part": "C — YAGNI",
+      "subtopic": "YAGNI — You Aren't Gonna Need It",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": [
+        "C2",
+        "C3"
+      ],
+      "l5Pattern": null,
+      "question": "Designing an in-memory chat room, you choose `List<Message>` for message history. A teammate says: 'We should use an interface — `MessageStore` — so we can swap to a database later.' What is the most accurate YAGNI-aware response?",
+      "options": [
+        "Agree and introduce the `MessageStore` interface with one in-memory implementation. Even one implementation behind an interface is good practice — it documents intent, supports testing via mock implementations, and decouples the chat room from storage details. The interface is essentially free and the future swap becomes trivial.",
+        "Refuse and use `List<Message>` directly without any abstraction. YAGNI prohibits any structure that isn't required to make the current code work; the interface is a guess about future requirements and adds indirection that hurts readability now without buying anything today.",
+        "Use `List<Message>` directly but keep the storage access localized to a small set of methods (`addMessage`, `recentMessages`) inside the chat room class. If a database becomes a real requirement, those methods are the natural extraction point — but until then, the interface would carry indirection cost without a corresponding benefit. This is what 'design with extension in mind, but only implement what's needed now' actually looks like.",
+        "Use `List<Message>` directly but immediately wrap it in a `MessageRepository` class that mediates all access; this gives a swap point without an interface, satisfies YAGNI by avoiding speculative inheritance, and lets you evolve to an interface later if a second implementation ever materializes — getting the best of both worlds at minimal cost."
+      ],
+      "correctIndex": 2,
+      "explanation": "The article's exact distinction: 'Design with extension in mind, but only implement what's needed now.' Option C is the operational form — keep the access surface narrow and well-named so a future swap is mechanical, but don't manufacture an interface for a hypothetical second implementation. Option A is the seductive 'interfaces are free' position; they're not free — they spread cognitive load across two declarations, complicate navigation, and lock in a contract before you know what the contract should look like for the *real* second implementation. Option B is YAGNI-as-a-cudgel — refusing all forethought, which the article explicitly warns against ('this principle doesn't mean never think ahead'). Option D adds a wrapping class that has the same indirection cost as an interface without any of the benefit; you've paid for an abstraction you didn't need.",
+      "interviewScript": "In your interview, say: 'I'd use a List directly but localize all storage access into a couple of methods on the chat room — addMessage and recentMessages. That gives me a clean extraction point if a real database requirement lands, without forcing an interface I'd have to redesign once I know what the actual storage looks like. That's the difference between designing for extension and building for it.'",
+      "proTip": "The shape of YAGNI-friendly extensibility is *narrow access surface*, not *interfaces and abstract classes*. Keep the points of contact small; the extraction will be obvious if it's ever needed."
+    },
+    {
+      "id": "q11",
+      "part": "C — YAGNI",
+      "subtopic": "YAGNI — You Aren't Gonna Need It",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": [
+        "C3",
+        "C4"
+      ],
+      "l5Pattern": null,
+      "question": "Halfway through your parking lot design, the interviewer says: 'How would you extend this to support EV charging?' You haven't built any EV-related code, and you've intentionally kept the design narrow per YAGNI. What is the strongest response?",
+      "options": [
+        "Apologize for not having anticipated it, then quickly insert an `EVChargingCapable` interface and refactor `ParkingSpot` to implement either it or a plain `ParkingSpot` interface. Demonstrating that you can retrofit on demand under pressure is what the question is testing.",
+        "Sketch the change conceptually: a `PowerOutlet` value object on each spot (null if non-EV), a `chargingRate` field on the spot, and a small EV-aware billing path that adds energy cost to the parking fee. Note that this is a small, localized addition because the original design didn't pre-commit to a `ChargingStation` class hierarchy that you'd now have to reconcile. This is the article's exact intent: design with extension in mind, build only what's needed now, then *talk* about extension when asked.",
+        "Defend the current design and decline to discuss the extension on YAGNI grounds — speculating about EV charging would violate the principle and waste interview time. If EV charging becomes a real requirement, the team can address it then.",
+        "Propose a complete new design from scratch that treats EV charging as a first-class concern, with a `ChargingPort` aggregate, a `ChargingSession` entity separate from `ParkingSession`, a `ChargingPolicy` strategy for time-of-day pricing, and a `GridLoad` interface for utility integration; this shows the depth of design you'd bring if EV charging were in scope from the start."
+      ],
+      "correctIndex": 1,
+      "explanation": "'How would you extend this?' is the cue the article *explicitly* names: it's the place to demonstrate that your design is extension-friendly without having pre-built the extension. Option B does the right thing — sketches a localized addition, points out *why* the original design accommodates it (no premature class hierarchy to reconcile), and leaves the actual implementation for if/when the requirement is real. Option A misreads the question as a punishment for YAGNI; it's the opposite — the interviewer is opening a discussion, not failing the design. Option C refuses the discussion entirely, which is a different failure mode (silence reads as inability to think about extension at all). Option D blows up the scope — proposing a complete redesign for a follow-up question signals poor judgment about which questions warrant which depth of response.",
+      "interviewScript": "In your interview, say: 'Good question. I'd add a PowerOutlet value object to ParkingSpot — null for non-EV spots — plus a chargingRate field, and extend the billing path to add energy cost on top of the time-based fee. That's a small, localized change because I didn't pre-build a ChargingStation hierarchy that would now have to be reconciled with the existing ParkingSpot design. If the requirement becomes real I can implement it in a couple of hours.'",
+      "proTip": "Treat 'how would you extend this?' as a discussion prompt, not a coding task. Sketch the change in 2-3 sentences and point out *why your existing structure accommodates it*. That's the YAGNI win condition."
+    },
+    {
+      "id": "q12",
+      "part": "C — YAGNI",
+      "subtopic": "YAGNI — You Aren't Gonna Need It",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": [
+        "C3",
+        "C4",
+        "G1",
+        "G5"
+      ],
+      "l5Pattern": "framing-is-wrong",
+      "question": "You designed a `NotificationService` with no abstraction over the email-sending dependency. The interviewer says: 'OCP would tell you to introduce a `MessageSender` interface so you can add SMS later without modifying NotificationService. Why didn't you?' What is the senior-level move?",
+      "options": [
+        "Concede that OCP applies and immediately introduce the interface; OCP and YAGNI are direct conflicts and OCP is the more important principle for class design, so the right call is to default to OCP unless the abstraction is actively painful.",
+        "Argue that OCP doesn't apply because there's no concrete plan to add SMS, so introducing the interface preemptively is the speculative-future-requirement pattern YAGNI specifically warns against. If SMS lands as a real requirement, the interface is a one-method extraction.",
+        "Reject the framing of the question. OCP and YAGNI are not in conflict — OCP says 'open for extension, closed for modification' which is about *the shape of the change* when extension happens, not about whether to build the abstraction up front. The right move is to keep `NotificationService` concrete now, *and* to keep its dependency on the email sender narrow enough that introducing an interface later requires no changes to the calling code. The interviewer is testing whether you can defend a design that satisfies both principles by reading them as design *guides* rather than build orders.",
+        "Agree with the interviewer's framing and admit YAGNI was the wrong choice here — OCP is one of the few SOLID principles that survives YAGNI critique, because the cost of an interface is genuinely near zero in modern languages and the future swap cost is genuinely high without it; the call should default to OCP."
+      ],
+      "correctIndex": 2,
+      "explanation": "The framing-is-wrong move: the interviewer presents OCP and YAGNI as if they're in tension, but the article's own treatment shows they're not. OCP is about *what changes when extension happens* (you add a new class, you don't modify the old one). YAGNI is about *whether to introduce abstractions before you have a concrete reason*. You can satisfy both by keeping the dependency narrow (a single method call, not a sprawl of email-specific calls) so that introducing the `MessageSender` interface *when SMS actually lands* is a mechanical change that doesn't touch `NotificationService` semantics. Option A treats OCP as a default-to-on rule, ignoring its cost. Option B is correct in direction but doesn't unpack *why* OCP and YAGNI both pass — it just picks YAGNI. Option D is wrong on the cost claim ('interfaces are free') and capitulates to a false dichotomy. The deeper insight: principles are tools for thinking; when they appear to conflict, the resolution is usually that one of them was being misapplied, not that you have to pick.",
+      "interviewScript": "In your interview, say: 'I'd push back on the framing. OCP and YAGNI aren't in conflict here — OCP describes what should happen when extension occurs (add a new class, don't modify the old one), and YAGNI describes when to build the abstraction (only when there's a real reason). If I keep NotificationService's dependency on the email sender to a single narrow call, then when SMS arrives I can extract a one-method MessageSender interface, write SmsSender, and inject it — without modifying any existing logic. Both principles pass.'",
+      "proTip": "When an interviewer poses two principles as if they conflict, the senior move is usually to show they don't — one is being misapplied. Resolve the apparent conflict by separating *design intent* from *build order*."
+    },
+    {
+      "id": "q13",
+      "part": "D — Separation of Concerns",
+      "subtopic": "Separation of Concerns",
+      "difficulty": "L2",
+      "style": "Failure Analysis",
+      "conceptIds": [
+        "D1",
+        "D2"
+      ],
+      "l5Pattern": null,
+      "question": "A `PlayerProfile` class has a method `renderProfileHtml()` that pulls the player's stats from the database, formats them as HTML strings with inline `<b>` tags around personal records, and writes the resulting HTML to a file. Three teams need to change something about player profiles next quarter: the design team wants different HTML styling, the analytics team wants a new stat on the page, and the storage team wants to move from filesystem to S3. What is the structural cost of this design?",
+      "options": [
+        "Each team's change requires editing the same `renderProfileHtml` method; their pull requests will conflict, their tests will entangle, and a regression in one team's change can break the others. The class is doing rendering, data access, and storage in one place, so a change driven by any one of those three concerns forces touching the others' code.",
+        "The design's main cost is performance — pulling from the database inside a method that also does HTML formatting blocks the rendering thread on I/O, so the team should extract the database call into an async preloader while keeping HTML and storage logic together for cohesion.",
+        "The cost is naming hygiene — `renderProfileHtml` should be split into `getProfileHtml` and `saveProfileHtml` so the interface signals the side effect; the underlying coupling between rendering, data access, and storage is acceptable as long as the method names are accurate.",
+        "The design is acceptable because all three changes are inside a single class, which means version control and code ownership are simple; SoC would only become important if the changes were spread across multiple classes that needed to evolve independently."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's tic-tac-toe example compressed: when one method mixes data access, presentation, and storage, every change driven by any one of those concerns has to traverse the other two. The teams collide on the same file, the tests entangle (you can't unit-test rendering without a DB and a filesystem), and changes to one concern can silently break the others. Option B substitutes a performance critique for the structural one. Option C treats SoC as a naming problem rather than a structural one. Option D inverts the principle — colocating concerns *inside* a class is exactly the failure mode SoC names; the boundary doesn't have to be class-vs-class to matter.",
+      "interviewScript": "In your interview, say: 'This class mixes data access, presentation, and storage. A change driven by any one of those — a new stat, a styling change, an S3 migration — forces editing code from the other two. I'd split it into a PlayerStatsRepository for data, a ProfileHtmlRenderer for presentation, and a ProfileWriter for storage. Each team can then change one thing without touching the others, and each piece is independently testable.'",
+      "proTip": "When you spot a method whose name uses three verbs (`renderProfileHtml` → render + format + save), that's almost always SoC failure. Split until each method's name uses one verb."
+    },
+    {
+      "id": "q14",
+      "part": "D — Separation of Concerns",
+      "subtopic": "Separation of Concerns",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": [
+        "D2",
+        "D3"
+      ],
+      "l5Pattern": null,
+      "question": "In a tic-tac-toe game, a candidate proposes a `Game` class that owns a `Board`, a `Display`, and an `InputHandler` — passing them in via the constructor. The interviewer asks: 'What concrete benefit does this layering give you that a single `Game` class with all three responsibilities wouldn't have?' What is the strongest concrete answer?",
+      "options": [
+        "It allows the game to support more than two players in the future without restructuring; a multi-player variant can subclass `Game` and override the turn-management logic without touching `Board` or `Display`.",
+        "It improves performance by allowing the renderer to run on a separate thread from the input handler, since they're now independent objects; the single-class design would force them onto the main event loop and degrade frame rate.",
+        "It lets you swap any one of those three implementations without changing the others. Console input → GUI input is a change to `InputHandler` only. Text board → graphical board is a change to `Display` only. New win condition is a change to `Board` only. Each change is isolated to one class, and each class can be unit-tested independently with stub implementations of the other two.",
+        "It satisfies SOLID's DIP principle by injecting dependencies through the constructor; the main benefit is that the design becomes inversion-of-control compliant, which makes it compatible with standard DI frameworks."
+      ],
+      "correctIndex": 2,
+      "explanation": "The article's exact case study: 'If you want to switch from console input to a GUI, you only touch InputHandler. If you want to change how the board displays, you only modify Display. If you need to add new win conditions, you only update Board.' Option A is a different benefit (extensibility for variants) that the layering does also enable, but it's not the *primary* concrete benefit the article cites. Option B invents a concurrency benefit that's not what SoC is about and would be a non-improvement on the single thread that tic-tac-toe runs on. Option D conflates SoC with DIP — they're related but distinct; SoC is about *what* lives where (responsibilities), DIP is about *which direction* the dependencies point (abstractions vs concretes).",
+      "interviewScript": "In your interview, say: 'Each of those three classes can change independently of the others. Console-to-GUI is an InputHandler change. New display style is a Display change. New win condition is a Board change. None of those changes leak across the boundary. And because each class only needs the others through small interfaces, I can unit-test the Board with a stub Display and stub InputHandler without standing up the real ones.'",
+      "proTip": "When an interviewer asks 'what does this layering buy you?', list specific changes that become single-class edits. That's the operational form of SoC's value."
+    },
+    {
+      "id": "q15",
+      "part": "D — Separation of Concerns",
+      "subtopic": "Separation of Concerns",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": [
+        "D3",
+        "D4"
+      ],
+      "l5Pattern": null,
+      "question": "You've split a tic-tac-toe game into `Board`, `Display`, and `InputHandler`. The interviewer asks: 'Doesn't `Display.render(board)` couple the renderer to the board's internal structure? You're passing the whole board into the renderer, so a change to how the board stores its state (2D array → bitboard) would force a change in the renderer.' What is the most accurate response?",
+      "options": [
+        "The interviewer is right and the design is broken — `Display.render(board)` should instead receive a pre-computed `RenderModel` produced by `Board.toRenderModel()`, which keeps the storage representation hidden from the renderer entirely. Without that intermediate model, the SoC split is illusory.",
+        "The interviewer is right that there's coupling, and the fix is to define a small read-only interface on the board — something like `BoardView` exposing `getCell(row, col)` and `getDimensions()` — that the renderer depends on. The board's storage representation can change freely behind that interface; the renderer only knows about cells and dimensions, not arrays or bitboards.",
+        "The interviewer is wrong — passing the whole board into the renderer is fine because the board's public methods are the abstraction; even if the storage changes from a 2D array to a bitboard, as long as `Board.getCell(row, col)` keeps the same signature the renderer is unaffected. The coupling is to the *method surface*, which is exactly what objects are for.",
+        "The interviewer is right and the renderer should instead poll the board through events — `board.subscribe(renderer)` — so the renderer is decoupled from both the board's data shape and from being called explicitly; this is the only way to truly separate the two concerns."
+      ],
+      "correctIndex": 2,
+      "explanation": "The interviewer's pushback contains a confusion that the senior candidate should catch and correct: passing an object isn't the same as depending on its internal storage. The renderer depends on the board's *public method surface* (`getCell`, `getDimensions`, `hasWinner`, etc.) — not on whether those methods are backed by a 2D array, a bitboard, a sparse map, or a database. Storage changes that preserve the method contract are invisible to the renderer. Option A is a more elaborate restatement of the same misunderstanding (a `RenderModel` is an interface; the board's public methods *already are* an interface). Option B introduces an extra named interface (`BoardView`) for a problem that doesn't exist — the public method surface of `Board` is already the interface in any reasonable language. Option D adds publish-subscribe coupling that solves a different problem (decoupling *who calls whom*) and is worse for a synchronous game loop. The deeper insight: SoC is preserved by encapsulation, not by parameter shape.",
+      "interviewScript": "In your interview, say: 'I disagree — Display depends on Board's public methods, not on its internal storage. If Board switches from a 2D array to a bitboard, the renderer keeps calling getCell(row, col) and never notices. The coupling is to the method contract, which is what objects are for. Adding an extra RenderModel or BoardView interface would solve a problem that doesn't exist here.'",
+      "proTip": "Encapsulation is the unit of SoC, not parameter shape. As long as a callee depends only on the caller's public methods, the caller's internals can change freely."
+    },
+    {
+      "id": "q16",
+      "part": "D — Separation of Concerns",
+      "subtopic": "Separation of Concerns",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": [
+        "D4",
+        "F1",
+        "F4"
+      ],
+      "l5Pattern": "trade-off-inversion",
+      "question": "You've been told a junior on your team treats SoC and SRP as the same principle and applies them interchangeably. The interviewer asks: 'Are they the same principle? If not, where do they diverge in a way that produces different design choices?' What is the most precise answer?",
+      "options": [
+        "They are the same principle; SRP is just SoC applied at the class level, and the article essentially treats them as interchangeable. Any time you split for one, you've satisfied the other. The junior's intuition is correct.",
+        "They are different principles applied at different scales. SoC operates across the *system* — UI vs business logic vs storage, often crossing module or service boundaries. SRP operates within a *single class* — one reason to change. A class can satisfy SRP (one responsibility, one reason to change) while sitting inside a system that violates SoC (because the system's layers leak across each other), and a system can satisfy SoC while containing classes that violate SRP. They constrain each other but neither implies the other.",
+        "They are different but only in name; SoC is the older term from structured programming and SRP is the OO restatement. In practice they produce identical decompositions, so treating them as the same principle is a harmless simplification that doesn't lead to bad design choices.",
+        "They are different principles and SRP is the stricter of the two. Any class that satisfies SRP automatically satisfies SoC, but the reverse is not true — SoC permits multi-responsibility classes as long as the responsibilities are within the same architectural concern. This means SRP-driven designs are always SoC-compliant, but SoC-driven designs may need additional refactoring to satisfy SRP."
+      ],
+      "correctIndex": 1,
+      "explanation": "The trade-off-inversion: most candidates treat SoC and SRP as the same principle just because both involve splitting things up. The senior insight is that they operate at different scales and can fail independently. A class can be perfectly SRP-compliant (a `PlayerStatsCalculator` does one thing — calculate stats) but live inside a system that mixes presentation, business, and storage logic across module boundaries (SoC failure). Conversely, a system can have clean architectural layers (UI module, business module, storage module) but contain a god-class inside the business module that does ten things at once (SRP failure). They constrain each other but neither implies the other. Option A is the junior's misconception. Option C is wrong on the history and dangerously wrong on practice. Option D invents a containment relationship that doesn't hold — SRP at the class level says nothing about whether the *system's* layers are clean.",
+      "interviewScript": "In your interview, say: 'They're related but operate at different scales. SoC is system-level — UI, business, storage as separate concerns. SRP is class-level — one reason to change. A clean SRP class can sit inside a system with terrible SoC, if the system's layers are tangled across modules. And clean architectural layers can hide an SRP-violating god-class inside one of them. They constrain each other but neither implies the other, so you have to evaluate them separately.'",
+      "proTip": "When you hear someone use SoC and SRP interchangeably, suspect a thinking shortcut. Ask them: 'at what scale?' SoC = system; SRP = class. Most design discussions are clearer once that's separated."
+    },
+    {
+      "id": "q17",
+      "part": "E — Law of Demeter",
+      "subtopic": "Law of Demeter",
+      "difficulty": "L2",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": [
+        "E1",
+        "E2"
+      ],
+      "l5Pattern": null,
+      "question": "A shipping module computes the destination zip code as `order.getCustomer().getAddress().getZipCode()`. The Customer team refactors to support multiple addresses per customer (`getAddresses()` returning a list, with a `getDefaultAddress()` accessor). What predictable failure does the shipping module experience, and what does the original chain reveal about its design?",
+      "options": [
+        "The shipping module fails to compile because `getAddress()` no longer exists, and the chain reveals that the shipping code knew about Customer's internal organization (Customer-has-Address-has-ZipCode); it had to traverse three different object types to get one piece of data, so any reorganization of those types breaks it.",
+        "The shipping module continues to work because Java's reflection layer falls back to the new `getDefaultAddress()` method by name similarity; the chain is fine and the refactor is non-breaking thanks to language-level resilience to accessor renames.",
+        "The shipping module fails at runtime because `getAddress()` returns `null`, and the chain reveals that the shipping code didn't null-check at every level; the right fix is to wrap the chain in `Optional.ofNullable(...).map(...)` to handle the new shape resiliently.",
+        "The shipping module fails because the new `Customer.getAddresses()` returns a list rather than a single Address, and the chain reveals that the shipping code assumed cardinality 1; the right fix is to update the chain to `getCustomer().getAddresses().get(0).getZipCode()` and handle empty lists explicitly."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's exact example. The chain is fragile because the shipping module depends on the *internal organization* of three different types — Customer's relation to Address, Address's exposure of ZipCode. Any of those can change. When Customer reorganizes its address relation (single → list, or address → addressBook → primaryAddress), the shipping code breaks. The right fix is for Customer to expose a higher-level method like `getShippingZipCode()` that owns the navigation internally; the shipping module talks only to its immediate friend (Customer) and is insulated from how Customer organizes its data. Option B invents a language feature that doesn't exist. Option C addresses null-safety, which is a real concern but not the structural one Demeter is about. Option D adapts the chain to the new shape — that's exactly the maintenance burden Demeter aims to eliminate, doing it again.",
+      "interviewScript": "In your interview, say: 'The chain breaks because the shipping module depended on Customer's internal structure — knowing that Customer has an Address that has a ZipCode. When that structure changes, the shipping module changes too. The Demeter fix is to put a getShippingZipCode() method on Customer; Customer owns the navigation, and the shipping module talks only to its immediate friend.'",
+      "proTip": "Every dot in a chain represents a coupling. Three dots = three things you can't change without breaking the caller. Push the navigation behind a method on the immediate friend."
+    },
+    {
+      "id": "q18",
+      "part": "E — Law of Demeter",
+      "subtopic": "Law of Demeter",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": [
+        "E2",
+        "E3"
+      ],
+      "l5Pattern": null,
+      "question": "A reporting service needs three pieces of data from a `User`: the user's display name, the user's primary email, and the zip code of the user's billing address. A junior writes `user.getName()`, `user.getEmail()`, and `user.getBillingAddress().getZipCode()`. They argue the third one is fine because two-dot chains are 'short.' Why is the third call structurally different from the first two even though it only has one extra hop?",
+      "options": [
+        "The third call is structurally identical to the first two — `getBillingAddress().getZipCode()` is just a two-dot chain that any modern style guide treats as acceptable; Demeter applies only when chains exceed three or four hops or when the intermediate types are owned by different bounded contexts.",
+        "The third call traverses to a different object (`Address`) and then asks *that* object for data; the reporting service now depends on `Address` having a `getZipCode()` method and on `User` keeping its billing address as a navigable property. The first two calls only depend on `User`'s public surface. Hop count isn't the metric — *whether you traverse to an object you don't own* is the metric.",
+        "The third call is worse only because zip codes are strings and Java's String hashing is slower than the integer ID lookup the first two calls would use internally; the structural pattern is fine but the performance cost makes it worth pushing into a single accessor.",
+        "The third call is worse because `Address` is mutable in most domain models, so the reporting service might receive a stale zip code if the user updates their address mid-report; the right fix is to clone the address before reading from it, not to introduce a new accessor on User."
+      ],
+      "correctIndex": 1,
+      "explanation": "The misconception the question targets is treating Demeter as a *hop-count* rule when it's actually a *coupling-direction* rule. `user.getName()` and `user.getEmail()` couple the reporting service to User's public method surface — that's the legitimate kind of coupling, the whole reason objects exist. `user.getBillingAddress().getZipCode()` couples the reporting service to *both* User (must expose `getBillingAddress`) *and* Address (must expose `getZipCode`). Now a refactor that touches Address's interface ripples back to the reporting service even though the reporting service has no business caring about Address. The fix is `user.getBillingZipCode()` — the navigation is encapsulated, and the reporting service stays coupled only to User. Option A invents a quantitative threshold that the principle doesn't have. Options C and D substitute unrelated concerns (performance, mutability) for the structural one.",
+      "interviewScript": "In your interview, say: 'The first two calls couple me to User. The third couples me to User AND to Address — I'm now depending on Address's interface even though Address isn't part of my business. The fix is to add user.getBillingZipCode() so User owns the navigation and I stay coupled only to my immediate friend. Hop count isn't the rule; whether I'm reaching into a stranger object is.'",
+      "proTip": "Demeter isn't 'no chains'; it's 'no traversal into objects you don't own.' One hop into a foreign type is the violation, even if the chain looks short."
+    },
+    {
+      "id": "q19",
+      "part": "E — Law of Demeter",
+      "subtopic": "Law of Demeter",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": [
+        "E4",
+        "E5"
+      ],
+      "l5Pattern": null,
+      "question": "An interviewer reviews your code: `queryBuilder.select(\"name\").from(\"users\").where(\"active\", true).orderBy(\"name\").build()`. They say: 'That's a five-method chain — isn't it a Law of Demeter violation?' What is the strongest response?",
+      "options": [
+        "Concede and refactor — long chains are always a Demeter risk regardless of return type, and breaking the chain into intermediate variables (`var q = queryBuilder.select(\"name\"); q = q.from(\"users\"); ...`) makes it explicit that each step is an independent operation rather than a single fluent statement.",
+        "Defend the chain by pointing out that fluent interfaces typically return `this` rather than a new object, so even though there are five method calls, the receiver is the same builder object the whole way through; the chain doesn't traverse to a stranger object, so Demeter isn't violated. The article makes this exact distinction — chaining through *different* object types is the violation, fluent chaining on the *same* type is fine.",
+        "Defend the chain on practicality grounds — fluent builders are too widely used to be considered a violation, and code style guides for Java/C#/JS all permit them; the principle has to yield to community convention even if it strictly applies.",
+        "Defend the chain on grounds that builders are exempt from Demeter because they're a known design pattern; the GoF book explicitly carves out builder-style fluent interfaces as a permitted exception to the principle, so the call site is correct."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article's exact carve-out: 'Method chaining itself is not the problem. Fluent interfaces like builder.setName(\"John\").setAge(30).build() are fine because they return the same object type. The issue is specifically when chaining leaks internal structure by traversing through multiple different object types.' The right defense names the structural reason (return type identity), not just the convention. Option A capitulates and produces uglier code without addressing the actual question. Option C defends the right thing but for the wrong reason — convention isn't an answer. Option D invents a GoF exemption that doesn't exist and would be wrong even if it did (the GoF book doesn't address Demeter at all).",
+      "interviewScript": "In your interview, say: 'Fluent chaining returns the same builder each step — every dot is a method call on the same object. Demeter is about chaining through *different* object types because that leaks the structure of objects you don't own. A builder isn't doing that. If the chain were queryBuilder.getConnection().getMetadata().getColumns() — three different types — that would be the violation.'",
+      "proTip": "When asked about Demeter on a chain, the question to answer is: 'do all those dots return the same type?' If yes, it's fluent — fine. If they return different types you don't own — that's the violation."
+    },
+    {
+      "id": "q20",
+      "part": "E — Law of Demeter",
+      "subtopic": "Law of Demeter",
+      "difficulty": "L5",
+      "style": "Implementation-Specific Nuance",
+      "conceptIds": [
+        "E5",
+        "E6"
+      ],
+      "l5Pattern": "implementation-specific-gotcha",
+      "question": "Two languages, same pattern: in Java, `stream.filter(...).map(...).collect(...)` chains four calls returning different types (Stream → Stream → Stream → Collection). In Kotlin/Scala/JS, the same pipeline (`list.filter(...).map(...).reduce(...)`) chains across types as well. By a strict Demeter reading, both are violations. What is the senior insight that resolves this with the article's framing?",
+      "options": [
+        "Both are Demeter violations and should be refactored to imperative loops with intermediate variables; functional chaining is a stylistic preference but doesn't survive principled scrutiny, and codebases that take SOLID seriously typically prohibit it.",
+        "Both are exempt because the intermediate types (Stream, Iterator, Sequence) are language-provided rather than user-defined; Demeter applies only to types in the user's own domain, not to types from the standard library.",
+        "Demeter is about not depending on the *internal organization* of objects you don't own. The intermediate Stream / Sequence types in functional pipelines are not objects whose internal structure you depend on — they're transient pipeline stages whose only contract is the next operator. The caller doesn't query them for fields, doesn't pass them around, doesn't depend on their representation. The article's distinction is between fluent chaining that hides structure and chain-through-strangers that exposes structure; a pipeline where the strangers are anonymous transient stages with no exposed structure is closer to the fluent case than to the violating case, even though the static types differ.",
+        "The article's principle is wrong about functional code and applies cleanly only to OO chains; modern Demeter formulations (e.g. those used in Scala style guides) explicitly exclude functional pipelines from the principle as a known limitation of Demeter as originally stated."
+      ],
+      "correctIndex": 2,
+      "explanation": "The framing-is-wrong / implementation-specific gotcha: a strict reading of 'no chain through different types' would prohibit every functional pipeline, which would be absurd. The senior reading goes back to *what Demeter is actually preventing* — coupling to the internal organization of objects you don't own. A Stream stage isn't an object you depend on the structure of; you don't ask it for fields, you don't pass it around, you can't even meaningfully observe it outside the pipeline. The intermediate types are pipeline plumbing, not domain objects. The principle's spirit is preserved because nothing leaks. Option A treats Demeter as a syntactic ban on chains, which the article explicitly rejects. Option B invents a 'standard library exemption' the principle doesn't have. Option D blames the principle rather than reading it carefully. The deeper insight: design principles are propositional, not syntactic — `chain.length > 1` is not the test; *what coupling does the chain create* is the test.",
+      "interviewScript": "In your interview, say: 'The principle is about not depending on the internal organization of strangers. In a functional pipeline, the intermediate Stream stages aren't objects I depend on the structure of — they're transient plumbing with no observable internals beyond the next operator. The chain doesn't leak structure even though the types differ, so it doesn't violate the spirit of the rule. Compare that to order.getCustomer().getAddress().getZipCode() — there the chain exposes the internal organization of Customer and Address, which is what Demeter actually prevents.'",
+      "proTip": "When a principle seems to forbid something obviously fine (functional pipelines, fluent builders), go back to the *coupling* the principle is preventing. If your code doesn't create that coupling, it doesn't violate the principle — even if it superficially matches the forbidden syntax."
+    },
+    {
+      "id": "q21",
+      "part": "F — SRP",
+      "subtopic": "Single Responsibility Principle",
+      "difficulty": "L2",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": [
+        "F1",
+        "F2"
+      ],
+      "l5Pattern": null,
+      "question": "A `Report` class has three methods: `generateContent()`, `printToPDF()`, and `saveToFile()`. The PDF library is being upgraded to a new vendor. Why does SRP predict this single change will be unnecessarily painful, and what does 'one reason to change' really mean operationally?",
+      "options": [
+        "SRP predicts pain because the PDF upgrade requires modifying the same class that owns content generation and file saving; the operational reading of 'one reason to change' is that *each axis of change* (content rules, PDF formatting, storage) should map to a single class, so a change driven by any one axis touches exactly one class.",
+        "SRP predicts pain because the Report class has too many lines; the operational reading is that any class over a fixed length (typically 200-300 lines) violates SRP and must be split, with the PDF logic being the obvious extraction candidate due to its bulk.",
+        "SRP predicts pain because PDF generation is an inherently I/O-bound responsibility that conflicts with the synchronous nature of content generation; the operational reading is that I/O and computation should never share a class, so the split is forced by execution-model concerns rather than by responsibility-counting.",
+        "SRP predicts pain because the Report class fails the cohesion metric (LCOM) — the methods don't share enough state to justify being together; the operational reading is that cohesion-by-shared-fields is the test, and methods that don't co-vary on the same instance variables must be split into separate classes regardless of conceptual responsibility."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's exact framing: 'one reason to change.' Operationally, that means each *axis of change* — what content the report contains, how PDFs are formatted, where files are stored — should map to a single class so that a change on any axis touches exactly one class. The PDF vendor swap is one axis; if it touches the same class as content rules and storage, those teams collide. Option B treats SRP as a line-count rule, which it isn't (some 50-line classes violate SRP, some 800-line classes don't). Option C invents an I/O-vs-computation split that isn't what SRP is about. Option D conflates SRP with the LCOM cohesion metric, which is a related but different formal concept and doesn't capture the 'reason to change' framing.",
+      "interviewScript": "In your interview, say: 'The Report class mixes three axes of change: what content the report has, how PDFs are formatted, and where files are saved. A PDF vendor swap touches the same class that owns the other two. Splitting into Report (content), PDFPrinter (formatting), and FileStorage (saving) means each axis maps to one class, so each change is isolated. That's what one-reason-to-change actually means.'",
+      "proTip": "When checking SRP, list the *axes of change* — not the methods, not the lines. If two axes of change land in the same class, that's the violation, regardless of class size."
+    },
+    {
+      "id": "q22",
+      "part": "F — SRP",
+      "subtopic": "Single Responsibility Principle",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": [
+        "F2",
+        "F3"
+      ],
+      "l5Pattern": null,
+      "question": "After splitting `Report` into `Report` (content), `PDFPrinter` (formatting), and `FileStorage` (saving), a teammate points out that 70% of the time these three are used together as a pipeline, and asks: 'Doesn't the split just push the orchestration into the caller? Now every call site has to do `storage.save(printer.print(report.generateContent()))`, which is more code, not less.' What is the strongest response?",
+      "options": [
+        "The teammate is right and the split should be reverted — SRP that pushes complexity into callers is a wash, and the canonical solution is a single ReportService class that mediates all three steps internally; this restores SRP at a higher level (one orchestration class) while keeping callers simple.",
+        "The teammate is partly right; the orchestration call IS more code at every site, but that's the cost of decoupling. The benefit is that the *individual* changes are isolated — a PDF vendor swap touches PDFPrinter only, a storage move touches FileStorage only, and content rule changes touch Report only. If callers want a one-liner, they can build a thin orchestration helper (`ReportPipeline.run(report)`) on top — but that helper is an add-on, not a return to the conflated design. The orchestration line at call sites is a one-time cost; the change-isolation is a recurring benefit.",
+        "The teammate is right and the split was over-applied — the right granularity for SRP is 'one user-visible feature per class', not 'one technical concern per class'. Since 'produce a saved PDF report' is one user-visible feature, it belongs in one class regardless of how many internal concerns it touches.",
+        "The teammate is wrong because callers already had to coordinate the three steps internally inside the old Report class; moving that coordination outside doesn't change its quantity, only its location. The split is therefore strictly better with no caller-side cost increase, and the teammate is mistaken about what changed."
+      ],
+      "correctIndex": 1,
+      "explanation": "The honest engineering tradeoff: SRP doesn't reduce *total* code, it relocates and isolates *change cost*. The orchestration line at every call site is a one-time write; the isolation of each axis of change is paid out repeatedly over the life of the system. Option A's 'orchestration class' is a real pattern but the right framing is that it's an *optional add-on*, not a reversion. Option C invents a different SRP granularity ('user-visible feature') that the article doesn't endorse and that would conflate axes of change again. Option D is wrong about the caller-side cost — the old Report class hid the orchestration, the new design surfaces it; the cost moved, it didn't disappear.",
+      "interviewScript": "In your interview, say: 'The orchestration line at every call site IS the cost of the split. But the benefit is recurring — a PDF vendor change now touches one class, a storage migration touches one class, content rule changes touch one class. If callers want a one-liner, I can build a thin ReportPipeline helper that wraps the three steps. That helper is a convenience, not a reversion — the underlying classes stay decomposed.'",
+      "proTip": "SRP doesn't reduce total code — it isolates change cost. When defending a split against 'this is more code', point to the *change cost over time*, not the line count today."
+    },
+    {
+      "id": "q23",
+      "part": "F — SRP",
+      "subtopic": "Single Responsibility Principle",
+      "difficulty": "L4",
+      "style": "Cross-Part Bridge",
+      "conceptIds": [
+        "F3",
+        "F4",
+        "D4"
+      ],
+      "l5Pattern": null,
+      "question": "A teammate proposes splitting your `OrderProcessor` class into 14 single-method classes, citing SRP. Each class has one method and one tiny job. The result is a 14-class graph that reads as a chain of forwarding calls. SRP, taken literally as 'one responsibility per class', seems to bless this. Why is this design worse, and what is the correct SRP framing that excludes it?",
+      "options": [
+        "The design is fine and faithful to SRP — fan-out into many tiny classes is the standard endpoint of strict SRP, and modern test frameworks make the navigation cost acceptable; the teammate is correctly applying the principle and the discomfort is just unfamiliarity with the style.",
+        "SRP says 'one *reason* to change', not 'one method'. A class earns its existence when it owns a coherent slice of behavior that changes for one reason. A single-method class typically has no autonomous reason to exist — it changes for the same reasons as its caller — so splitting that finely doesn't isolate any axis of change. It just spreads one responsibility across N classes, with all the navigation cost of decomposition and none of the isolation benefit.",
+        "The design violates DRY rather than SRP — 14 single-method classes will have 14 nearly-identical constructors and dependency lists, which is the duplication problem; the SRP critique is technically valid but the operational issue is the redundancy of class boilerplate.",
+        "The design violates the Open/Closed Principle because adding a new step requires inserting a new class into the forwarding chain rather than extending an existing one; the right SRP-compliant alternative is a single OrderProcessor class with a Strategy interface for each step, which preserves the spirit of SRP without the navigation cost."
+      ],
+      "correctIndex": 1,
+      "explanation": "The misreading the question targets is a hyperliteral interpretation of 'one responsibility' as 'one method'. The article (and SRP's actual formulation) frames it as 'one *reason* to change' — that is, one axis of change. A single-method class that changes for the same reasons as its caller doesn't isolate any axis; it just splits one cohesive responsibility into N pieces of code that all move together. The *cost* of the split (navigation, indirection, ceremony) is real; the *benefit* (change isolation) is illusory because there's no independent change axis to isolate. This is also where SRP and SoC reinforce each other (the cross-bridge): a class deserves to exist when it owns a meaningful slice of behavior, not just when its method count is one. Option A romanticizes the over-split. Option C substitutes a DRY critique for the actual SRP critique. Option D over-engineers in a different direction (Strategy is its own form of premature abstraction here).",
+      "interviewScript": "In your interview, say: 'SRP says one reason to change, not one method. A class earns its existence when it owns a coherent slice of behavior that changes for one reason that the caller doesn't share. Fourteen single-method classes typically all change for the same reasons as their caller — splitting that finely just spreads one responsibility across many files without isolating any axis of change. The navigation cost is real; the isolation benefit is zero.'",
+      "proTip": "Before splitting a class for SRP, name the *axis of change* the new class would isolate. If you can't name an axis the original class didn't already isolate, the split is decomposition for its own sake."
+    },
+    {
+      "id": "q24",
+      "part": "G — OCP",
+      "subtopic": "Open/Closed Principle",
+      "difficulty": "L2",
+      "style": "Failure Analysis",
+      "conceptIds": [
+        "G1",
+        "G2"
+      ],
+      "l5Pattern": null,
+      "question": "A `PaymentProcessor` has a single `process(type, amount)` method with an if/else chain on `type` for `\"credit\"` and `\"paypal\"`. The team is asked to add cryptocurrency support. Two engineers propose different paths: Engineer X adds `else if (type == \"crypto\")` to the existing method; Engineer Y introduces a `PaymentMethod` interface and rewrites `process` to take an instance of it. Which OCP-relevant risk does Y's path eliminate that X's path keeps?",
+      "options": [
+        "Y eliminates the risk that adding crypto requires changing existing, working code — the credit and paypal branches are untouched, so a regression in either of them due to the crypto change is structurally impossible. X's path leaves both branches inside the same method as the new branch, so a refactor or shared-helper change can ripple into them. The OCP framing is exactly this: extension via new code can't break old code; modification of existing code can.",
+        "Y eliminates the runtime overhead of the if/else dispatch by replacing it with virtual method dispatch, which is faster on modern JVMs by roughly 10-20%; the OCP framing here is mainly about performance under high transaction volume rather than maintainability.",
+        "Y eliminates the need for unit tests on the crypto path because interface-based designs are automatically covered by the existing tests of the interface contract; X's path requires writing new branch-specific tests, which is the maintenance overhead OCP exists to eliminate.",
+        "Y eliminates the need to deploy `PaymentProcessor` whenever a new payment method is added — interface implementations can be loaded as plugins via Java's ServiceLoader or equivalent, so adding crypto becomes a deployment of a new artifact without touching the processor; X's path forces a redeploy of the core payment service for every new method."
+      ],
+      "correctIndex": 0,
+      "explanation": "The OCP-relevant risk is *the possibility of breaking working code by editing it*. Every time you modify a method that currently works, you risk introducing a bug into the parts that *weren't* the target of your change. Y's path doesn't touch the credit or paypal logic at all — adding crypto is writing a new class. X's path inserts the crypto branch into the same method where credit and paypal live; a careless edit to a shared variable, a misplaced bracket, or a refactor of the dispatch could break either of the existing branches. Option B substitutes a performance argument (virtual dispatch is not actually consistently faster than branch-predictable if/else). Option C is wrong on the testing claim — interface-based designs still need per-implementation tests. Option D adds a deployment-isolation benefit that's a real thing in some architectures but isn't what OCP is fundamentally about.",
+      "interviewScript": "In your interview, say: 'Y's design means adding crypto is writing a new CryptoPayment class — the credit and paypal logic is never touched, so it can't be broken by the crypto change. X's design puts the crypto branch in the same method as the others, so any edit risks regressing the working branches. That's what OCP buys: extension without modification means new code can't break old code.'",
+      "proTip": "OCP isn't a performance principle and isn't a deployment principle — it's a *risk* principle. The cost of touching working code is the cost OCP is paying to avoid."
+    },
+    {
+      "id": "q25",
+      "part": "G — OCP",
+      "subtopic": "Open/Closed Principle",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": [
+        "G2",
+        "G3",
+        "G4"
+      ],
+      "l5Pattern": null,
+      "question": "Your `NotificationDispatcher` has three notification channels (email, SMS, push) implemented behind a `Channel` interface. The product team asks for a new requirement: every notification of type `URGENT` must go through *all three* channels simultaneously. A junior proposes adding `if (notification.isUrgent()) { ... }` inside the dispatcher's main loop. What's the OCP-cleanest design and why?",
+      "options": [
+        "Add the if/else as proposed — OCP doesn't apply because the urgent-fanout is a dispatcher-level policy decision, not a new channel; the dispatcher is the only place that knows about all three channels, so the policy belongs there.",
+        "Introduce a `BroadcastChannel` that holds a list of `Channel` instances and itself implements `Channel`, fanning out `send()` to each underlying channel. Then route `URGENT` notifications to the broadcast channel and non-urgent ones to a single channel. The dispatcher learns nothing new; the policy is encoded by which Channel instance is selected per notification. New code (BroadcastChannel) implements the interface; existing code (Email, SMS, Push) is untouched.",
+        "Refactor the `Channel` interface to add an `isUrgent()` parameter to `send()` and have each channel decide internally whether to forward urgent messages to a sibling channel; this distributes the urgency policy across the channels and avoids any centralization of routing logic.",
+        "Drop the `Channel` interface entirely and replace it with a `NotificationPipeline` builder pattern that constructs the routing per notification at call sites; this gives the most flexibility and avoids both the if/else and the interface-explosion that BroadcastChannel would cause."
+      ],
+      "correctIndex": 1,
+      "explanation": "The composite/decorator move that satisfies OCP cleanly. `BroadcastChannel` is a *new class* that *implements the existing interface*; existing channel classes are untouched. The dispatcher's logic stays the same — pick a channel, call `send`. The selection of *which* channel handles a notification is a configuration concern that can live in a small router or factory, also new code rather than modification. Option A is the modify-existing-code path that OCP exists to prevent. Option C extends the interface itself, which forces every existing implementation to either implement or default the new parameter — that's the modification OCP avoids. Option D throws out a working abstraction for a different one without showing it actually pays its complexity cost.",
+      "interviewScript": "In your interview, say: 'I'd add a BroadcastChannel that itself implements Channel and fans send() out to a list of inner channels. Urgent notifications get routed to a BroadcastChannel containing email, SMS, and push; non-urgent ones get routed to whatever single channel the policy picks. The dispatcher logic stays the same, the existing channel classes are untouched, and the new behavior is in a new class. That's the OCP-clean shape.'",
+      "proTip": "When a new policy needs to combine existing pieces, look for the composite move — a new class that implements the existing interface and aggregates instances of it. Almost always cleaner than modifying the dispatcher."
+    },
+    {
+      "id": "q26",
+      "part": "G — OCP",
+      "subtopic": "Open/Closed Principle",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": [
+        "G3",
+        "G5"
+      ],
+      "l5Pattern": null,
+      "question": "An interviewer says: 'You introduced a `PaymentMethod` interface with three implementations. But suppose the credit-card processor needs a special retry behavior that the others don't. You'd have to either add a `supportsRetry()` method to the interface (modifying it) or put the retry logic in a wrapper. Doesn't OCP fail as soon as implementations diverge in their needs?' What is the strongest response?",
+      "options": [
+        "Concede — OCP is a useful guideline but it does break down when implementations diverge in their capabilities; in practice, most teams add interface methods over time and accept the modification cost, treating OCP as aspirational rather than strict.",
+        "Disagree — the retry behavior should go in a `RetryablePayment` decorator that wraps any `PaymentMethod` and adds retry semantics around the `process` call. The base interface stays untouched, the credit card configuration becomes `new RetryablePayment(new CreditCardPayment())`, and OCP holds: new behavior is added in a new class, no existing class is modified. The pattern generalizes — any cross-cutting concern (retry, logging, encryption) becomes a decorator stack, not an interface extension.",
+        "Disagree — divergent capabilities are a sign that the interface was wrong from the start; the right move is to split `PaymentMethod` into `BasicPayment` and `RetryablePayment` as two separate interfaces, with `CreditCardPayment` implementing both. This is ISP applied to fix an OCP-breaking divergence.",
+        "Concede on OCP but argue that LSP is the relevant principle here — adding `supportsRetry()` and having non-credit-card implementations return false would violate LSP because callers would have to special-case based on capability; the retry must be added in some other mechanism but OCP is a casualty."
+      ],
+      "correctIndex": 1,
+      "explanation": "The decorator pattern is OCP's answer to capability divergence. A `RetryablePayment` decorator implements the same `PaymentMethod` interface, takes another `PaymentMethod` in its constructor, and adds retry logic around the inner `process` call. The interface doesn't change. None of the existing implementations change. Credit card payment is configured as a wrapped instance. The pattern composes — you can stack `LoggedPayment(RetryablePayment(EncryptedPayment(CreditCardPayment())))` and OCP holds at every layer. Option A capitulates without offering the right answer. Option C is structurally fine in some cases (ISP-style split) but is heavier than needed when the divergence is purely behavioral rather than capability-based — and it requires modifying the interface or call sites. Option D introduces an LSP confusion that isn't really there.",
+      "interviewScript": "In your interview, say: 'The decorator pattern handles this. I'd write a RetryablePayment decorator that implements the same PaymentMethod interface and wraps any other PaymentMethod, adding retry logic around process(). The credit card path becomes new RetryablePayment(new CreditCardPayment()). The interface doesn't change, no existing class changes, and retry stacks cleanly with logging or encryption decorators if those land later. OCP holds because the new behavior is in a new class.'",
+      "proTip": "When implementations diverge in capability, reach for decorator before reaching for interface modification. Decorators preserve OCP because they're new classes that extend the existing interface — and they compose cleanly with each other."
+    },
+    {
+      "id": "q27",
+      "part": "G — OCP",
+      "subtopic": "Open/Closed Principle",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": [
+        "G5",
+        "H6"
+      ],
+      "l5Pattern": "future-proofing",
+      "question": "You designed an `Animal` interface with `move()`, `eat()`, and `breathe()`. Three implementations: `Dog`, `Bird`, `Fish`. A new requirement adds `Snake`, which slithers (no `move()` problem there). Then a requirement adds `Coral`, which doesn't move at all. A junior proposes: 'We'll just have `Coral.move()` be a no-op.' What's the OCP-and-LSP-aware critique, and what does this reveal about how OCP-friendly designs can fail under future requirements?",
+      "options": [
+        "The proposal is fine — no-op overrides are the standard mechanism for handling capability gaps in interface hierarchies, and they preserve OCP because Coral is a new class implementing the existing interface without modifying anything.",
+        "The proposal violates LSP because callers passing a Coral to a function expecting an Animal will silently get no movement instead of the documented behavior; it also pushes us toward the same wrong shape that the Bird/Penguin example warned about. The OCP-respecting *and* LSP-respecting fix is to split the interface — `Animal` keeps the universally-applicable methods (`eat`, `breathe`), and `Mobile` (or `Movable`) becomes a separate interface that Dog, Bird, Fish, Snake implement but Coral doesn't. This is OCP failing under a future requirement that the original interface contract didn't anticipate, and LSP forcing the redesign.",
+        "The proposal is fine for OCP but should also override `eat()` and `breathe()` as no-ops for consistency, since coral's metabolism doesn't fit the `Animal` interface either; this is a known case where OCP-compliant additions require multi-method silencing to preserve the interface's universality.",
+        "The proposal's underlying issue is that `Animal` should have been an abstract class with default no-op implementations from the start, which would let Coral inherit safely; OCP would then be preserved by adding Coral as a subclass without overriding anything, and the no-op default makes callers' assumptions explicit at the type level."
+      ],
+      "correctIndex": 1,
+      "explanation": "The future-proofing pattern: an OCP-compliant design (`Animal` interface, three implementations) can still fail when future requirements introduce subtypes that don't fit the original contract. The Coral case is structurally identical to the article's Penguin/Bird example — a no-op (or worse, a throw) on `move()` violates LSP because callers can't substitute Coral wherever they expected an Animal. The fix is also identical to the article's: split the interface so the universally-applicable methods stay in `Animal` and the capability-specific method (`move`) lives in a separate sub-interface that only the right subset implements. This is the cross-bridge insight: OCP via interfaces requires LSP-safe subtypes, and when subtypes diverge in capability, the fix is interface segregation. Option A gives a no-op pass that the article explicitly warns against. Option C compounds the error by silencing more methods. Option D turns the problem into an inheritance default, which is the same wrong pattern in a different language feature.",
+      "interviewScript": "In your interview, say: 'A no-op move() is the Penguin/Bird trap — callers passing Coral wherever they expect an Animal will silently get nothing. The fix is to split the interface: Animal keeps eat() and breathe() — universal — and Mobile becomes a separate interface that Dog, Bird, Fish, and Snake implement but Coral doesn't. This is OCP failing because the original interface contract assumed all Animals move; LSP forces us to fix it by segregating the moving capability into its own contract.'",
+      "proTip": "When a new subtype can't honor an existing interface method, that's almost never solved by no-ops or exceptions — those just relocate the problem to runtime. Split the interface so the new subtype simply doesn't implement what it can't honor."
+    },
+    {
+      "id": "q28",
+      "part": "H — LSP",
+      "subtopic": "Liskov Substitution Principle",
+      "difficulty": "L2",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": [
+        "H1",
+        "H2"
+      ],
+      "l5Pattern": null,
+      "question": "A `Bird` base class defines `fly()`. A `Penguin` subclass overrides `fly()` to throw `UnsupportedOperationException`. A function `migrateFlock(List<Bird> flock)` calls `bird.fly()` on each member and now crashes when a Penguin is in the list. Why does LSP frame this specifically as a *design* problem rather than a *missing-null-check* problem?",
+      "options": [
+        "LSP says subclasses must work wherever the base class works. The Penguin's exception means a function written against `Bird` can't safely accept any subclass — callers must now know which Bird subclasses are 'real' birds and special-case the rest. The exception isn't a bug to be caught with a try/catch; it's a signal that `fly()` doesn't actually belong in `Bird`, because Penguin (a real Bird) can't honor it. Fixing it with a null check or try/catch leaves the design wrong; restructuring the hierarchy is the actual fix.",
+        "LSP frames it as a design problem because exceptions are slow on the JVM (~1000x slower than normal returns), and `migrateFlock` will degrade severely if the list contains many Penguins; the fix is to override `fly()` to return a no-op rather than throw, which preserves both LSP and performance.",
+        "LSP frames it as a design problem because the exception type `UnsupportedOperationException` is unchecked, and unchecked exceptions cross method boundaries silently — making the failure invisible at the caller's signature; the fix is to convert it to a checked exception that callers must explicitly handle.",
+        "LSP frames it as a design problem only because Penguin shares no flight-related state with the other birds; if Penguin had a `flightAltitude` field set to 0, the override could return successfully and LSP would not be violated despite the conceptual mismatch."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's exact framing: 'When a subclass throws an exception for a method the parent class provides, that's a red flag you're violating LSP.' The deeper point is that LSP is *about substitutability* — the question is whether `migrateFlock` can be written once against `Bird` and trusted to work for every subclass. Penguin's override breaks that trust. A try/catch in the caller is a band-aid that admits the abstraction is wrong; the structural fix is to restructure the hierarchy (split into `Bird` and `FlyingBird`) so that `migrateFlock(List<FlyingBird>)` cannot receive a Penguin in the first place. Option B substitutes a performance argument for the structural one. Option C substitutes an exception-checking critique. Option D invents a state-based loophole that doesn't exist.",
+      "interviewScript": "In your interview, say: 'LSP says I should be able to substitute any subclass for the base class. Penguin throws on fly(), so any function written against Bird can\\'t trust the substitution — callers have to special-case Penguin. The right fix is to restructure: Bird has the universally-applicable methods, FlyingBird extends Bird with fly(), and Penguin extends Bird without it. Then migrateFlock takes List<FlyingBird> and the type system prevents the bad substitution at compile time.'",
+      "proTip": "When you override a parent method only to throw, that's almost always an LSP violation. The fix is in the hierarchy, not the override — remove the method from the parent, or split the parent so the unfit subclass doesn't inherit it."
+    },
+    {
+      "id": "q29",
+      "part": "H — LSP",
+      "subtopic": "Liskov Substitution Principle",
+      "difficulty": "L3",
+      "style": "Gotcha/Trap",
+      "conceptIds": [
+        "H2",
+        "H3",
+        "H4"
+      ],
+      "l5Pattern": null,
+      "question": "A `Rectangle` class has `setWidth(int)` and `setHeight(int)`. A `Square` subclass overrides `setWidth` to also set the height (and vice versa) to maintain the square invariant. A test `assertArea(Rectangle r)` does `r.setWidth(5); r.setHeight(10); assertEqual(50, r.area());` and fails for Square because the area is 100. Why is this an LSP violation, and what does it reveal about IS-A reasoning?",
+      "options": [
+        "It's not an LSP violation — Square IS-A Rectangle in mathematics, and the assertion in `assertArea` is making an unreasonable assumption about side independence; the test should be rewritten to set width and height in a single atomic operation.",
+        "It's an LSP violation because Square *strengthens* the precondition of `setWidth` (silently coupling height to width), breaking a contract callers depend on. Mathematical IS-A doesn't imply behavioral IS-A: a Square can fail to be a behavioral Rectangle even though it's a mathematical one. The fix is to not have Square inherit from Rectangle at all — they should be siblings under a common Shape interface, or Square should be a value type that doesn't expose mutable side accessors.",
+        "It's an LSP violation only because the override modifies hidden state without notifying the caller; the fix is to fire a `dimensionsChanged` event from `setWidth` so callers can re-read both dimensions, restoring the substitutability via observation rather than by structural redesign.",
+        "It's not an LSP violation — Square correctly maintains its invariant and the test is what's broken; assertArea was written without considering that Rectangle subclasses might have constraints, which is a test design flaw rather than a class hierarchy flaw."
+      ],
+      "correctIndex": 1,
+      "explanation": "The classic Square-Rectangle LSP problem. The structural insight: Square's override of `setWidth` silently changes `height` too, which means callers who set width and height independently — a perfectly reasonable expectation given Rectangle's interface — get wrong answers. Square has *strengthened* the precondition of `setWidth` (it now requires that you accept simultaneous height changes), which LSP forbids. The deeper insight is the IS-A trap: mathematical IS-A is about *being*, behavioral IS-A is about *honoring contracts*. A Square is mathematically a Rectangle but cannot behaviorally substitute for one because its setters carry stronger invariants. The fix is to break the inheritance entirely — make them siblings or make Square immutable. Option A blames the test for a real LSP failure. Option C papers over the substitutability problem with events. Option D inverts the responsibility — the test is a perfectly legitimate use of Rectangle's interface.",
+      "interviewScript": "In your interview, say: 'Square strengthens setWidth\\'s precondition — calling it now silently changes height, which a Rectangle caller doesn\\'t expect. That breaks substitutability: any function written against Rectangle can\\'t trust that independent width and height assignments survive. Mathematical IS-A doesn\\'t imply behavioral IS-A. The fix is to not inherit at all — Square and Rectangle become siblings under a Shape interface, or Square becomes immutable so the bad setters don\\'t exist.'",
+      "proTip": "Mathematical IS-A is a trap. Before extending a class, ask: 'can the subclass honor every contract the parent advertises, including precondition-and-postcondition strength?' If not, prefer composition or sibling types over inheritance."
+    },
+    {
+      "id": "q30",
+      "part": "H — LSP",
+      "subtopic": "Liskov Substitution Principle",
+      "difficulty": "L4",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": [
+        "H4",
+        "H5",
+        "H6"
+      ],
+      "l5Pattern": null,
+      "question": "Code review: a function processing payment methods has `if (method instanceof CryptoPayment) { handleCryptoSpecific(...); } else { method.process(amount); }`. The author argues this is fine because the special-casing is small and contained. What LSP-and-design red flag does the `instanceof` check signal, and what's the correction?",
+      "options": [
+        "No red flag — `instanceof` is a normal language feature for handling subtype-specific behavior, and explicit branching is clearer than hidden polymorphism for cases where one subtype genuinely behaves differently. The author is right.",
+        "The `instanceof` check signals that the `PaymentMethod` interface doesn't fully cover what callers actually need to do — callers are forced to peek under the abstraction to handle CryptoPayment specifically. That's the LSP red flag the article names: callers having to add `instanceof` checks means substitutability has broken. The correction is to either lift the crypto-specific behavior into the interface (if it generalizes — e.g. `prepareEnvironment()` that's a no-op for credit/paypal) or to introduce a sub-interface (`CryptoCapable`) that only crypto implements, then route crypto through a separate code path that *expects* it.",
+        "The red flag is that `instanceof` defeats the JIT's inlining optimizations on the hot path; the correction is to use a visitor pattern with `method.accept(handler)` that performs the same dispatch through virtual methods, recovering the inlining without changing behavior.",
+        "The red flag is that `instanceof` will fail when `CryptoPayment` is wrapped in a decorator (e.g. `RetryablePayment(CryptoPayment(...))`); the correction is to use a marker interface and check `method instanceof CryptoCapable` instead, which survives wrapping because decorators can also implement the marker interface."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article's exact red flag: 'If a subclass forces callers to add special-case logic (e.g., `if (bird instanceof Penguin)`), you violated LSP.' The deeper insight is that `instanceof` is a *symptom* — it tells you that the interface doesn't capture what callers need to do. The correction has two routes depending on whether the special behavior generalizes: if `prepareEnvironment` is a sensible no-op for non-crypto methods, lift it into the interface; if crypto's special behavior is genuinely incompatible with the others, segregate the interface and route crypto separately. Option A normalizes the smell. Option C addresses a JIT performance angle that isn't the real concern. Option D is a real concern (decorator-broken instanceof) but doesn't address the structural problem — a marker interface check is still an instanceof check that says 'my interface is incomplete.'",
+      "interviewScript": "In your interview, say: 'The instanceof check is the LSP red flag — callers having to peek under the interface to special-case CryptoPayment means PaymentMethod doesn\\'t fully cover what callers need to do. Two fixes depending on the case: if the crypto-specific behavior generalizes, lift it into the interface as a no-op default for the others. If it doesn\\'t, split the interface so crypto callers explicitly route through a CryptoCapable interface and never see crypto behind a generic PaymentMethod reference.'",
+      "proTip": "Every `instanceof` check on a polymorphic type is a confession that the interface is incomplete. Fix the interface, don't normalize the check."
+    },
+    {
+      "id": "q31",
+      "part": "H — LSP",
+      "subtopic": "Liskov Substitution Principle",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": [
+        "H5",
+        "H6",
+        "I4"
+      ],
+      "l5Pattern": "two-levels-of-indirection",
+      "question": "A `ReadWriteRepository<T>` interface has `read(id)`, `write(id, value)`, and `delete(id)`. You have three implementations: `MySQLRepo`, `RedisRepo`, and `S3Repo`. A new requirement adds `AnalyticsRepo` — a write-only repository that ships data to a downstream warehouse and explicitly does *not* support reads or deletes. A junior proposes: `AnalyticsRepo.read()` and `AnalyticsRepo.delete()` throw. What's the senior critique, and what's the deeper LSP/ISP insight that this scenario exposes?",
+      "options": [
+        "The throws are fine because callers of an `AnalyticsRepo` know it's write-only and won't call `read` or `delete`; the LSP issue only arises when callers are unaware of the subtype, and naming a class `AnalyticsRepo` makes the limitation visible enough to satisfy substitutability in practice.",
+        "The throws violate LSP and the right fix is a `WriteOnlyRepository<T>` sub-interface plus `ReadOnlyRepository<T>` and `DeletableRepository<T>` — the original `ReadWriteRepository` becomes a composite that extends all three. AnalyticsRepo implements only `WriteOnlyRepository`. This is LSP forcing an ISP-style interface segregation: the original fat interface is decomposed so subtypes can implement only the capabilities they honor, and any function written against a sub-interface gets exactly the substitutability it needs.",
+        "The throws violate LSP, and the fix is to keep `ReadWriteRepository` and have `AnalyticsRepo.read()` return a buffered last-write value rather than throwing, restoring substitutability at the cost of a small in-memory cache; this is the standard 'LSP via fallback' pattern for write-mostly stores.",
+        "The throws are acceptable because LSP applies only to behavioral preservation of methods that are *meaningfully implementable* in the subtype; methods that have no semantic meaning for the subtype (read on a write-only store) are exempt from the principle, similar to how `compareTo` is allowed to throw for unordered types in Java."
+      ],
+      "correctIndex": 1,
+      "explanation": "The two-levels-of-indirection insight: the surface problem is throwing methods (LSP), but the underlying problem is that `ReadWriteRepository` is a fat interface that doesn't match the natural decomposition of repository capabilities (read, write, delete are independent). The LSP fix and the ISP fix are the same fix — segregate the interface so each subtype implements exactly the capabilities it honors. Functions that need to read take `ReadOnlyRepository`; functions that only write take `WriteOnlyRepository`. AnalyticsRepo cannot be passed where reads are required, which is exactly what the type system should enforce. Option A normalizes the LSP violation by appealing to caller discipline, which is exactly what the type system is supposed to remove the need for. Option C invents a 'read returns last-written' fallback that misrepresents what AnalyticsRepo actually does. Option D invents an LSP exemption that isn't real and would defeat the principle's purpose. The deeper insight: when LSP fails, ISP often points at the structural fix.",
+      "interviewScript": "In your interview, say: 'The throw is the LSP red flag, but the deeper issue is that ReadWriteRepository conflates three independent capabilities. I\\'d split it: ReadOnlyRepository, WriteOnlyRepository, DeletableRepository. ReadWriteRepository becomes a composite that extends all three. AnalyticsRepo implements only WriteOnlyRepository, so the type system prevents anyone from trying to read or delete from it — substitutability is preserved by construction, not by hoping callers won\\'t call the wrong methods.'",
+      "proTip": "When LSP fails because subtypes can\\'t honor all the parent\\'s methods, ISP is usually pointing at the fix — segregate the interface so subtypes implement only what they can honor. LSP and ISP are the same problem viewed from two angles."
+    },
+    {
+      "id": "q32",
+      "part": "I — ISP",
+      "subtopic": "Interface Segregation Principle",
+      "difficulty": "L2",
+      "style": "Failure Analysis",
+      "conceptIds": [
+        "I1",
+        "I2"
+      ],
+      "l5Pattern": null,
+      "question": "An `Employee` interface has 14 methods covering attendance, payroll, performance reviews, project assignments, time-off requests, and equipment access. A new `Contractor` class only meaningfully supports the project-assignment and equipment-access methods. The team is forced to implement the other 10 methods as no-ops or throws on `Contractor`. What does ISP predict will go wrong, and what is the structural failure mode?",
+      "options": [
+        "ISP predicts that the no-op methods will accumulate stale documentation and inconsistent behavior across implementations, slowly diverging until callers can't trust any of them; the structural failure is that fat interfaces incentivize implementations to silently lie about their capabilities, and the cost compounds with every new implementation that has to fake additional methods.",
+        "ISP predicts that the no-op methods will be slower than necessary because they still incur a virtual dispatch on every call; the structural failure is that fat interfaces impose an aggregate performance cost on consumers even when most methods aren't invoked, which becomes significant in tight loops.",
+        "ISP predicts that the team will eventually inline the Employee interface into Contractor as concrete methods to escape the no-op burden; the structural failure is that fat interfaces drive teams toward duplication of method declarations across subclasses rather than maintaining a coherent abstraction.",
+        "ISP predicts that the no-op methods will pass type checks but fail integration tests when callers expect real behavior; the structural failure is that the type system can't enforce capability constraints when one interface conflates many capabilities, so the failures only surface late in the cycle when consumers exercise paths the implementer didn't expect."
+      ],
+      "correctIndex": 3,
+      "explanation": "The article's framing: 'fat interfaces force classes to implement methods they'll never use… leads to empty implementations or methods that throw exceptions, which is a code smell.' The structural failure is that the type system stops being able to express what a Contractor can actually do — every consumer of `Employee` thinks it can call all 14 methods, and the gap between what the type promises and what the implementation actually honors only surfaces when a consumer hits a no-op or exception. The fix is to split the interface so Contractor implements only the small interfaces it can honor, and consumers depend on the smallest interface they actually need. Option A is partly true (silent lies do accumulate) but doesn't name the type-system failure that's the core ISP concern. Options B and C substitute performance and code-style concerns for the structural one.",
+      "interviewScript": "In your interview, say: 'No-op or throwing implementations make the type system lie. Anyone holding an Employee reference thinks they can call all 14 methods — Contractor passes the type check but fails at runtime when they hit a no-op. The fix is to split Employee into smaller interfaces by capability, and have Contractor implement only the ones it actually honors. Then the type system enforces what callers can expect.'",
+      "proTip": "ISP is fundamentally about *what the type system can prove*. A fat interface with no-op implementations means the type promises things the runtime won\\'t deliver — that's a defect in the type, not in the implementation."
+    },
+    {
+      "id": "q33",
+      "part": "I — ISP",
+      "subtopic": "Interface Segregation Principle",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": [
+        "I2",
+        "I3"
+      ],
+      "l5Pattern": null,
+      "question": "A teammate proposes: 'Let's split our `MediaPlayer` interface (12 methods: play, pause, stop, seek, setVolume, setEqualizer, recordOutput, captureScreenshot, etc.) into 12 single-method interfaces — `Playable`, `Pausable`, `Stoppable`, etc. — and have classes implement only what they support.' Why is this technically ISP-compliant but operationally a bad design, and where is the right granularity?",
+      "options": [
+        "It's actually fine — single-method interfaces are the canonical endpoint of strict ISP, and modern languages support them ergonomically (Java's functional interfaces, C#'s `interface I { void M(); }`); the teammate's design is the textbook ideal and operational concerns about cohesion are secondary.",
+        "The split is too fine. ISP is about not forcing implementations to honor methods they can't, but the unit of segregation should be a *cohesive capability*, not a single method. play/pause/stop/seek belong together as `Playback` because no real implementation supports one without the others; setVolume/setEqualizer belong together as `AudioControl`; recordOutput/captureScreenshot belong together as `Capture`. Three or four cohesive sub-interfaces, not 12 single-method ones — and the test for granularity is whether real implementations would split along the same lines you're splitting the interface.",
+        "The split is fine in principle but should use mixins or traits rather than interfaces to avoid the multiple-inheritance complexity; in languages without trait support, the right move is to use a single fat interface and tolerate the no-ops, since 12-interface composition is operationally worse than 12 no-op methods.",
+        "The split should be along axes of mutability rather than capability — `ReadablePlayer` (query state), `WritablePlayer` (commands), and `RecordablePlayer` (output) — since mutability is the most stable axis of variation across implementations and capability splits drift over time as features are added."
+      ],
+      "correctIndex": 1,
+      "explanation": "ISP without cohesion produces a different anti-pattern: interface explosion. The right granularity is one interface per *capability that varies independently across real implementations*. play/pause/stop/seek always travel together — no realistic media player supports play without pause or seek without stop — so splitting them buys nothing. Volume/equalizer travel together as audio control. Recording/screenshot travel together as capture. The test the article implicitly endorses: 'would real implementations split along these lines?' If yes, the split is right. If you'd see 12-interface compositions everywhere, you've over-split. Option A romanticizes the over-split. Option C invents a language-feature workaround for a non-problem. Option D picks the wrong axis (mutability) when the natural axis is capability.",
+      "interviewScript": "In your interview, say: 'Twelve single-method interfaces is over-segregated — the test is whether real implementations would split along those lines, and play/pause/stop/seek always travel together. I\\'d split into three or four cohesive sub-interfaces: Playback, AudioControl, Capture, maybe Streaming. Each represents a capability that varies independently across implementations. A YouTube embed implements Playback only; a desktop player implements all four; a podcast streamer implements Playback and AudioControl but not Capture.'",
+      "proTip": "The ISP granularity test: would real implementations naturally implement one of your sub-interfaces without the others? If not, the split is too fine — fold them back together."
+    },
+    {
+      "id": "q34",
+      "part": "I — ISP",
+      "subtopic": "Interface Segregation Principle",
+      "difficulty": "L4",
+      "style": "Cross-Part Bridge",
+      "conceptIds": [
+        "I3",
+        "I4",
+        "I5"
+      ],
+      "l5Pattern": null,
+      "question": "Your `Worker` interface has `work()`, `eat()`, `sleep()`, and `attendStandup()`. You have `Human`, `Robot`, and `Contractor` implementations. After splitting into `Workable`, `Feedable`, `Restable`, and `Meetable`, a junior says: 'Now my dependency injection container has to wire 4 interfaces instead of 1 for every Human, and call sites that need to do `worker.work(); worker.attendStandup();` have to take two interfaces. Hasn't ISP made the call-site code worse?' What is the strongest defense?",
+      "options": [
+        "The junior is right — ISP at this granularity is operationally painful, and the 4-interface decomposition should be reverted; the original Worker interface with no-op `eat()` and `sleep()` for Robot was a smaller cost than the multi-interface wiring complexity.",
+        "The juniors\\'s pain is real but the answer isn\\'t to revert. Each call site takes the smallest interface it actually needs — a function that runs work and standup takes `Workable & Meetable` (intersection types in TS, multi-bound generics in Java, or two parameters). That call site never sees `Feedable` or `Restable`, so it\\'s insulated from changes there and from what kinds of Worker can be passed in. The DI container wires implementations once; the call-site benefit (depending only on what you use) is paid out repeatedly. The right reading of ISP is that consumers — not just implementations — get the type-system precision the segregation provides.",
+        "The junior is right that wiring is worse but ISP is still the right call because the *implementations* benefit even if call sites don\\'t; the DI cost is acceptable as a one-time setup tax in exchange for cleaner subtype hierarchies, and most DI frameworks have helpers to wire multi-interface implementations from one declaration.",
+        "The junior is wrong because Java\\'s default methods on interfaces let you provide no-op fallbacks for `eat`/`sleep` directly in `Workable`, eliminating the need for separate interfaces while still satisfying ISP's spirit; the segregation should be undone in favor of default-method-based optionality."
+      ],
+      "correctIndex": 1,
+      "explanation": "The ISP benefit isn't only on the implementation side; it's also (and primarily) on the consumer side. A function that needs to call `work()` and `attendStandup()` should declare that it needs `Workable & Meetable` (or take two parameters) — that function is then insulated from what other capabilities the passed-in object happens to have, *and* the type system stops it from accidentally calling `eat()` or `sleep()` on something that may not honor them. The implementation-side benefit (no fake methods) is real but secondary. Option A reverts the decomposition. Option C concedes the call-site cost when there isn\\'t one. Option D's default methods reintroduce the same lying-type-system problem ISP exists to solve (Robot.eat() with a default no-op is just the original anti-pattern in a new syntax).",
+      "interviewScript": "In your interview, say: 'ISP isn\\'t only for implementations — call sites also depend on the smallest interface they need. A function that does work and standup takes Workable & Meetable, not Worker. It can\\'t accidentally call eat() or sleep() on something that may not honor them, and it\\'s insulated from changes to those interfaces. The DI container wires implementations once; call sites get type-level precision every time they\\'re read or modified. Default methods would just put the no-op problem back.'",
+      "proTip": "When defending ISP against 'this makes call sites verbose', point at *what the call site is now insulated from*. A call site that takes `Workable & Meetable` cannot break when `Feedable` evolves — the verbosity is buying you change-isolation."
+    },
+    {
+      "id": "q35",
+      "part": "J — DIP",
+      "subtopic": "Dependency Inversion Principle",
+      "difficulty": "L2",
+      "style": "Failure Analysis",
+      "conceptIds": [
+        "J1",
+        "J3"
+      ],
+      "l5Pattern": null,
+      "question": "A `NotificationService` constructs an `EmailSender` directly inside its constructor. You're asked to write a unit test for `NotificationService` that doesn't actually send email. What does this constructor's structure cost you, and what does DIP-aware design replace it with?",
+      "options": [
+        "Cost: the test must either set up a fake SMTP server, monkeypatch the network at the OS level, or accept that emails get sent to real addresses during testing. DIP replaces the constructor with one that takes a `MessageSender` interface; the test passes a stub `MessageSender` that records calls instead of sending, and the production code passes a real `EmailSender`. The test is fast, hermetic, and free of side effects.",
+        "Cost: the test will be slow because EmailSender's constructor opens a TCP connection to the SMTP server eagerly; DIP replaces the constructor with a lazy initializer that defers the connection until the first send call, allowing tests to skip the network entirely while keeping EmailSender as a concrete dependency.",
+        "Cost: the test will fail intermittently due to SMTP server flakiness in CI; DIP replaces the constructor with a retry-wrapped EmailSender that masks the flakiness, allowing tests to remain deterministic without changing the dependency shape.",
+        "Cost: the test pollutes the actual email logs with test data, making production debugging harder; DIP replaces the constructor with an environment-aware EmailSender that detects test mode and writes to a separate log file, preserving the concrete dependency while isolating test artifacts."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's exact testability framing: when `NotificationService` depends on a concrete `EmailSender`, you can't unit test without sending real emails. When it depends on a `MessageSender` interface, you can inject a mock. The cost of the concrete dependency is that the test environment must somehow work around the real side effect — fake SMTP servers, network monkeypatching, accepting real sends — none of which scale or stay correct as the test suite grows. Options B, C, and D all attempt to preserve the concrete dependency by working around its side effects (lazy init, retry, environment-aware logging) instead of inverting the dependency. They might individually solve narrow problems but they don't address the structural one: the service is hard-wired to one implementation, so testing and swapping are both expensive forever.",
+      "interviewScript": "In your interview, say: 'Without DIP, my unit test either has to stand up an SMTP server, monkeypatch the network, or accept that real emails go out. With DIP, the constructor takes a MessageSender interface — the test passes a stub that records calls, and production passes the real EmailSender. The test is fast, hermetic, and the production code is identical to what runs in CI. That\\'s the DIP testability win.'",
+      "proTip": "Anytime you find yourself thinking 'how do I test around this dependency?', the answer is usually 'invert the dependency.' DIP turns 'I have to work around X' into 'I pass a different X.'"
+    },
+    {
+      "id": "q36",
+      "part": "J — DIP",
+      "subtopic": "Dependency Inversion Principle",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": [
+        "J2",
+        "J3",
+        "J4"
+      ],
+      "l5Pattern": null,
+      "question": "You're designing a `BillingService`. It needs to send bills via email today, with SMS planned for next quarter. Engineer X creates a `BillingService` constructor that takes `EmailSender`, `SmsSender` and a `useSms` flag. Engineer Y creates `BillingService(MessageSender sender)` and lets the wiring layer pick which to inject. Why is Y's design more aligned with DIP's notion of 'inversion', and what does the word *inversion* actually refer to?",
+      "options": [
+        "Y aligns with DIP because the constructor takes one parameter instead of three, which is simpler; 'inversion' refers to inverting the constructor's parameter count from many to one, which is the operational form of the principle.",
+        "Y aligns with DIP because BillingService doesn\\'t know which channel will be used — that knowledge lives in the wiring layer. 'Inversion' refers to who defines the contract: normally, the high-level module (BillingService) would have to conform to whatever the low-level module (EmailSender, SmsSender) provides. With DIP, BillingService defines what it needs (a `send(message)` method), and the implementations conform to *that* contract. The arrow of dependency is inverted — both BillingService and its implementations now depend on the abstraction, instead of BillingService depending on the implementations.",
+        "Y aligns with DIP because the `MessageSender` interface lets the wiring layer add new implementations without rebuilding BillingService; 'inversion' refers to inverting the build-time order — interfaces compile before implementations, so BillingService no longer has to be rebuilt when a sender changes.",
+        "Y aligns with DIP because the wiring layer can use a DI framework (Spring, Dagger, Wire) to manage construction lifecycle; 'inversion' refers to inversion of control (IoC), which is a synonym for DIP and refers specifically to letting the framework own construction rather than the application code."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article's exact framing: '\"inversion\" refers to who defines the contract. Normally, your business logic conforms to whatever the implementation provides. With DIP, you flip this: define an interface based on what your business logic needs, then have implementations conform to that interface. The implementation adapts to the business logic, not the other way around.' This is the conceptual heart of the principle and the most-misunderstood part. Option A reduces 'inversion' to parameter count, which is incidental. Option C reduces it to build order, which is a different concept. Option D conflates DIP with Inversion of Control — they\\'re related but DIP is about the *direction of dependency on abstractions*, while IoC is about *who calls whom* in control flow (frameworks calling app code rather than app code calling libraries).",
+      "interviewScript": "In your interview, say: 'Inversion in DIP refers to who defines the contract. Without DIP, BillingService would have to conform to EmailSender\\'s interface — taking on whatever methods Email happens to expose. With DIP, BillingService defines what it needs — a send(message) method — and EmailSender, SmsSender, and any future channel conform to *that* interface. Both BillingService and the senders depend on the abstraction; neither depends on the other directly. That\\'s the dependency arrow being inverted.'",
+      "proTip": "DIP is not about constructor parameter shape and not about DI frameworks. It\\'s about *where the interface comes from*. If the interface is shaped to fit the consumer\\'s needs, you\\'ve done DIP. If it\\'s shaped to fit the implementation\\'s capabilities, you haven\\'t."
+    },
+    {
+      "id": "q37",
+      "part": "J — DIP",
+      "subtopic": "Dependency Inversion Principle",
+      "difficulty": "L4",
+      "style": "Cross-Part Bridge",
+      "conceptIds": [
+        "J2",
+        "J5",
+        "J6"
+      ],
+      "l5Pattern": null,
+      "question": "An interviewer says: 'You used dependency injection, so you've satisfied DIP.' You disagree. Where is the precise distinction between Dependency Inversion (the principle) and Dependency Injection (the technique), and how can a design use DI without satisfying DIP?",
+      "options": [
+        "There is no precise distinction — DI and DIP are the same thing in practice, and the interviewer\\'s framing is correct; modern usage treats the two terms as synonyms because one without the other is rare in real codebases.",
+        "DI is the *technique* of passing dependencies through constructors (or setters, or method parameters) rather than constructing them internally. DIP is the *principle* that the dependency should be on an abstraction defined by the consumer's needs. You can do DI without DIP by injecting a *concrete class* — `BillingService(EmailSender sender)` uses DI but the parameter type is the concrete EmailSender, so BillingService is still coupled to the implementation rather than to a consumer-shaped abstraction. To satisfy DIP, the parameter type must be an interface that BillingService (the high-level module) defines based on what it needs.",
+        "DI refers to runtime construction by a framework (Spring, Dagger), while DIP refers to compile-time interface declarations; using DI without DIP means using a framework like Guice without declaring interfaces, which is unusual but possible.",
+        "DI is the constructor-parameter pattern; DIP is the field-injection pattern. You can do DI without DIP by using constructor injection without `@Autowired`-style field injection, which most modern style guides recommend; the distinction is essentially a matter of which injection style you prefer."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article's explicit distinction: 'DIP is a design principle, while dependency injection (passing dependencies through the constructor) is a technique for achieving it. They\\'re related but not the same thing.' The DI-without-DIP example is the killer: you can pass dependencies through constructors (DI) and still have those constructor parameters be concrete classes — that satisfies DI but not DIP, because the high-level module is still coupled to the low-level implementation. DIP requires the *type* of the parameter to be an abstraction shaped to the consumer's needs. Option A flattens a meaningful distinction. Option C invents a runtime-vs-compile-time framing that isn\\'t the article's distinction. Option D invents a constructor-vs-field framing that isn\\'t the article's distinction either.",
+      "interviewScript": "In your interview, say: 'DI is the technique — passing dependencies in rather than constructing them. DIP is the principle — depending on an abstraction shaped by what I need. I can use DI without DIP: BillingService(EmailSender sender) uses constructor injection, but EmailSender is concrete, so I\\'m still coupled to the email implementation. DIP requires the parameter to be an interface I define based on what BillingService needs to do — `MessageSender` — and EmailSender becomes one implementation of it. DI is necessary for DIP but not sufficient.'",
+      "proTip": "Anytime you write a constructor parameter type, ask: 'is this type an abstraction shaped by what this class needs, or a concrete shaped by what some other class provides?' Only the first satisfies DIP."
+    },
+    {
+      "id": "q38",
+      "part": "J — DIP",
+      "subtopic": "Dependency Inversion Principle",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": [
+        "J6",
+        "A1",
+        "A3"
+      ],
+      "l5Pattern": "adversarial-pushback",
+      "question": "An interviewer pushes: 'You should put every dependency behind an interface for testability and flexibility — that's the DIP gospel.' You've designed a small `RandomPasswordGenerator` that calls `java.security.SecureRandom` directly without any abstraction. The interviewer says this violates DIP. What is the most defensible response?",
+      "options": [
+        "Concede and introduce a `RandomnessSource` interface implemented by a `SecureRandomSource` and a `DeterministicTestSource`; this is the OCP-and-DIP-correct shape and it costs almost nothing in modern languages.",
+        "Push back by distinguishing principle from policy. DIP applies when the dependency represents a *substitutable boundary* — a component you may want to swap, mock, or evolve. SecureRandom is a stable, OS-backed primitive with no realistic alternative implementation; abstracting it for the principle\\'s sake adds indirection without enabling any swap that\\'s likely to happen. The article\\'s own framing is that principles are tools for thinking, not a checklist; mechanically applying DIP to every dependency violates KISS by adding interfaces that buy nothing. The right test is not 'is there a dependency?' but 'is there a substitutable boundary?'",
+        "Defend the design on testability grounds — SecureRandom is already deterministic if seeded with a fixed value via reflection in tests, so DIP is unnecessary because the test seam already exists at the language level; modern Java specifically supports this pattern via the `SecureRandom.getInstanceStrong()` API\\'s testing hooks.",
+        "Defend the design on grounds that SecureRandom is a final class in the JDK and therefore can\\'t be mocked anyway; DIP is impossible to apply here as a matter of language constraint, so the interviewer\\'s pushback is misplaced and any abstraction would be cosmetic."
+      ],
+      "correctIndex": 1,
+      "explanation": "The adversarial-pushback test: the interviewer is invoking DIP as a universal rule, and the senior move is to recognize that *every* principle has a scope — DIP applies where there\\'s a substitutable boundary worth abstracting. SecureRandom is a stable OS-backed primitive; abstracting it for the principle's sake adds an interface no one will ever swap and a test seam no one needs (PRNG-deterministic test data can be supplied without an abstraction over the source). The article explicitly says principles are 'tools for thinking, not a checklist to recite' and warns against breaking KISS by forcing SOLID where simpler solutions work. Option A capitulates to the rule. Option C invents a fictional reflective seam. Option D blames the language for a constraint that isn\\'t the real point. The deeper insight: DIP is for substitutable boundaries; not every dependency is one.",
+      "interviewScript": "In your interview, say: 'I\\'d push back. DIP applies where there\\'s a substitutable boundary worth abstracting — somewhere you might mock, swap, or evolve the implementation. SecureRandom is a stable OS-backed primitive; I have no realistic plan to swap it, no testability need that requires it, and abstracting it adds an interface that buys nothing. The article\\'s own framing is that principles are tools for thinking, not checklists. Mechanically wrapping every dependency in an interface violates KISS and produces indirection without value.'",
+      "proTip": "Before applying DIP to a dependency, ask: 'is this a substitutable boundary, or a stable primitive?' Substitutable: invert. Stable primitive: leave it concrete. The principle has a scope; rules don\\'t."
+    },
+    {
+      "id": "q39",
+      "part": "K — Meta: Principles in Modern Practice",
+      "subtopic": "Principles in Modern Practice",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": [
+        "K1",
+        "K2"
+      ],
+      "l5Pattern": null,
+      "question": "A team writing a new TypeScript service is considering a strict OO + SOLID + GoF-pattern style adapted from their previous Java codebase. The tech lead suggests: 'Use composition of small functions and modules; reach for classes only when state is genuinely shared.' Which framing best captures the *why* behind the lead\\'s suggestion without dismissing SOLID outright?",
+      "options": [
+        "SOLID is a Java/C#-era set of principles built around deep inheritance hierarchies and interface-heavy designs that were necessary to manage complexity in those languages. In TypeScript (and other modern languages with first-class functions, structural typing, and easy composition), the same goals are often achieved more directly by composition and small modules — applying SOLID mechanically can add indirection that the language already lets you avoid. SOLID still has value when the design *calls for* it (multiple implementations, dispatch over a closed set, dependency inversion across boundaries), but it shouldn\\'t be the default shape of every new component.",
+        "SOLID is outdated and should be discarded entirely in modern languages — the principles were specific to Java's lack of first-class functions and have no remaining relevance in TypeScript, Rust, Go, or Kotlin. The lead is correct to skip SOLID and any team applying it in 2026 is signaling that they haven\\'t kept up.",
+        "SOLID is universal and language-agnostic; the lead is wrong, and TypeScript should use the same SOLID + GoF patterns the team's Java code uses, just with TypeScript syntax. The principles transcend language and abandoning them produces unmaintainable code regardless of what features the language offers.",
+        "SOLID is fine but the lead is correct that classes should be avoided — in TypeScript specifically, classes interact poorly with the structural type system and serialization, so all logic should be implemented as exported functions; this is a TypeScript-specific stylistic choice rather than a SOLID critique."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's exact framing of the meta-position: 'SOLID principles come from Java\\'s heyday of deep inheritance hierarchies and interface-heavy design. Outside of Java and C#, excessive application of SOLID is falling out of fashion. Modern languages favor simpler approaches—composition over class hierarchies, functions over interfaces. Don\\'t break KISS by forcing SOLID patterns where simpler solutions work fine.' Option A captures both the historical context and the qualified ongoing relevance. Option B overreaches into 'discard entirely', which the article explicitly doesn\\'t recommend. Option C ignores the language-relativity the article names. Option D invents TypeScript-specific class problems that aren\\'t the article's argument and aren\\'t generally true.",
+      "interviewScript": "In your interview, say: 'SOLID came out of the Java/C# era when deep inheritance and interface-heavy designs were the way to manage complexity in those languages. Languages with first-class functions, structural typing, or easy composition often hit SOLID\\'s goals more directly without needing the principles\\'s scaffolding. I still reach for SOLID when the design calls for it — multiple implementations, closed dispatch sets, real dependency inversion across boundaries — but I don\\'t make every component an interface plus implementation by default.'",
+      "proTip": "When choosing how SOLID-heavy to make a design, factor in the language. SOLID buys more in Java/C# than in Kotlin/TypeScript/Rust/Go because the latter offer composition, structural typing, and first-class functions that handle many of the same problems more directly."
+    },
+    {
+      "id": "q40",
+      "part": "K — Meta: Principles in Modern Practice",
+      "subtopic": "Principles in Modern Practice",
+      "difficulty": "L4",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": [
+        "K2",
+        "K3"
+      ],
+      "l5Pattern": null,
+      "question": "A candidate in a Python LLD interview designs a 4-class hierarchy (`AbstractAnimalFactory`, `ConcreteFactoryRegistry`, `AnimalBuilder`, `AnimalDirector`) just to construct three Animal instances with different names and ages. They explain: 'I\\'m applying SOLID — Factory satisfies OCP, Builder satisfies SRP, the Director satisfies DIP, and the Registry satisfies ISP.' What's the most accurate critique of the design AND the explanation?",
+      "options": [
+        "The design is correct application of SOLID to a small problem and shows the candidate has internalized the principles; the explanation is accurate, and the only concern is that the interviewer may not be familiar with this level of pattern usage in Python.",
+        "The design over-applies patterns to a problem that doesn\\'t need them, and the explanation reveals a deeper misunderstanding: SOLID principles describe *properties of a good design*, not patterns to mechanically instantiate. A design satisfies OCP because adding a new variant is a clean addition, not because it has a Factory. Citing GoF patterns as 'satisfying' SOLID conflates the principles (which describe outcomes) with patterns (which are sometimes-useful means). The right design is `class Animal: name, age` constructed directly — that satisfies all of SOLID for this scope, with zero scaffolding.",
+        "The design is wrong on the principle assignments — Factory satisfies SRP rather than OCP, Builder satisfies OCP rather than SRP, and the Director is unrelated to DIP; the candidate would have been correct if they\\'d mapped the patterns to the right principles, but the over-application itself is acceptable.",
+        "The design is fine because Python\\'s lack of compile-time interfaces makes pattern-heavy designs the only way to enforce SOLID; in static languages this would be over-engineering, but in Python the explicit class structure is necessary scaffolding to compensate for missing language features."
+      ],
+      "correctIndex": 1,
+      "explanation": "Two failures stacked: (1) over-application of patterns to a problem that doesn\\'t justify them (KISS violation), and (2) a category error in the explanation — SOLID principles are *properties of a design* (one reason to change, extension without modification, substitutability, etc.), not patterns to deploy. A simple `class Animal: name, age` satisfies SRP (one responsibility), satisfies OCP trivially (no extension needed), satisfies LSP (no inheritance to break), satisfies ISP (no fat interface), and satisfies DIP vacuously (no dependencies to invert). The patterns add nothing. The candidate is reciting SOLID rather than applying it. Option A normalizes the over-application. Option C accepts the over-application and quibbles only with the principle assignments. Option D invents a Python-specific exemption that isn\\'t real.",
+      "interviewScript": "In your interview, say: 'SOLID principles describe properties of a good design — one reason to change, extension without modification, substitutability — not patterns to deploy. A simple Animal class with name and age satisfies all of SOLID for this scope without any scaffolding. Adding Factory/Builder/Director/Registry to a problem that doesn\\'t need them violates KISS, and citing those patterns as evidence of satisfying SOLID conflates outcomes with means. The principles show through naturally in the simple design; they don\\'t require pattern names to be present.'",
+      "proTip": "If your design includes a pattern, you should be able to name a *concrete future requirement* that the pattern accommodates better than a simpler alternative. If you can only justify the pattern by naming a SOLID principle, that\\'s pattern-worship, not application."
+    },
+    {
+      "id": "q41",
+      "part": "K — Meta: Principles in Modern Practice",
+      "subtopic": "Principles in Modern Practice",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": [
+        "K3",
+        "K4",
+        "B5",
+        "A3"
+      ],
+      "l5Pattern": "trade-off-inversion",
+      "question": "An interviewer asks the meta question: 'When two principles conflict — say DRY pulls one way and KISS pulls the other — how do you choose?' What is the strongest senior-level answer?",
+      "options": [
+        "Pick the principle that comes higher in standard precedence orders (KISS > YAGNI > SOLID > DRY in most modern style guides) and apply it; principle conflicts are usually resolvable by precedence and explicit tie-breakers documented in the team\\'s coding standards.",
+        "There is no fixed precedence — the senior move is to (1) name the principles in tension out loud, (2) identify *what each one is buying or costing* in the specific context, (3) make an explicit trade-off with a concrete trigger condition for revisiting the decision, and (4) leave the decision visible in the design (e.g., a comment, a tracked TODO) so future maintainers see it as a conscious choice rather than an oversight. The senior signal is *managing* the tension visibly, not choosing one side and pretending the other doesn\\'t exist.",
+        "DRY almost always wins in disputes with KISS because duplication compounds maintenance cost over time while complexity tends to be paid once at design time; the right rule of thumb is to default to DRY unless the duplication is genuinely temporary (under a quarter\\'s lifetime).",
+        "KISS almost always wins in disputes with DRY because premature abstraction is harder to undo than duplication is to consolidate; the right rule of thumb is to default to KISS unless the duplication has already shown up three or more times across files or across teams."
+      ],
+      "correctIndex": 1,
+      "explanation": "The trade-off-inversion: the question invites the candidate to pick a side or a precedence order, but the senior move is to refuse the framing. Principles conflict because they\\'re each pointing at a real cost; the choice between them depends on *which cost matters more in this specific context* and *under what conditions the right choice would change*. The senior procedure is: (1) name the tension explicitly, (2) describe what each principle is buying or costing here, (3) make the trade-off with a trigger condition, (4) leave the decision visible. The article frames this as the difference between blindly following rules and applying principles as 'tools for thinking.' Options C and D pick a side and offer rules of thumb that sound senior but aren\\'t — they smuggle in the same kind of mechanical thinking the question is testing. Option A invents a precedence order that doesn\\'t exist as consensus.",
+      "interviewScript": "In your interview, say: 'I don\\'t have a fixed precedence. When DRY and KISS conflict I do four things: name the tension explicitly, identify what each is buying me here — DRY buys maintenance consolidation, KISS buys readability and avoids premature abstraction — make the trade-off with a trigger condition, like \"start in place, extract on the third occurrence,\" and leave the choice visible in a comment so future maintainers see it as conscious, not accidental. The senior signal is managing the tension, not picking a side.'",
+      "proTip": "When asked how to resolve principle conflicts, the answer is never 'X always wins' — it\\'s 'I name the tension, describe the trade-off, and choose with a trigger condition for revisiting.' That procedure is the senior signal."
+    },
+    {
+      "id": "q42",
+      "part": "K — Meta: Principles in Modern Practice",
+      "subtopic": "Principles in Modern Practice",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": [
+        "K4",
+        "K5",
+        "G1",
+        "J1"
+      ],
+      "l5Pattern": "framing-is-wrong",
+      "question": "Two candidates explain the same parking-lot design to an interviewer. Candidate X: 'Vehicle is open for extension via subtypes — that\\'s OCP. PaymentMethod inverts the dependency on the gateway — that\\'s DIP. The Receipt class has one reason to change — that\\'s SRP.' Candidate Y: 'Adding a new vehicle size means writing a new class without touching the existing ones. The billing code doesn\\'t care which gateway processes the payment, so I can swap Stripe for Adyen by changing one wiring line. The receipt logic is on its own class because content rules and PDF formatting evolve on different cadences.' Why does Y typically score higher even though both designs are structurally identical?**",
+      "options": [
+        "Y scores higher because the description is shorter, and interviewers prefer concise candidates; the structural designs being identical means the difference is purely communicative and X would win in a written submission.",
+        "Y scores higher because Y describes *what the design buys you* in concrete terms — what change becomes cheap, what swap becomes a one-liner, what cadence is isolated. X describes the design by *naming principles*, which is a layer removed from the actual benefit. The article\\'s closing point is exactly this: 'Focus on the reasoning behind your choices. The principles will show through naturally.' Y demonstrates the reasoning; X recites the principles. Interviewers grade reasoning, not vocabulary, because the principle name doesn\\'t prove understanding — the explanation of the benefit does.",
+        "Y scores higher because mentioning specific products (Stripe, Adyen) shows real-world grounding; X\\'s purely abstract framing reads as academic and signals lack of production experience. The principle naming itself is fine but should be paired with vendor-specific examples to land.",
+        "Y scores higher only with interviewers who don\\'t know SOLID well; X\\'s framing would score higher with experienced principal engineers who appreciate principle-literate candidates and find Y\\'s explanation imprecise. The right move is to read the interviewer and adapt — name principles for senior interviewers, describe benefits for junior ones."
+      ],
+      "correctIndex": 1,
+      "explanation": "The framing-is-wrong move: the candidate who *names* principles isn\\'t necessarily the candidate who *understands* them. The article\\'s explicit final point: 'Focus on the reasoning behind your choices. The principles will show through naturally.' Candidate Y describes what the design *buys* — concrete change-cost reductions, concrete swap costs, concrete cadence isolation — which is what the principles are actually about. Candidate X describes the design by labeling it with principle names, which is a layer of indirection that doesn\\'t prove the principle is understood; you can map a label onto a design without grasping the benefit the principle exists to deliver. Option A trivializes the difference as length. Option C adds a vendor-name angle that isn\\'t the real signal. Option D inverts the seniority gradient — experienced interviewers in particular are the most allergic to principle-recitation in place of reasoning, because they\\'ve seen it most often as a substitute for understanding. The deeper insight: principles are what *show through* good reasoning; they\\'re not the reasoning itself.",
+      "interviewScript": "In your interview, say it like Y does: 'Adding a new vehicle size means writing a new class without touching the existing ones. The billing code doesn\\'t care which gateway processes the payment, so I can swap Stripe for Adyen by changing one wiring line. The receipt logic is on its own class because content rules and PDF formatting evolve on different cadences.' Don\\'t name OCP, DIP, SRP — let them show through.",
+      "proTip": "If you\\'re tempted to name a principle in an interview, replace the principle name with the *concrete benefit* it delivers in this design. 'OCP' becomes 'adding a new variant doesn\\'t touch existing code.' 'DIP' becomes 'I can swap the gateway by changing one line.' That\\'s the version that actually demonstrates understanding."
+    }
+  ],
+  "partsOrder": [
+    "A — KISS",
+    "B — DRY",
+    "C — YAGNI",
+    "D — Separation of Concerns",
+    "E — Law of Demeter",
+    "F — SRP",
+    "G — OCP",
+    "H — LSP",
+    "I — ISP",
+    "J — DIP",
+    "K — Meta: Principles in Modern Practice"
+  ],
+  "subtopicsOrder": [
+    "KISS — Keep It Simple",
+    "DRY — Don't Repeat Yourself",
+    "YAGNI — You Aren't Gonna Need It",
+    "Separation of Concerns",
+    "Law of Demeter",
+    "Single Responsibility Principle",
+    "Open/Closed Principle",
+    "Liskov Substitution Principle",
+    "Interface Segregation Principle",
+    "Dependency Inversion Principle",
+    "Principles in Modern Practice"
+  ],
+  "difficultyTiers": [
+    "L2",
+    "L3",
+    "L4",
+    "L5"
+  ],
+  "active": false
+}

@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "build:quiz-data": "node scripts/build-quiz-data.mjs",
-    "strip:quiz-ui": "node scripts/strip-quiz-ui.mjs",
     "dev": "node scripts/build-quiz-data.mjs && vite",
     "build": "node scripts/build-quiz-data.mjs && vite build",
     "preview": "vite preview"

@@ -2,13 +2,166 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import { ChevronDown, ChevronRight, CheckCircle2, LayoutGrid, BookOpen, ExternalLink, PlayCircle, Trash2, XCircle, RotateCcw, Clock, AlertTriangle, Cloud, UploadCloud, DownloadCloud, RefreshCw, Layers, Boxes, ScrollText } from 'lucide-react';
 import quizState from './quiz-state.json';
-import quizDataCatalog from './quiz-data.json';
 import { getQuizSummaries, clearQuizProgress, clearAllProgress, PROGRESS_CHANGED_EVENT } from './quizProgressStore';
 import { getCloudSyncConfig, hasCloudSyncConfig, pushProgressToCloud, pullProgressFromCloud, syncProgress } from './quizCloudSync';
 import QuizEngine from './QuizEngine';
 import QuizReview from './QuizReview';
 
-const quizDataBySlug = quizDataCatalog.quizzes || {};
+const quizModules = import.meta.glob('./data/quizzes/**/*.json', { eager: true, import: 'default' });
+
+const TRACK_CONFIG = [
+  {
+    id: 'system-design',
+    title: 'Learn System Design',
+    subtitle: 'Distributed systems, scaling patterns, and core infrastructure',
+    icon: 'Layers',
+    accent: 'teal',
+  },
+  {
+    id: 'low-level-design',
+    title: 'Learn Low Level Design',
+    subtitle: 'Object-oriented design, concurrency, and interview problem breakdowns',
+    icon: 'Boxes',
+    accent: 'violet',
+  },
+];
+
+const TRACK_ICONS = {
+  Layers,
+  Boxes,
+};
+
+const LLD_SECTION_ORDER = ['In a Hurry', 'Concurrency', 'Problem Breakdowns'];
+
+function normalizeQuizPath(modulePath) {
+  return modulePath.replace(/^\.\//, '');
+}
+
+const quizModuleByPath = Object.fromEntries(
+  Object.entries(quizModules).map(([modulePath, module]) => [normalizeQuizPath(modulePath), module])
+);
+
+function isLldTopic(topic) {
+  return topic.path.startsWith('/learn/low-level-design');
+}
+
+function getTrackId(topic) {
+  return isLldTopic(topic) ? 'low-level-design' : 'system-design';
+}
+
+function groupByCategory(topics) {
+  return topics.reduce((acc, topic) => {
+    if (!acc[topic.category]) acc[topic.category] = [];
+    acc[topic.category].push(topic);
+    return acc;
+  }, {});
+}
+
+function orderSectionEntries(trackId, sectionEntries) {
+  if (trackId === 'system-design') {
+    return [
+      ...sectionEntries.filter(([category]) => category === 'In a Hurry'),
+      ...sectionEntries.filter(([category]) => category !== 'In a Hurry' && category !== 'Advanced Topics'),
+      ...sectionEntries.filter(([category]) => category === 'Advanced Topics'),
+    ];
+  }
+
+  if (trackId === 'low-level-design') {
+    return [
+      ...LLD_SECTION_ORDER.map(category => sectionEntries.find(([name]) => name === category)).filter(Boolean),
+      ...sectionEntries.filter(([category]) => !LLD_SECTION_ORDER.includes(category)),
+    ];
+  }
+
+  return sectionEntries;
+}
+
+function buildLearningTracks(topics) {
+  return TRACK_CONFIG.map(track => {
+    const trackTopics = topics.filter(topic => getTrackId(topic) === track.id);
+    const sectionEntries = orderSectionEntries(track.id, Object.entries(groupByCategory(trackTopics)));
+
+    return {
+      ...track,
+      sections: sectionEntries.map(([name, articles]) => ({ name, articles })),
+    };
+  }).filter(track => track.sections.length > 0);
+}
+
+function normalizeQuestion(question, index) {
+  const rawOptions = Array.isArray(question.options) ? question.options : [];
+  const options = rawOptions.map((option, optionIndex) => {
+    if (typeof option === 'string') return option;
+    if (option && typeof option === 'object') {
+      return option.text ?? option.label ?? `Option ${optionIndex + 1}`;
+    }
+    return String(option ?? '');
+  });
+
+  const correctIndex =
+    Number.isInteger(question.correctIndex) ? question.correctIndex :
+    Number.isInteger(question.correct) ? question.correct :
+    Number.isInteger(question.answerIndex) ? question.answerIndex :
+    0;
+
+  return {
+    ...question,
+    id: String(question.id ?? `q${index + 1}`),
+    options,
+    correctIndex,
+  };
+}
+
+function inferOrderedValues(questions, fieldName) {
+  const seen = new Set();
+  const values = [];
+  for (const question of questions) {
+    const value = question[fieldName];
+    if (value && !seen.has(value)) {
+      seen.add(value);
+      values.push(value);
+    }
+  }
+  return values;
+}
+
+function buildQuizEntry(article) {
+  if (!article.quizDataPath) return null;
+
+  const quiz = quizModuleByPath[article.quizDataPath];
+  if (!quiz || quiz.active === false) return null;
+
+  const questions = (quiz.questions || []).map(normalizeQuestion);
+
+  return {
+    slug: article.slug,
+    name: article.name,
+    title: quiz.title ?? `${article.name} Quiz`,
+    description: quiz.description ?? `Practice scenario-based system design questions for ${article.name}.`,
+    category: article.category,
+    path: article.path,
+    quizDataPath: article.quizDataPath,
+    estimatedTime: quiz.estimatedTime ?? null,
+    difficultyLabel: quiz.difficulty ?? quiz.difficultyLabel ?? null,
+    categories: quiz.categories ?? inferOrderedValues(questions, 'category'),
+    partsOrder: quiz.partsOrder ?? inferOrderedValues(questions, 'part'),
+    subtopicsOrder: quiz.subtopicsOrder ?? inferOrderedValues(questions, 'subtopic'),
+    difficultyTiers: quiz.difficultyTiers ?? ['L1', 'L2', 'L3', 'L4', 'L5'],
+    questions,
+  };
+}
+
+const learningTracks = buildLearningTracks(quizState.topics || []);
+const articleTopics = learningTracks.flatMap(track =>
+  (track.sections || []).flatMap(section => section.articles || [])
+);
+const articleBySlug = new Map(articleTopics.map(article => [article.slug, article]));
+const quizDataBySlug = Object.fromEntries(
+  articleTopics
+    .map(article => [article.slug, buildQuizEntry(article)])
+    .filter(([, quiz]) => quiz)
+);
+const quizArticles = articleTopics.filter(article => quizDataBySlug[article.slug]);
 
 function timeAgo(isoStr) {
   if (!isoStr) return '';
@@ -317,7 +470,7 @@ function Index() {
   }, [refreshSummaries]);
   
   const handleClearQuiz = (slug) => {
-    const topic = quizState.topics.find(t => t.slug === slug);
+    const topic = articleBySlug.get(slug);
     setConfirmDialog({
       message: `Clear all progress for "${topic?.name || slug}"? This will remove your saved answers, scores, and attempt history for this quiz.`,
       onConfirm: () => {
@@ -338,29 +491,6 @@ function Index() {
       },
     });
   };
-
-  const isLldTopic = (t) => t.path.startsWith('/learn/low-level-design');
-  const groupByCategory = (topics) => topics.reduce((acc, topic) => {
-    if (!acc[topic.category]) acc[topic.category] = [];
-    acc[topic.category].push(topic);
-    return acc;
-  }, {});
-
-  const sdTopics = quizState.topics.filter(t => !isLldTopic(t));
-  const lldTopics = quizState.topics.filter(isLldTopic);
-
-  const sdCategoryEntries = Object.entries(groupByCategory(sdTopics));
-  const orderedSdEntries = [
-    ...sdCategoryEntries.filter(([c]) => c === 'In a Hurry'),
-    ...sdCategoryEntries.filter(([c]) => c !== 'In a Hurry' && c !== 'Advanced Topics'),
-    ...sdCategoryEntries.filter(([c]) => c === 'Advanced Topics'),
-  ];
-
-  const lldCategoryEntries = Object.entries(groupByCategory(lldTopics));
-  const lldOrder = ['In a Hurry', 'Concurrency', 'Problem Breakdowns'];
-  const orderedLldEntries = lldOrder
-    .map(c => lldCategoryEntries.find(([cat]) => cat === c))
-    .filter(Boolean);
 
   const hasAnyProgress = Object.keys(summaries).length > 0;
 
@@ -397,29 +527,31 @@ function Index() {
 
         <CloudSyncPanel onPulled={refreshSummaries} />
         
-        <ProgressStats summaries={summaries} quizTopics={quizState.topics} />
+        <ProgressStats summaries={summaries} quizTopics={articleTopics} />
         
-        <TrackSection
-          title="Learn System Design"
-          subtitle="Distributed systems, scaling patterns, and core infrastructure"
-          icon={Layers}
-          accent="teal"
-          entries={orderedSdEntries}
-          summaries={summaries}
-          onClearQuiz={handleClearQuiz}
-        />
+        {learningTracks.map((track, index) => {
+          const Icon = TRACK_ICONS[track.icon] || Layers;
+          const entries = (track.sections || []).map(section => [section.name, section.articles || []]);
+          const section = (
+            <TrackSection
+              title={track.title}
+              subtitle={track.subtitle}
+              icon={Icon}
+              accent={track.accent}
+              entries={entries}
+              summaries={summaries}
+              onClearQuiz={handleClearQuiz}
+            />
+          );
 
-        <div className="mt-6">
-          <TrackSection
-            title="Learn Low Level Design"
-            subtitle="Object-oriented design, concurrency, and interview problem breakdowns"
-            icon={Boxes}
-            accent="violet"
-            entries={orderedLldEntries}
-            summaries={summaries}
-            onClearQuiz={handleClearQuiz}
-          />
-        </div>
+          if (index === 0) return <React.Fragment key={track.id}>{section}</React.Fragment>;
+
+          return (
+            <div key={track.id} className="mt-6">
+              {section}
+            </div>
+          );
+        })}
       </div>
       
       {confirmDialog && (
@@ -627,7 +759,7 @@ export default function App() {
     <HashRouter>
       <Routes>
         <Route path="/" element={<Index />} />
-        {quizState.topics.filter(t => quizDataBySlug[t.slug]).flatMap((quiz) => [
+        {quizArticles.flatMap((quiz) => [
           <Route
             key={quiz.slug}
             path={`/${quiz.slug}`}
