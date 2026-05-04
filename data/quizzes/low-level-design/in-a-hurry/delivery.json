@@ -1,0 +1,784 @@
+{
+  "coverageManifest": {
+    "source": "/learn/low-level-design/in-a-hurry/delivery",
+    "totalQuestions": 33,
+    "parts": [
+      {
+        "id": "A",
+        "name": "The framework as a whole — pacing and failure modes",
+        "concepts": [
+          { "id": "A1", "description": "~35 minutes total", "questions": ["q3"] },
+          { "id": "A2", "description": "Failure mode: code-first / bogged in edge cases", "questions": ["q1", "q32"] },
+          { "id": "A3", "description": "Failure mode: setup-too-slow / no design by end", "questions": ["q3"] },
+          { "id": "A4", "description": "Framework purpose: clear sequence + pacing for nerves", "questions": ["q1", "q2", "q3", "q4"] },
+          { "id": "A5", "description": "Order: requirements → entities → class design → impl → extensibility", "questions": ["q3"] },
+          { "id": "A6", "description": "Time budget: 5 / 3 / 10–15 / 10 / 5", "questions": ["q3"] },
+          { "id": "A7", "description": "Don't fight the interviewer — follow lead, gently guide back", "questions": ["q2", "q4"] }
+        ],
+        "ladder": { "L1": ["q1"], "L2": ["q2"], "L3": ["q3"], "L4": [], "L5": ["q4"] }
+      },
+      {
+        "id": "B",
+        "name": "Step 1 — Requirements (~5 min)",
+        "concepts": [
+          { "id": "B1", "description": "Prompt is intentionally minimal — turn into a spec", "questions": ["q5", "q9", "q32"] },
+          { "id": "B2", "description": "Themes: Primary capabilities, Rules/completion, Error handling, Scope boundaries", "questions": ["q6", "q7"] },
+          { "id": "B3", "description": "Themes work across every domain", "questions": ["q6", "q7"] },
+          { "id": "B4", "description": "Small focused set reveals behavior", "questions": ["q7", "q8", "q9", "q32"] },
+          { "id": "B5", "description": "Confirm spec back to interviewer", "questions": ["q5", "q8", "q9"] },
+          { "id": "B6", "description": "Track Out-of-Scope explicitly to prevent scope creep", "questions": ["q8"] },
+          { "id": "B7", "description": "Whiteboard artifact: numbered requirements + bulleted out-of-scope", "questions": ["q7", "q8"] }
+        ],
+        "ladder": { "L1": ["q5"], "L2": ["q6"], "L3": ["q7"], "L4": ["q8"], "L5": ["q9"] }
+      },
+      {
+        "id": "C",
+        "name": "Step 2 — Entities and Relationships (~3 min)",
+        "concepts": [
+          { "id": "C1", "description": "Entities = meaningful nouns from requirements", "questions": ["q10", "q14", "q32"] },
+          { "id": "C2", "description": "Filter: state/rules → entity; info attached → field", "questions": ["q10", "q14", "q32"] },
+          { "id": "C3", "description": "Avoid micro-object explosion", "questions": ["q10", "q32"] },
+          { "id": "C4", "description": "Relationships: orchestrator, durable-state owners, dependencies, where rules live", "questions": ["q11", "q14", "q19"] },
+          { "id": "C5", "description": "Simple list/arrows beats UML", "questions": ["q12", "q13"] },
+          { "id": "C6", "description": "Whiteboard is communication, not formal notation", "questions": ["q12", "q13"] },
+          { "id": "C7", "description": "Sample: Entities + Relationships list", "questions": ["q12"] }
+        ],
+        "ladder": { "L1": ["q10"], "L2": ["q11"], "L3": ["q12"], "L4": ["q13"], "L5": ["q14"] }
+      },
+      {
+        "id": "D",
+        "name": "Step 3 — Class Design (~10–15 min)",
+        "concepts": [
+          { "id": "D1", "description": "Top-down: orchestrator first, then supporting entities", "questions": ["q19"] },
+          { "id": "D2", "description": "Each entity has State + Behavior", "questions": ["q17"] },
+          { "id": "D3", "description": "Derive state from requirements", "questions": ["q17"] },
+          { "id": "D4", "description": "Derive behavior from requirements", "questions": ["q17"] },
+          { "id": "D5", "description": "Tell, Don't Ask — encapsulation", "questions": ["q15", "q18", "q30", "q33"] },
+          { "id": "D6", "description": "Workflow/lifecycle rules → orchestrator", "questions": ["q16", "q18"] },
+          { "id": "D7", "description": "Data-specific rules → entity that owns data", "questions": ["q16", "q18"] },
+          { "id": "D8", "description": "Outcome: small focused APIs; predictable for debugging", "questions": ["q15"] },
+          { "id": "D9", "description": "Notation flexibility — pick easy-to-follow", "questions": ["q12"] },
+          { "id": "D10", "description": "UML is outdated", "questions": ["q20"] },
+          { "id": "D11", "description": "Modern engineers design in code", "questions": ["q20"] },
+          { "id": "D12", "description": "Visual Studio dropped UML tooling in 2016", "questions": ["q20"] },
+          { "id": "D13", "description": "UML was for era when running code was expensive", "questions": ["q20"] },
+          { "id": "D14", "description": "Formality slows interview without adding clarity", "questions": ["q20"] },
+          { "id": "D15", "description": "If asked for UML, propose simplified notation first", "questions": ["q13", "q20"] }
+        ],
+        "ladder": { "L1": ["q15"], "L2": ["q16"], "L3": ["q17"], "L4": ["q18", "q19"], "L5": ["q20"] }
+      },
+      {
+        "id": "E",
+        "name": "Step 4 — Implementation (~10 min)",
+        "concepts": [
+          { "id": "E1", "description": "Ask detail level before writing", "questions": ["q24"] },
+          { "id": "E2", "description": "Modes: pseudocode default, full code, walkthrough only", "questions": ["q24"] },
+          { "id": "E3", "description": "Focus on most interesting methods", "questions": ["q23"] },
+          { "id": "E4", "description": "Default to pseudocode unless specified", "questions": ["q24"] },
+          { "id": "E5", "description": "Happy path first: inputs → steps → calls → return", "questions": ["q21"] },
+          { "id": "E6", "description": "Edge cases after happy path", "questions": ["q21"] },
+          { "id": "E7", "description": "Indentation-based pseudocode", "questions": ["q24"] },
+          { "id": "E8", "description": "If full code, use language they specify or you know", "questions": ["q24"] },
+          { "id": "E9", "description": "Don't pick unfamiliar language", "questions": ["q24"] },
+          { "id": "E10", "description": "Pick methods showing cooperation/transitions/edge-handling/isolation", "questions": ["q23", "q33"] },
+          { "id": "E11", "description": "Interviewer often explicit about which methods", "questions": ["q23"] },
+          { "id": "E12", "description": "Patterns can be impactful but over-engineering is the more common failure", "questions": ["q26"] },
+          { "id": "E13", "description": "Verification = 1–2 min trace", "questions": ["q22", "q25"] },
+          { "id": "E14", "description": "Verification finds logical errors not syntax", "questions": ["q22", "q25"] },
+          { "id": "E15", "description": "Verification shows initial state + per-op changes", "questions": ["q22"] },
+          { "id": "E16", "description": "Bugs caught: turn-switch, win detection, state order, edge cases", "questions": ["q25"] },
+          { "id": "E17", "description": "Fix bug on the spot if found", "questions": ["q25"] },
+          { "id": "E18", "description": "Better you find it than the interviewer", "questions": ["q25"] }
+        ],
+        "ladder": { "L1": ["q21"], "L2": ["q22"], "L3": ["q23"], "L4": ["q24", "q26"], "L5": ["q25"] }
+      },
+      {
+        "id": "F",
+        "name": "Step 5 — Extensibility (~5 min)",
+        "concepts": [
+          { "id": "F1", "description": "Time-permitting interviewer-led extensions", "questions": ["q29"] },
+          { "id": "F2", "description": "Goal: design evolves cleanly without hacks", "questions": ["q27", "q28", "q30", "q31", "q33"] },
+          { "id": "F3", "description": "Level-dependence: junior little, mid 1–2, senior several", "questions": ["q29"] },
+          { "id": "F4", "description": "Pattern: propose change → show clean handling", "questions": ["q27", "q28", "q30", "q31", "q33"] },
+          { "id": "F5", "description": "Undo example: single state-mutation method, command history stack", "questions": ["q27", "q30", "q31", "q33"] },
+          { "id": "F6", "description": "Works because mutations isolated", "questions": ["q30", "q33"] },
+          { "id": "F7", "description": "Stay high-level — point to design parts, don't rewrite", "questions": ["q27", "q28", "q31"] },
+          { "id": "F8", "description": "Demonstrate initial design is extensible/robust", "questions": ["q30"] }
+        ],
+        "ladder": { "L1": ["q27"], "L2": ["q28"], "L3": ["q29"], "L4": ["q30"], "L5": ["q31"] }
+      }
+    ],
+    "crossPart": ["q19", "q30", "q32", "q33"],
+    "l5PatternCoverage": {
+      "framing-is-wrong": ["q9"],
+      "two-levels-of-indirection": ["q14"],
+      "adversarial-pushback": ["q25"],
+      "trade-off-inversion": ["q4"],
+      "implementation-specific-gotcha": ["q20"],
+      "estimation-backed-scenario": [],
+      "future-proofing": ["q31"]
+    }
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "part": "A — The framework as a whole",
+      "subtopic": "Failure Modes",
+      "difficulty": "L1",
+      "style": "Failure Analysis",
+      "conceptIds": ["A2", "A4"],
+      "l5Pattern": null,
+      "question": "A candidate is given the prompt 'Design a coffee machine that dispenses coffee and makes espresso.' They immediately open their pseudocode editor and start writing `class CoffeeMachine { brew()... }`, working through the brewing logic line by line. Five minutes in, they're deep in edge cases for water-temperature ramping. What is the structural failure of this approach in a 35-minute LLD interview?",
+      "options": [
+        "There's no failure — starting in code shows fluency, and edge cases are exactly what interviewers look for as evidence of production-code thinking; the candidate is being efficient.",
+        "The candidate skipped the framework's earlier steps (requirements, entities, class design), so the interviewer has no shared mental model of the system before the candidate gets bogged down in implementation details — the structure of the design is invisible.",
+        "The failure is that the candidate chose the wrong abstraction — coffee machines are better modeled as state machines than as classes, so the entire approach needs to restart with a state diagram before any code is written.",
+        "The candidate didn't ask which language to use first, so all the pseudocode produced may be in a format the interviewer can't easily read; the failure is format-level, not structural in nature."
+      ],
+      "correctIndex": 1,
+      "explanation": "This is the canonical 'dive into code' failure the framework explicitly calls out — getting bogged in edge cases before the interviewer even understands the structure. Without requirements (what does the machine actually need to do?), entities (what classes exist?), and class design (what are their APIs?), the interviewer has no frame to evaluate the implementation against. The fix is to follow the sequence: requirements → entities → class design → implementation, with implementation as a *late* step.",
+      "interviewScript": "In your interview, say: 'Before I write any code, let me make sure I understand the system. Quick clarifiers, then I'll sketch entities and class APIs, and we'll get to the brewing implementation in about 15 minutes.'",
+      "proTip": "If you find yourself writing code in the first 10 minutes of an LLD interview, you've almost certainly skipped a step. Stop, step back, and decide which earlier step you owe."
+    },
+    {
+      "id": "q2",
+      "part": "A — The framework as a whole",
+      "subtopic": "Following the Interviewer",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["A4", "A7"],
+      "l5Pattern": null,
+      "question": "An interviewer asks about a system you've designed: 'Wait, before you go to implementation, can we talk about how this would handle a power outage?' You're at minute 18, just finishing class design. According to the framework's guidance about following the interviewer, what's the right move?",
+      "options": [
+        "Politely refuse — the framework specifies class design comes before any extensibility-style discussion, and breaking sequence here will cost time you need for implementation later in the slot.",
+        "Pause class design, fully address the power-outage discussion as a long sub-conversation, then return to where you left off — interviewer questions are always priority over your sequence and never need to be time-boxed.",
+        "Engage briefly with the power-outage question by pointing at where in your existing design it would land, then gently guide back to finishing class design before implementation — follow the interviewer's lead but don't sacrifice the framework's coverage of important bits.",
+        "Skip directly to implementation now — power-outage is an extensibility concern that fits in the last 5 minutes, so getting to code first is the way to address it without breaking framework sequence at all."
+      ],
+      "correctIndex": 2,
+      "explanation": "The framework explicitly says: 'If your interviewer pulls you off this framework to cover questions or extensions, follow their lead. Don't fight your interviewer, but gently guide the interview back to ensure you're covering the important bits.' Option C is exactly that — engage briefly, then guide back. Option A fights the interviewer (worst possible signal). Option B over-corrects in the other direction (open-ended absorption costs time). Option D ignores the question, which is also fighting.",
+      "interviewScript": "In your interview, say: 'Good question — quick high-level answer: power-outage handling lands cleanly on Game's state-mutation method, which would write each transition to durable storage. Want me to expand that as the extensibility discussion at the end, and finish class design first? I want to make sure we still get to implementation.'",
+      "proTip": "When the interviewer redirects, don't refuse and don't absorb open-endedly. A short answer + a graceful return earns more signal than either extreme."
+    },
+    {
+      "id": "q3",
+      "part": "A — The framework as a whole",
+      "subtopic": "Time Budget Reasoning",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["A1", "A3", "A4", "A5", "A6"],
+      "l5Pattern": null,
+      "question": "You're 8 minutes into an interview and have just finished a long requirements clarification round. The framework's nominal budget for that step is ~5 minutes, so you've spent 60% extra. Which adjustment best preserves the rest of the interview's quality?",
+      "options": [
+        "Compress entities and relationships to 1 minute by drawing only entity names with no relationship arrows, then do extra-detailed class design to make up for the rushed entities step and recover the early overshoot.",
+        "Cut implementation entirely and skip directly to extensibility after entities — the implementation walkthrough is the most expendable step because the interviewer can already infer the code from the class design done earlier.",
+        "Tell the interviewer that you've gone over budget on requirements and ask them which of the remaining steps to drop — that preserves agency but burns yet more time on meta-conversation that the interview hasn't budgeted for.",
+        "Stay with the framework's relative shape but compress every remaining step proportionally — entities to ~2.5 min, class design to ~9 min, implementation to ~8 min, extensibility to ~4 min — to absorb the overshoot evenly across all remaining work."
+      ],
+      "correctIndex": 3,
+      "explanation": "The framework's value is the *relative shape* of the budget — each step gets its proportion. Skipping or gutting any one step (Options A, B) sacrifices the whole rationale. Asking the interviewer to prioritize (C) is meta-conversation that itself costs minutes. Proportional compression preserves the framework's coverage of every graded area at slightly reduced depth — the right trade.",
+      "interviewScript": "In your interview, after a long requirements round, say (silently to yourself): 'OK that took 8 minutes instead of 5. I'll trim entities, class design, implementation, and extensibility each by ~10% to absorb the overshoot, and keep moving.'",
+      "proTip": "Don't drop an entire step to compensate for an overshoot in another. The framework grades coverage; uneven compression preserves coverage where uneven cuts destroy it."
+    },
+    {
+      "id": "q4",
+      "part": "A — The framework as a whole",
+      "subtopic": "Interviewer-Driven Pacing Override",
+      "difficulty": "L5",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["A4", "A7"],
+      "l5Pattern": "trade-off-inversion",
+      "question": "You're at minute 22, in the middle of class design. The interviewer says: 'Forget about the rest of the classes — I want to spend the remaining time on how you'd implement and verify makeMove() in detail.' Following the framework's pacing as written would still allocate ~5 min to extensibility. What is the senior+ move when the interviewer's request inverts the framework's default trade-off?",
+      "options": [
+        "Politely reject the interviewer's redirect — the framework's pacing is calibrated for full coverage, and skipping the rest of the classes will leave the design incomplete and ungradable on Class Design as a separate area.",
+        "Follow the interviewer fully — abandon the rest of class design, spend all remaining time on makeMove() and verification, and don't come back to the broader design even if there's time at the end of the slot.",
+        "Acknowledge the redirect and follow it, but ask one clarifying question first ('do you also want me to walk through extensibility briefly at the end, or is the deep-dive on makeMove the entire remaining slot?') — the framework is a default, and the interviewer's redirect is explicit signal that the default doesn't apply for this slot.",
+        "Negotiate — propose 10 minutes on makeMove and verification, then 3 minutes on extensibility. Push back if the interviewer disagrees, since giving up extensibility coverage forfeits an entire graded area you can't get back later in the slot."
+      ],
+      "correctIndex": 2,
+      "explanation": "Why the wrong answers are tempting: A treats the framework as a contract instead of a default — the source explicitly says 'don't fight your interviewer'. B follows fully but loses the cheap chance to ask one clarifier that costs 10 seconds and earns trust by surfacing the trade-off. D pushes back unnecessarily — pushback is for when the interviewer's request is unclear, not when it's deliberate. Deeper insight: the framework is *scaffolding* for when the interview drifts; when the interviewer is actively shaping pacing, the right move is to follow with one calibration question. Never silent absorption, never resistance.",
+      "interviewScript": "In your interview, say: 'Got it — I'll spend the remaining time on makeMove and verification. Quick check before I dive in: do you also want me to touch on extensibility at the end (a few minutes), or is the makeMove deep-dive the entire remaining slot? Either is fine, just want to budget correctly.'",
+      "proTip": "When an interviewer overrides the framework's pacing, the best move is to follow + one calibration question. The clarifier costs nothing and removes the risk of guessing wrong about whether they wanted full absorption or partial."
+    },
+    {
+      "id": "q5",
+      "part": "B — Step 1: Requirements",
+      "subtopic": "Prompt to Spec",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["B1", "B5"],
+      "l5Pattern": null,
+      "question": "A recruiter sends the prompt: 'Design Tic Tac Toe.' That's all. Two candidates respond differently. Candidate U immediately writes `class Game { ... }`. Candidate V writes a list of 5 questions: 'Two players? 3x3 board? Win conditions for diagonals? Invalid-move handling? Reset?' Which response better matches what the requirements step is for, and why?",
+      "options": [
+        "U is better — the prompt is short because the system is well-known, so requirements can be inferred and starting in code shows efficiency that interviewers reward in the early minutes of the slot.",
+        "Both are equivalent — V's questions could just as easily be answered by U's writing of the code, since edge cases will surface naturally during implementation and either order produces the same final design at the end.",
+        "U is better but V is acceptable — both end at the same design, but U's faster start gives more time for the interesting parts later in the interview when the interviewer adds extension requirements.",
+        "V is better — the prompt is intentionally minimal, and the candidate's job is to convert it into a clear spec by asking targeted questions before designing anything; that's exactly what the requirements step is for."
+      ],
+      "correctIndex": 3,
+      "explanation": "The framework explicitly says the prompt is intentionally minimal and that 'your job is to turn it into a spec you can actually design around'. V's questions are aimed at exactly the four themes (capabilities, rules/completion, error handling, scope). U is implementing without a spec — even for a 'well-known' system, the interviewer's specific interpretation matters (3×3 vs N×N? UI in scope? AI?). Inferring is risky; asking is cheap.",
+      "interviewScript": "In your interview, say: 'A few quick clarifiers before I start. (1) Two human players or one against an AI? (2) Standard 3×3 grid? (3) Should I support invalid-move rejection and a reset method? (4) Is the UI in scope or only the engine?'",
+      "proTip": "Even on prompts you've practiced ten times, ask the same four-theme questions. The interviewer needs to *see* the discipline, not just benefit from it."
+    },
+    {
+      "id": "q6",
+      "part": "B — Step 1: Requirements",
+      "subtopic": "Question Themes",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["B2", "B3"],
+      "l5Pattern": null,
+      "question": "You're designing a coffee machine. Which of these clarifying questions belongs to 'Primary capabilities' and which belongs to 'Scope boundaries'? (Q1) 'Does the machine make tea, or only coffee and espresso?' (Q2) 'Should I model the user interface, or only the brewing logic?' Which answer best maps each question to its theme and explains the distinction?",
+      "options": [
+        "Q1 is Primary capabilities (it's about what the machine does); Q2 is Scope boundaries (it's about what's in/out of the design slot). The two themes overlap when a 'capability' question is really asking what to leave out, but the distinction is whether the answer changes the *core function* or the *interface boundary*.",
+        "Q1 is Scope boundaries (it asks what's in scope); Q2 is Primary capabilities (it asks what the machine should do). The distinction is whether the question is about features or about the surface area covered, and Q1's enumeration of features makes it the scope question.",
+        "Both are Primary capabilities — anything about what the machine does or what it covers is the same theme; Scope boundaries is reserved for non-functional concerns like persistence and concurrency that don't appear in the prompt itself.",
+        "Both are Scope boundaries — Primary capabilities are answered by the prompt itself (the prompt says 'coffee and espresso'), while clarifying questions are always about narrowing scope rather than expanding capability."
+      ],
+      "correctIndex": 0,
+      "explanation": "Primary capabilities = what the system *does* (its operations). Scope boundaries = what's in vs out of the *design slot* (UI, persistence, networking, concurrency). Q1 asks whether tea is a supported operation — that's a capability question. Q2 asks whether the UI layer needs to be designed at all — that's a boundary question. The themes do overlap (a capability outside scope is functionally excluded), but the distinction is whether the answer changes *what the system does* vs *what we're designing for*.",
+      "interviewScript": "In your interview, after enumerating capabilities, say: 'And on scope — should I cover the UI layer, persistence, or concurrency, or are those out of scope for this slot? I want to mark them on the whiteboard explicitly to keep the design focused.'",
+      "proTip": "When a clarifier is ambiguous between themes, ask both questions: 'is X a capability we need, and if so, is the implementation in scope?' Two short questions are cheaper than one ambiguous one."
+    },
+    {
+      "id": "q7",
+      "part": "B — Step 1: Requirements",
+      "subtopic": "Selecting Clarifiers",
+      "difficulty": "L3",
+      "style": "Scenario-Based",
+      "conceptIds": ["B2", "B3", "B4", "B7"],
+      "l5Pattern": null,
+      "question": "Prompt: 'Design a parking lot system where cars are assigned to spots as they pull in.' You can ask three clarifying questions before starting. Which set covers the four themes (capabilities, rules/completion, error handling, scope boundaries) most efficiently?",
+      "options": [
+        "(1) Should I assume one entrance or multiple? (2) Should the assignment algorithm prefer the closest spot to the entrance? (3) Should I support reservations as a feature on top of basic parking?",
+        "(1) What vehicle types and what spot types are supported, and how do they map? (2) What happens when the lot is full or when a vehicle exits the lot? (3) Is the UI in scope, and is concurrency in scope?",
+        "(1) Which language should I use? (2) Should I draw UML or write pseudocode? (3) How long do I have before extensibility questions begin in the slot?",
+        "(1) How many spots is the largest lot? (2) Are payments in scope? (3) Should I assume integers for spot IDs or strings for human-readable identifiers?"
+      ],
+      "correctIndex": 1,
+      "explanation": "Option B covers all four themes in three questions: vehicle/spot types and mapping (capabilities), full-lot and exit handling (rules/completion + error handling), UI/concurrency (scope boundaries). Option A is all capabilities (no error handling, no scope). Option C is logistics, not requirements. Option D mixes capacity (out of band for LLD) with one capability and an implementation detail.",
+      "interviewScript": "In your interview, say: 'Three quick clarifiers. (1) What vehicle types and spot types does this support, and how do they map? (2) What's the expected behavior when the lot is full and when a vehicle exits — including invalid plate / no-show cases? (3) Is the UI or concurrency in scope, or only the assignment-and-exit logic?'",
+      "proTip": "When you have a small budget of clarifying questions, one question per theme is the most efficient packing. Don't burn three questions all on capabilities."
+    },
+    {
+      "id": "q8",
+      "part": "B — Step 1: Requirements",
+      "subtopic": "Out-of-Scope Discipline",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["B4", "B5", "B6", "B7"],
+      "l5Pattern": null,
+      "question": "You've explicitly noted 'concurrency is out of scope' on the whiteboard. At minute 25 the interviewer asks: 'What happens when two cars try to take the last spot at the same time?' Two candidates respond differently. X says 'Out of scope — I noted that earlier.' Y says 'I noted concurrency as out of scope; do you want me to address it now, or leave it as a known boundary?' Why is Y's move better and what underlying skill does it demonstrate?",
+      "options": [
+        "Y is better because they invite the interviewer to expand the scope on demand — interviewers always want candidates to address every question they ask, regardless of any earlier scope agreements that were made.",
+        "X is better — protecting scope boundaries you've established is exactly what the framework prescribes, and re-opening scope wastes time that should go to the original design as confirmed earlier.",
+        "Y is better because it acknowledges the prior scope agreement (good Problem Analysis), checks whether the interviewer wants to expand scope (good Communication), and offers to handle either path — without unilaterally re-scoping or refusing to engage.",
+        "Both are equivalent — the interviewer will explicitly tell the candidate which path they want, so the choice between X and Y is a stylistic preference rather than a graded difference between the two candidates."
+      ],
+      "correctIndex": 2,
+      "explanation": "Out-of-scope items are *boundaries*, not refusals. They prevent scope creep — but if the interviewer explicitly invites you to address the boundary, that's a deliberate scope expansion. X reads as rigid; Y demonstrates the skill of holding boundaries while still being responsive. The check ('do you want me to address it now?') costs five seconds and removes ambiguity.",
+      "interviewScript": "In your interview, say: 'I noted concurrency as out of scope. If you'd like, I can address it now — either as a high-level extensibility note (where would the locks go) or as a detailed design with a structured-locking approach. Or we can leave it as a known boundary and move on. What would you prefer?'",
+      "proTip": "Out-of-scope is a *whiteboard contract*, not a refusal mechanism. When the interviewer asks about an out-of-scope item, the contract is being renegotiated — surface that, don't enforce silently."
+    },
+    {
+      "id": "q9",
+      "part": "B — Step 1: Requirements",
+      "subtopic": "Skipping the Requirements Step",
+      "difficulty": "L5",
+      "style": "Critical Failure Modes",
+      "conceptIds": ["B1", "B4", "B5"],
+      "l5Pattern": "framing-is-wrong",
+      "question": "A candidate sees an LLD prompt for a system they've practiced before ('Design a parking lot' — they've done it three times). They skip clarifying questions entirely to save time, jump to entities, and use their memorized solution. The interview goes faster but the feedback says 'failed Problem Analysis.' Why does the candidate's framing of 'I've done this — I can skip the requirements' invert the actual purpose of the requirements step, and what is the senior+ move on a familiar prompt?",
+      "options": [
+        "The candidate's framing was reasonable and the feedback is wrong — for a well-known problem, skipping requirements is efficient. The senior+ move is to push back on this feedback during the debrief and explain the reasoning.",
+        "The framing was wrong because every parking lot interview is actually subtly different — the candidate's memorized solution misses 80% of the time. The senior+ move is to never use a memorized solution and rebuild from scratch on every prompt regardless.",
+        "The candidate's framing was correct in spirit but they implemented it wrong — they should have asked one quick question ('any twist on the standard parking lot?') and then proceeded. The feedback is calibrated to the omission of that single token-question, not to the absence of full requirements.",
+        "The framing inverts purpose because requirements aren't only for *information* — they're also the visible *signal* the interviewer grades on Problem Analysis. Even on a familiar prompt, asking the four-theme questions demonstrates the discipline. The senior+ move is to ask the same questions but compress the conversation: 'I'd assume X, Y, Z unless you'd like a different scope — confirm or correct me?' Speeds the conversation without skipping it."
+      ],
+      "correctIndex": 3,
+      "explanation": "Why the wrong answers are tempting: A is contrarian (the framework is clear that Problem Analysis is graded). B is over-corrective (memorization isn't the issue if you confirm). C understates — the omission isn't the *form* of the question but the *visibility* of the discipline. Deeper insight: requirements gathering serves two purposes — *information* (what to design) and *signal* (that you can scope). On a familiar prompt the information cost is near-zero, but the signal cost is the same. The senior+ move is to *compress*, not skip — restate your assumptions, give the interviewer one move (confirm or correct), and proceed. That preserves all the signal at low time cost.",
+      "interviewScript": "In your interview, say: 'For this parking lot, I'll assume: vehicle types are car/motorcycle/truck with size-matched spots, the lot has multiple entrances, payment is out of scope, concurrency is out of scope, the assignment is closest-available-spot. Anything you'd like me to change before I sketch entities?'",
+      "proTip": "The cost of asking is mostly time. The cost of not asking is signal. On familiar prompts, compress to one combined assertion-and-check; never skip the act."
+    },
+    {
+      "id": "q10",
+      "part": "C — Step 2: Entities and Relationships",
+      "subtopic": "Entity vs Field",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["C1", "C2", "C3"],
+      "l5Pattern": null,
+      "question": "Designing a movie ticket booking system. A candidate has identified `Movie`, `Theater`, `Showtime`, `Seat`, `Booking`, and `Customer` as entities. They also list `seatNumber`, `bookingId`, and `customerEmail` as entities. Which of those second-list items should *not* be entities, and what filter explains why?",
+      "options": [
+        "All three should be entities since they each have unique identity and could be referenced from elsewhere — under-modeling fields as entities loses important information about identity that the design needs to track.",
+        "Only `bookingId` should be an entity since it's a system-generated value with its own lifecycle; the other two are user-supplied and remain fields on their parent objects.",
+        "Only `customerEmail` should be an entity since it's the canonical identifier for a customer across the system; the other two are derived values that don't need their own entity status.",
+        "None should be entities — none of seatNumber, bookingId, or customerEmail maintains changing state or enforces rules; they're values attached to other entities (Seat, Booking, Customer respectively), so they belong as fields on those entities."
+      ],
+      "correctIndex": 3,
+      "explanation": "The framework's filter: 'If something maintains changing state or enforces rules, it likely deserves to be its own entity. If it's just information attached to something else, it's probably just a field on another class.' seatNumber is a field on Seat. bookingId is a field on Booking. customerEmail is a field on Customer. None of them changes state independently or enforces rules of its own. Promoting them to entities causes 'micro-object explosion' — exactly what the framework warns against.",
+      "interviewScript": "In your interview, when listing entities, say: 'I'm using the filter: state plus rules → entity, attached info → field. So Movie, Theater, Showtime, Seat, Booking, Customer are entities. seatNumber lives as a field on Seat, bookingId as a field on Booking, customerEmail as a field on Customer.'",
+      "proTip": "Before promoting any noun to an entity, ask: does it change state independently? Does it enforce a rule? If both are no, it's a field. Save entity status for things that *do* something."
+    },
+    {
+      "id": "q11",
+      "part": "C — Step 2: Entities and Relationships",
+      "subtopic": "Identifying the Orchestrator",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["C4"],
+      "l5Pattern": null,
+      "question": "In a chess design, two candidates argue about whether `Board` or `Game` should be the orchestrator. Candidate P says Board is the orchestrator because it owns the most state (the squares and pieces). Candidate Q says Game is the orchestrator because it drives the workflow (whose turn, has the game ended, accept moves, return state). Which framing is correct and what's the underlying principle?",
+      "options": [
+        "P is correct — the orchestrator is whichever entity owns the most state, since state is the load-bearing concern; in chess that's Board (64 squares + pieces) so Board is the orchestrator that exposes the public API.",
+        "Both are wrong — chess has no orchestrator because the rules are static and the workflow is purely reactive; both Board and Game are equal-weight entities that each handle their own concerns without coordination.",
+        "Q is correct — the orchestrator is whichever entity drives the *main workflow* (the lifecycle, the dispatch, the rules about ordering); in chess Game owns 'whose turn', 'is game over', and 'accept move', which is the workflow shape that the framework identifies as the orchestrator role.",
+        "Both could be correct depending on the design — choosing one over the other is a stylistic preference, not a structural one, and either decision can be defended as long as you're consistent through the rest of the design."
+      ],
+      "correctIndex": 2,
+      "explanation": "The framework defines the orchestrator as 'the one driving the main workflow', not the one with the most state. Game owns the lifecycle (in-progress vs won vs draw), the dispatch (whose turn), and the validation envelope (accept move only if in-progress and from the right player). Board owns *data and data-rules* (cell occupancy), not workflow. Two entities with different roles (workflow vs data) is exactly the framework's prescription — they're not equal-weight; they're different-weight.",
+      "interviewScript": "In your interview, say: 'For chess, the orchestrator is Game — it drives the workflow (whose turn, has the game ended, accept moves) and is the public face the outside world calls. Board is a supporting entity that owns the cells and answers cell-level questions like is-this-cell-occupied. Game depends on Board, not the other way around.'",
+      "proTip": "The orchestrator drives the workflow; supporting entities own data and answer questions. When two entities seem to compete for the orchestrator role, ask: which one's *methods* are the system's public API?"
+    },
+    {
+      "id": "q12",
+      "part": "C — Step 2: Entities and Relationships",
+      "subtopic": "Notation Level Choice",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["C5", "C6", "C7", "D9"],
+      "l5Pattern": null,
+      "question": "You've identified 6 entities and 8 relationships in a design. The interviewer hasn't specified a notation. What is the most useful notation level to draw on the whiteboard, and why?",
+      "options": [
+        "Simple boxes and arrows with text labels (`Game → Board`, `Game → Player (2x)`), without strict UML syntax — communicates structure cleanly without time spent on notation formality, which is exactly what the framework prescribes.",
+        "Full UML class diagram with composition diamonds, aggregation arrows, dependency lines, and cardinality labels — this is the most precise notation and removes ambiguity about each relationship's exact shape.",
+        "A bulleted list of entity names with one-line descriptions of each — this is the most concise notation and avoids the time cost of arrows entirely so you can move on quickly.",
+        "A sequence diagram showing how the entities interact during a typical operation — sequence flows make the relationships concrete and actionable for the next step rather than abstract."
+      ],
+      "correctIndex": 0,
+      "explanation": "The framework explicitly says: 'A simple list of entities and a few arrows showing which objects own or use which others is more than enough. You're not drawing a full UML diagram, you're just communicating structure that you can build on later.' Option B is exactly what the framework warns against (rigid notation cost). Option C drops the relationships entirely, losing structure. Option D is for runtime sequences, not structural relationships. The whiteboard is communication; arrows + labels are sufficient.",
+      "interviewScript": "In your interview, say: 'Quick relationship sketch — Game has-a Board, Game has-two Players, Player has-an Mark (X or O). I'm not going formal UML; I'd rather spend the time on class design and have something we can iterate on quickly.'",
+      "proTip": "Notation precision and design quality are inversely correlated past a point. Spend your minutes on structural decisions, not on the syntax of the diagram."
+    },
+    {
+      "id": "q13",
+      "part": "C — Step 2: Entities and Relationships",
+      "subtopic": "Pushback on Notation",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["C5", "C6", "D15"],
+      "l5Pattern": null,
+      "question": "An interviewer says: 'I expected to see UML for the relationships. Boxes and arrows aren't formal enough.' What's the right response?",
+      "options": [
+        "Acknowledge the request, ask if simplified class notation (state + behavior lists per class, with the existing arrows) is acceptable since it's faster to write and easier to discuss in real time, then adopt UML if they insist on it.",
+        "Apologize and switch to full UML for the rest of the interview — the interviewer's expectation is the contract you have to meet, regardless of how much time UML takes to draw on the whiteboard.",
+        "Defend the boxes-and-arrows choice — UML is outdated and modern engineering doesn't use it; the interviewer is wrong on substance and you should explain why with reference to industry trends.",
+        "Switch to UML for the most important entity (the orchestrator) only — the rest can stay in informal notation, balancing the interviewer's expectation with time budget across the remaining slot."
+      ],
+      "correctIndex": 0,
+      "explanation": "The framework's exact prescription: 'If it comes up, ask whether simplified class notation is acceptable — it's faster to write and easier to discuss. In most cases, it will be.' Option A follows that script. Option B capitulates immediately and burns time. Option C fights the interviewer (always wrong). Option D produces an inconsistent notation across the diagram, which is worse than either pure choice.",
+      "interviewScript": "In your interview, say: 'Happy to add more formality. Quick check: would simplified class notation work — I'll list state and behavior per class with the existing relationship arrows? It's faster to iterate on than full UML. If you'd specifically prefer UML with composition diamonds and cardinality, I'll switch — just want to confirm before I redraw.'",
+      "proTip": "When asked for UML, the cheapest move is to ask if simplified class notation is acceptable. Most interviewers say yes, and you save 5 minutes that would otherwise go to drawing diamonds."
+    },
+    {
+      "id": "q14",
+      "part": "C — Step 2: Entities and Relationships",
+      "subtopic": "Missing Entity Detection",
+      "difficulty": "L5",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["C1", "C2", "C4"],
+      "l5Pattern": "two-levels-of-indirection",
+      "question": "Designing an elevator system. The candidate identifies `Elevator`, `Floor`, `Button`, `RequestQueue`, and `ElevatorController`. Implementation reveals that the trickiest logic isn't in any of those — it's in deciding *which* elevator to dispatch when multiple are idle. The candidate added that logic into ElevatorController as a private method. What's the deeper structural issue this reveals about the entity decomposition, and what's the fix?",
+      "options": [
+        "There's no issue — private methods inside a controller are exactly where dispatch logic belongs; the design is correct and the controller-with-private-helper shape is canonical for this kind of logic.",
+        "The issue is that ElevatorController has too many public methods; the fix is to split the dispatch logic into its own controller class (`DispatchController`) so the public surface stays small.",
+        "The surface entities (Elevator, Floor, Button, etc.) are correct, but the *real* entity behind 'which elevator to dispatch' is a Dispatch Strategy — a first-class entity owning that decision, with its own state (load history, distance preference) and behavior (`selectElevator(request, candidates)`). Hiding it as a private method on Controller masks both that the policy is swappable and that it has its own state.",
+        "The issue is that Floor and Button are too granular — combining them into a single FloorRequest entity would let dispatch logic live cleanly inside FloorRequest itself without adding a new entity."
+      ],
+      "correctIndex": 2,
+      "explanation": "Why the wrong answers are tempting: A misses the design issue entirely (private methods can hide first-class entities). B addresses surface symptom (controller bloat) without naming the real cause (missing entity). D restructures unrelated entities and doesn't solve the dispatch problem. Deeper insight: when the trickiest logic ends up as an unmodeled private method, the entity decomposition is missing an entity. The framework's filter ('maintains state or enforces rules → entity') triggers here — DispatchStrategy enforces a rule (which elevator) and may hold state (load history, learned preferences). Surface entities catch the visible nouns; the missing entity is one level down — what *makes the decision*, not what the decision is *about*.",
+      "interviewScript": "In your interview, say: 'Looking at where the trickiest logic ended up — dispatch — I think I missed an entity. DispatchStrategy is its own thing: it has state (load history per elevator, recent-request distribution) and a behavior (selectElevator). Promoting it from a private method to a first-class entity also makes the policy swappable later, which I'd want for closest-elevator vs least-loaded vs energy-saving variants.'",
+      "proTip": "If implementation reveals that a 50-line private method is doing the most interesting work, you're missing an entity. Promote it: name the decision, give it state, give it behavior. The pattern reads as design maturity."
+    },
+    {
+      "id": "q15",
+      "part": "D — Step 3: Class Design",
+      "subtopic": "Tell, Don't Ask",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["D5", "D8"],
+      "l5Pattern": null,
+      "question": "A candidate has a `Cart` class. They write `if (cart.items.size() > 0 && cart.totalPrice() < 10) { applyDiscount(); }`. The interviewer suggests: `if (cart.qualifiesForDiscount()) { applyDiscount(); }`. Which design principle is the interviewer applying, and why does it make the design cleaner?",
+      "options": [
+        "DRY — the interviewer is removing duplication of the items/totalPrice check that may exist elsewhere in the codebase; cleanness comes from reuse and avoidance of repeated logic across call sites.",
+        "Encapsulation by hiding fields — by removing direct access to `items.size()` and `totalPrice()`, the interviewer is making the cart's state private; cleanness comes from access control over internal state.",
+        "Single Responsibility — the interviewer is moving discount logic out of the caller, which had multiple responsibilities; cleanness comes from each class having one purpose rather than several intertwined.",
+        "Tell, Don't Ask — the cart owns the rule for what 'qualifies for discount' means, so the caller should ask the cart whether it qualifies rather than fetching cart's data and deciding outside. Cleanness comes from rules living with the entity that owns the relevant state."
+      ],
+      "correctIndex": 3,
+      "explanation": "The framework names this exact principle: 'Tell, Don't Ask' — objects should manage their own state and expose behavior, not getters for callers to make decisions. The original code asks the cart for two pieces of state (items.size, totalPrice) and decides outside. The fix moves the *decision* into the cart, where the relevant state lives. Other principles (DRY, Encapsulation, SRP) are related but secondary — the *primary* move is relocating the rule.",
+      "interviewScript": "In your interview, say: 'I'm going to put the qualifies-for-discount rule on Cart itself rather than computing it from getters in the caller. The cart owns the state that decides the rule, so the rule should live with the state. The caller asks `cart.qualifiesForDiscount()` and doesn't need to know what items.size or totalPrice mean.'",
+      "proTip": "When you find yourself fetching multiple getters from one object to make a decision, the decision belongs *on that object*. That's Tell, Don't Ask in one diagnostic."
+    },
+    {
+      "id": "q16",
+      "part": "D — Step 3: Class Design",
+      "subtopic": "Workflow Rules vs Data Rules",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["D6", "D7"],
+      "l5Pattern": null,
+      "question": "In Tic Tac Toe, two rules need a home: (R1) 'a move can only be made if it's the player's turn'; (R2) 'a cell can only have a mark if it's currently empty.' Where should each live, and what's the principle?",
+      "options": [
+        "Both R1 and R2 belong in Game (the orchestrator) — centralizing rules in the orchestrator makes them easier to find and change consistently when the rules evolve over time.",
+        "R1 in Game (workflow/lifecycle rule about whose turn it is — the orchestrator owns that state); R2 in Board (data-specific rule about cell occupancy — Board owns the cells). Workflow rules live in the orchestrator; data-specific rules live with the entity that owns the data.",
+        "Both R1 and R2 belong in Board — Board sees both the cells and the move, so colocating both rules in Board avoids inter-class chatter and keeps `makeMove` atomic in the implementation.",
+        "R1 in Player (the player knows whose turn it is for itself); R2 in Cell (each cell knows whether it's occupied for itself). Devolving rules to the smallest possible entity is the cleanest design and minimizes coupling."
+      ],
+      "correctIndex": 1,
+      "explanation": "The framework's exact split: 'Workflow and lifecycle rules (like \"can this operation run right now?\") belong in the orchestrator. Data-specific rules (like \"is this cell already occupied?\") belong in the entity that owns that data.' R1 is about turn-ordering — that's lifecycle, owned by Game. R2 is about cell occupancy — that's data, owned by Board. Centralizing in Game (A) overloads it; centralizing in Board (C) gives Board responsibilities it doesn't need; devolving (D) over-fragments and loses the orchestrator's coherence.",
+      "interviewScript": "In your interview, say: 'Game owns the turn-ordering rule because Game owns the workflow — \"is it your turn?\" is a question about the lifecycle. Board owns the cell-occupancy rule because Board owns the cells. So Game.makeMove first checks turn, then asks Board whether the cell is empty, then mutates.'",
+      "proTip": "Two-class systems with rules in the wrong class are surprisingly common. Diagnostic: if a class is making a decision about state it doesn't own, the rule is misplaced."
+    },
+    {
+      "id": "q17",
+      "part": "D — Step 3: Class Design",
+      "subtopic": "Deriving State from Requirements",
+      "difficulty": "L3",
+      "style": "Scenario-Based",
+      "conceptIds": ["D2", "D3", "D4"],
+      "l5Pattern": null,
+      "question": "Requirement: 'A coffee machine can dispense up to 3 cups per hour, with a 5-minute cooldown between cups.' Which set of state fields on `CoffeeMachine` directly satisfies this requirement, with no extra speculation?",
+      "options": [
+        "`cupsToday: int`, `lastBrewTime: timestamp`, `weeklyUsage: list<timestamp>`, `userId: string`, `model: string` — track usage broadly so the machine can be inspected and tuned for telemetry purposes later in development.",
+        "`canBrewNow: bool` — derived flag updated by a background timer; encapsulates both rules into one queryable field that downstream code can rely on without recomputing.",
+        "`hourlyCounter: int`, `cooldownTimer: int`, `currentlyBrewing: bool`, `errorState: string` — uses primitive counters/timers and an error field for completeness, mirroring how an embedded device might be implemented.",
+        "`brewingHistory: list<timestamp>` (last hour only, for the rate limit), `lastBrewTime: timestamp` (for the cooldown). Each field maps directly to a requirement clause; nothing is added that isn't required by either of the two stated rules."
+      ],
+      "correctIndex": 3,
+      "explanation": "The framework prescribes deriving state directly from requirements: 'Which parts of the requirements does this entity own? What information does it need to keep in memory to satisfy those responsibilities?' Option D maps each field 1:1 to a requirement clause. Option A speculates (weeklyUsage, userId, model — none required). Option B (canBrewNow) is a derived flag, not raw state — it would still need brewingHistory and lastBrewTime underneath. Option C uses ambiguous primitive types (a 'cooldownTimer: int' doesn't say what unit) and adds extra fields (currentlyBrewing, errorState) that don't map to requirements.",
+      "interviewScript": "In your interview, say: 'For the rate limit (3 cups per hour) I need brewingHistory — the last hour of brew timestamps. For the cooldown (5 minutes between cups) I need lastBrewTime. That's the state. canBrewNow is a method, not a field — it computes from those two. I won't add userId or weekly tracking unless a requirement asks for them.'",
+      "proTip": "For each state field, point at the exact requirement it serves. If you can't, delete it. Speculative state is the same anti-pattern as speculative classes."
+    },
+    {
+      "id": "q18",
+      "part": "D — Step 3: Class Design",
+      "subtopic": "Misplaced Rule Cascade",
+      "difficulty": "L4",
+      "style": "Failure Analysis",
+      "conceptIds": ["D5", "D6", "D7"],
+      "l5Pattern": null,
+      "question": "A candidate puts the 'is this cell empty' rule into Game (the orchestrator) instead of Board. What downstream consequence is most likely, and why does the source's encapsulation principle predict it?",
+      "options": [
+        "No consequence — Game and Board both have access to the same state ultimately, so where the rule lives is a stylistic preference rather than a load-bearing decision in the design.",
+        "Game will need to grow a `boardCellsCache` field to avoid repeatedly querying Board, which adds memory but no correctness issue and is easily addressed with a small cache invalidation routine.",
+        "Game's makeMove() will need to ask Board for cell contents (`board.getCell(r, c) == empty`), which means Board exposes a getter for its internal state — and now any class that holds a Board can make decisions about cell occupancy on its own. The rule has leaked: it's enforced in Game but *enforceable* by anyone with a Board reference. When a new caller (e.g. an AI move evaluator) is added, it may re-implement the rule slightly differently, creating two sources of truth.",
+        "Board will become unused since all rules live in Game; the design devolves into a single-class system that loses the benefit of separation entirely as the design grows."
+      ],
+      "correctIndex": 2,
+      "explanation": "The framework's encapsulation argument is exactly this cascade: keeping the rule with Board means Board exposes only `canPlace(r, c)` (behavior), not `getCell(r, c)` (raw state). Putting the rule in Game forces Board to expose state, which leaks the rule's domain — anyone with a Board reference can now reimplement the rule, often subtly differently. This is the 'two sources of truth' failure mode that bites once a second caller (AI evaluator, undo, replay) is added. Option A denies the principle. B fixates on a non-issue (caching). D inverts the logic.",
+      "interviewScript": "In your interview, when placing a rule, say: 'I'm putting this rule on Board because Board owns the cells. If I put it on Game, Board would expose getCell, and any future caller could re-implement is-empty differently — that's a two-sources-of-truth problem I want to avoid.'",
+      "proTip": "When a rule lives in the wrong class, the second caller is what pays the price. The first caller works fine; the second caller silently diverges."
+    },
+    {
+      "id": "q19",
+      "part": "D — Step 3: Class Design",
+      "subtopic": "Top-Down Derivation Order",
+      "difficulty": "L4",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["D1", "C4"],
+      "l5Pattern": null,
+      "question": "A candidate starts class design with `Player` (the smallest entity), then `Board`, then finally `Game`. By the time they reach Game, they've already committed to method signatures on Player and Board that don't quite match what Game needs to call. What's the framework's prescription about ordering, and why does bottom-up commit-first cause this issue?",
+      "options": [
+        "Bottom-up is correct — designing the leaves first lets you compose them upward into the orchestrator naturally. The candidate's issue isn't ordering; it's that they didn't refactor when discrepancies arose between the layers.",
+        "The framework prescribes top-down: orchestrator first, then supporting entities. Top-down lets the orchestrator's needs *drive* the API of the entities below it. Bottom-up commits to APIs before the orchestrator is even outlined, so the leaves have to be retrofitted — which is the candidate's exact problem.",
+        "Ordering doesn't matter — class design is iterative, and any sequence works as long as the candidate iterates frequently enough. The candidate's issue is that they stopped iterating prematurely instead of cycling back.",
+        "The framework prescribes designing entities in alphabetical order (Board, Game, Player) for predictability; the candidate's issue is they used a different sort order than the framework specifies."
+      ],
+      "correctIndex": 1,
+      "explanation": "The framework's exact prescription: 'You'll now go entity by entity, working top-down. Start with the orchestrator (for Tic Tac Toe, this is the Game class), then move down to the supporting entities (Board, Player, etc.).' Top-down lets the orchestrator's *needs* drive the API of supporting entities. Bottom-up commits to leaves first; the orchestrator then has to either accept the leaves' APIs (often a poor fit) or force a retrofit. Option A inverts the framework. C softens the prescription too much (iteration helps but ordering still matters). D invents an alphabetical rule.",
+      "interviewScript": "In your interview, say: 'I'll start with Game as the orchestrator. From its needs I'll derive what Board should expose (canPlace, placeMark, checkWin) and what Player should hold (just mark and identity). Designing top-down means the leaves' APIs are exactly what the orchestrator needs — no retrofits.'",
+      "proTip": "Top-down design lets the *consumer* shape the *producer's* API. Bottom-up design forces the consumer to accept whatever the producer happened to expose. The first is cleaner, almost always."
+    },
+    {
+      "id": "q20",
+      "part": "D — Step 3: Class Design",
+      "subtopic": "UML Expectations Vary",
+      "difficulty": "L5",
+      "style": "Implementation-Specific Nuance",
+      "conceptIds": ["D10", "D11", "D12", "D13", "D14", "D15"],
+      "l5Pattern": "implementation-specific-gotcha",
+      "question": "Two interviewers ask for 'class design.' Interviewer A explicitly wants UML with composition diamonds, cardinality labels, and visibility modifiers. Interviewer B is happy with a state-and-behavior list per class. The same candidate uses the simplified notation in both interviews. What deeper interview-specific gotcha does this reveal, and what is the senior calibration?",
+      "options": [
+        "The gotcha is that UML is not actually required — both interviewers will accept the simplified notation if you can defend it; calibration is to defend the notation choice in both interviews when challenged on it.",
+        "The gotcha is that the source's claim 'UML is rarely used in production' is wrong — UML is widely expected, and the senior calibration is to learn UML thoroughly and use it always to be safe.",
+        "The gotcha is that the *expectation* depends on the individual interviewer's training (academic vs production-engineer background), so the source's general guidance can be locally wrong. Senior calibration: at the start of class design, briefly ask whether the interviewer prefers UML or a simpler class-notation list — adapt to whichever they say without arguing about which is better as a notation system.",
+        "The gotcha is that interviewers who want UML are more senior than those who don't, so the senior calibration is to default to UML in interviews where the interviewer's level is unclear and use simplified notation only when explicitly told to switch."
+      ],
+      "correctIndex": 2,
+      "explanation": "Why the wrong answers are tempting: A understates the failure (some interviewers genuinely won't accept simplified notation). B contradicts the source's well-supported claim (Visual Studio dropped UML in 2016) with a sweeping generalization. D introduces an unsupported correlation (UML preference ≠ seniority). Deeper insight: the source's general guidance — UML is outdated, modern engineers design in code, formality slows interviews — is a *trend*, not a universal. Individual interviewers have their own training and expectations. The senior calibration is one quick alignment question at the start of class design — costs 10 seconds, removes the entire mismatch risk for 15 minutes of work. The framework explicitly recommends this: 'ask whether simplified class notation is acceptable.'",
+      "interviewScript": "In your interview, before drawing class details, say: 'Quick alignment — I tend to use a state-and-behavior list per class with simple arrows. If you'd specifically prefer UML with composition diamonds and cardinality labels, I'll switch. Let me know which is faster for you to follow.'",
+      "proTip": "The framework's notation guidance is a trend, not a universal. One alignment question at the start of class design is the cheapest way to remove the entire format-mismatch risk."
+    },
+    {
+      "id": "q21",
+      "part": "E — Step 4: Implementation",
+      "subtopic": "Happy Path First",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["E5", "E6"],
+      "l5Pattern": null,
+      "question": "You're implementing `processOrder(orderId, paymentInfo)`. Which sequence best matches the framework's prescription for walking through this method?",
+      "options": [
+        "Start with edge cases — if orderId is null, return error; if paymentInfo is invalid, return error; if account is suspended, return error — then describe the happy path at the end so the interviewer sees defensive code first.",
+        "Start with the happy path — load order, validate against inventory, charge payment, mark order as paid, schedule fulfillment, return success — then enumerate edge cases (invalid order, payment fail, inventory short) afterwards as a second pass.",
+        "Interleave happy path and edge cases — at each step, describe both the success and failure case before moving to the next step so the implementation is correct as it grows line by line.",
+        "Skip the happy path entirely — interviewers want to see edge case handling more than the success path, since the success path is obvious from the method name and reading it wastes time."
+      ],
+      "correctIndex": 1,
+      "explanation": "The framework's exact prescription: 'Start with the happy path—the normal flow when everything goes right. This makes the method's purpose and structure clear before you get into edge cases.' Then 'After the happy path, enumerate the failure modes...' Option A inverts (defensive code first) — makes the *purpose* of the method invisible. Option C interleaves — makes the structure hard to follow. Option D drops the happy path — leaves the most important narrative invisible.",
+      "interviewScript": "In your interview, say: 'Let me walk through the happy path first — order loaded, inventory checked, payment charged, order marked paid, fulfillment scheduled. Then I'll add the failure cases as guards: invalid orderId, payment decline, inventory shortage.'",
+      "proTip": "Happy path before edge cases is a narrative discipline. The interviewer needs to understand what the method *does* before they can evaluate how it *fails*."
+    },
+    {
+      "id": "q22",
+      "part": "E — Step 4: Implementation",
+      "subtopic": "Verification Step",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["E13", "E14", "E15"],
+      "l5Pattern": null,
+      "question": "After implementing `makeMove()`, you walk through the scenario 'X plays (0,0), then O plays (1,1), then X plays (2,2)' tick by tick, narrating the state changes. Why is this 'verification' step distinct from 'writing more code', and what does the framework grade it on?",
+      "options": [
+        "Verification is the same as writing more code — the framework just calls walking through scenarios 'verification' as a label, but it's checking that the candidate can produce more code on demand for the interviewer to grade more thoroughly.",
+        "Verification is distinct because it traces *existing* code through a scenario to find logical errors before the interviewer does — the framework grades it as both a debugging signal and a self-correction signal, and many interviewers explicitly include it in their rubric as a separate graded item.",
+        "Verification is a syntax-checking step where the candidate re-reads their code to spot misspelled variable names and missing semicolons; it's primarily about cleanliness and visual hygiene of the code as written.",
+        "Verification is a scaling-thought step where the candidate considers what would happen at higher loads or with more users; it bridges into extensibility discussion as the natural follow-on conversation."
+      ],
+      "correctIndex": 1,
+      "explanation": "The framework explicitly says: 'Many interviewers are explicitly testing verification as part of their rubric.' Verification's purpose is finding *logical* errors (forgot to switch turns, win detection doesn't trigger, state transitions in wrong order) by tracing through a concrete scenario. It's not new code — it's running the existing code mentally with sample inputs. Option A conflates it with code production. Option C reduces it to syntax (which is not what's graded). Option D misroutes it to scaling.",
+      "interviewScript": "In your interview, after implementing the core method, say: 'Let me trace through a quick scenario to verify. Initial state: board empty, currentPlayer = X. makeMove(X, 0, 0) — board[0][0] = X, currentPlayer becomes O. makeMove(O, 1, 1) — board[1][1] = O, currentPlayer becomes X. makeMove(X, 2, 2) — board[2][2] = X. Win check: diagonal X(0,0), X(1,1)... wait, (1,1) is O. So no win. Game continues.'",
+      "proTip": "Verification is mental execution, not code review. Pick a scenario the interviewer can follow, narrate state at each step, and explicitly check the transitions you implemented."
+    },
+    {
+      "id": "q23",
+      "part": "E — Step 4: Implementation",
+      "subtopic": "Picking the Right Method",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["E3", "E10", "E11"],
+      "l5Pattern": null,
+      "question": "You have 10 minutes for implementation and the system has these methods: `createGame()`, `getCurrentPlayer()`, `getBoard()`, `makeMove(player, row, col)`, `getGameState()`, `getWinner()`. Which method should you implement first and why?",
+      "options": [
+        "`makeMove(player, row, col)` — this is the method that defines system behavior (state transitions, win detection, edge cases), and shows class cooperation (Game, Board, Player). The framework prescribes implementing the most interesting methods, not the foundational ones, when time is limited.",
+        "`createGame()` — the constructor is foundational and everything else depends on a properly-initialized game state, so initialization should be implemented before any method that uses the resulting object.",
+        "`getCurrentPlayer()` and `getGameState()` — getters are quick to implement and demonstrate that the class API is wired correctly before tackling complex logic in the harder methods later.",
+        "All getters first to verify the data layer is correct, then `makeMove` last as the capstone — bottom-up implementation order avoids depending on unimplemented helpers and ensures correctness at each layer."
+      ],
+      "correctIndex": 0,
+      "explanation": "The framework explicitly says: 'Focus on the most interesting methods—the ones that truly define system behavior.' makeMove is exactly that — it touches state transitions, edge case handling, class cooperation, and win detection. Getters and constructors are uninteresting (the interviewer can infer them). Option B treats foundational ≠ interesting (it isn't). Option C/D treat 'safe to implement' as the criterion (it shouldn't be).",
+      "interviewScript": "In your interview, say: 'Out of these methods, makeMove is where the interesting logic lives — state transitions, win detection, edge cases, class cooperation. I'll implement that first and walk through it. Getters and the constructor are mechanical; happy to outline them but they don't show much.'",
+      "proTip": "Pick the method an interviewer would *want* to discuss, not the one that's safe to write. Getters are safe and uninformative; the orchestrator's main mutator is the opposite."
+    },
+    {
+      "id": "q24",
+      "part": "E — Step 4: Implementation",
+      "subtopic": "Language Calibration",
+      "difficulty": "L4",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["E1", "E2", "E4", "E7", "E8", "E9"],
+      "l5Pattern": null,
+      "question": "The interviewer says 'implement makeMove' without specifying a language. You're fluent in Java but the interviewer just mentioned earlier they 'mostly write Python'. What's the right code-format choice?",
+      "options": [
+        "Switch to Python to match the interviewer's daily language — it'll be easier for them to read and shows accommodation, which interviewers reward as a thoughtful gesture in their grading.",
+        "Default to indentation-based pseudocode unless the interviewer specifies otherwise; if they request full code, use the language you're fluent in (Java), and if they ask for walkthrough-only, narrate the same method shape without writing every line.",
+        "Write it in both Python and Java side by side to show fluency in multiple languages — at senior+ level interviewers expect polyglot fluency and side-by-side reads as a signal of thorough preparation.",
+        "Ask 'should I use pseudocode, Java, or Python?' three times throughout the interview — calibrate continuously rather than once, since the interviewer's preference may evolve as the implementation grows."
+      ],
+      "correctIndex": 1,
+      "explanation": "The framework gives three implementation modes: pseudocode by default, full code if the interviewer asks for it, and walkthrough-only if they want logic without code. When writing pseudocode, keep it indentation-based so control flow and state changes are readable without language ceremony. The framework also warns: don't pick an unfamiliar language purely to satisfy a single interviewer. Option A is the trap. Option C is performative and time-wasteful. Option D is repeated calibration overhead.",
+      "interviewScript": "In your interview, say: 'I'll start in indentation-based pseudocode unless you'd prefer something else. If you'd like a real language, I'm fastest in Java. If you only want a walkthrough, I'll narrate the same inputs, state changes, helper calls, and return path without writing every line.'",
+      "proTip": "The cost of stumbling over unfamiliar syntax is paid by the interviewer (in confusion) and you (in time). Use pseudocode, walkthrough-only, or your strongest language based on the requested detail level — never a courtesy language."
+    },
+    {
+      "id": "q25",
+      "part": "E — Step 4: Implementation",
+      "subtopic": "Verification Reveals a Bug",
+      "difficulty": "L5",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["E13", "E14", "E16", "E17", "E18"],
+      "l5Pattern": "adversarial-pushback",
+      "question": "You're verifying makeMove by tracing X→O→X→O→X. At step 5, you realize: when X completes a row, your code sets `state = WON` but *also* runs `currentPlayer = otherPlayer(currentPlayer)` because the player-switch is unconditional. Now currentPlayer is wrong on the final state. The interviewer notices and says: 'is that intended?' What's the senior+ recovery and why?",
+      "options": [
+        "Defend the behavior — argue that currentPlayer doesn't matter once the game is WON, so the wrong value is harmless and the code is correct in spirit even if the field reads as inconsistent at the boundary.",
+        "Erase the entire makeMove and rewrite it from scratch — a bug at this level means the design is broken; restarting demonstrates honesty and a willingness to throw away wrong work without ego attachment.",
+        "Acknowledge the bug explicitly ('you're right, that's wrong'), narrate the fix in one breath ('I should make the player-switch conditional on `state == IN_PROGRESS`'), update the pseudocode in place, and re-verify the trace from step 5. Finding-and-fixing a bug during verification is *positive* signal because it demonstrates exactly what verification is for.",
+        "Pretend you intended the bug as a stretch question — say 'good catch — let me see if you can identify the fix' and turn the moment back on the interviewer to test their debugging skills as well."
+      ],
+      "correctIndex": 2,
+      "explanation": "Why the wrong answers are tempting: A defends an actual bug — interviewers grade honesty about correctness, and a 'harmless' justification reads as evasive. B is over-reactive — restart wastes time and signals panic, when a one-line fix would do. D inverts the dynamic and reads as evasive. Deeper insight: the framework explicitly says 'finding a bug during verification...is far better than the interviewer discovering it later and is a positive signal regarding your ability to debug and fix issues.' The interviewer's 'is that intended?' is partly genuine curiosity and partly an adversarial probe — the senior+ response treats the bug as expected (verification's job), names it, fixes it in one breath, and re-traces. Confidence about fixing > defensiveness about the bug existing.",
+      "interviewScript": "In your interview, say: 'You're right, that's a bug — the player-switch needs to be conditional on the state still being IN_PROGRESS. Let me fix it: `if (state == IN_PROGRESS) currentPlayer = otherPlayer(currentPlayer);`. Re-tracing from step 5 — X wins, state becomes WON, currentPlayer stays as X. That looks correct now.'",
+      "proTip": "Bugs found during verification aren't failures — they're the verification step doing its job. The interviewer wants to see you fix and re-trace; defending the bug is the only response that doesn't earn signal."
+    },
+    {
+      "id": "q26",
+      "part": "E — Step 4: Implementation",
+      "subtopic": "Pattern Introduction Discipline",
+      "difficulty": "L4",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["E12"],
+      "l5Pattern": null,
+      "question": "Mid-implementation, you realize that `makeMove` could be cleanly factored using a Command pattern (each move encapsulated as an object with `execute()` and `undo()`). The current spec doesn't mention undo — but you've heard interviewers often add it as a follow-up. Should you introduce Command now, and what's the principle?",
+      "options": [
+        "Yes — introducing Command preemptively is a strong senior signal because it shows you anticipate the follow-up; the marginal complexity is small and the future-readiness is large enough to be worth the early investment.",
+        "Yes, but only if you can introduce it without changing existing methods — additive-only is acceptable; modifying existing signatures for a hypothetical future is not, but adding parallel structures is fine for low risk.",
+        "No — introducing Command before undo is asked makes the existing makeMove harder to verify, since each step now goes through an extra indirection that complicates the trace at verification time and slows debugging.",
+        "No — introduce Command only when the requirement actually lands. The framework explicitly warns that 'over-engineering by forcing patterns where they don't add value' is more common than under-using patterns; speculatively introducing Command for an undo that may not be asked is the same anti-pattern."
+      ],
+      "correctIndex": 3,
+      "explanation": "The framework's exact warning: 'It's more common for candidates to overengineer by forcing patterns where they don't add value, as opposed to excluding them when they're required.' Speculative Command introduction is forcing-a-pattern for a hypothetical requirement. The right move: implement makeMove plainly; if undo is requested as a follow-up, refactor to Command then (the refactor is bounded). Option A treats anticipation as a senior signal (it isn't — discipline is). Option B's 'additive only' rule still introduces complexity that doesn't pay for present requirements. Option C is right that verification gets harder, but the deeper reason is principled, not tactical.",
+      "interviewScript": "In your interview, say: 'I'm going to keep makeMove as a single method that mutates state directly. If undo lands as an extension, I'd refactor to Command then — the refactor is bounded because all state mutations are already in one place. Adding Command speculatively would be over-engineering for a requirement that isn't here.'",
+      "proTip": "When you reach for a pattern based on a hypothetical future requirement, pause. Patterns earn their complexity from *present* requirements; future ones may never arrive."
+    },
+    {
+      "id": "q27",
+      "part": "F — Step 5: Extensibility",
+      "subtopic": "Clean Extension Response",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["F2", "F4", "F5", "F7"],
+      "l5Pattern": null,
+      "question": "Interviewer asks: 'How would you add an in-game chat between players?' Two candidates respond. R says: 'I'd add a `ChatMessage` value object held in a `messages` list on Game, plus a `sendMessage(player, text)` method on Game that appends to the list. State mutations stay in one place; existing methods don't change.' S says: 'Let me re-architect — I'd extract chat into a separate ChatService with its own state, then introduce a Mediator pattern between Game and ChatService, and refactor Player to implement a Communicator interface.' Which response better matches the extensibility step's prescription, and why?",
+      "options": [
+        "S is better because it shows broader architectural thinking and uses recognized patterns (Mediator, Communicator) — depth signals senior maturity in extensibility discussions where pattern fluency is rewarded.",
+        "Both are equivalent — they describe two valid ways to add chat, and the choice between them is a stylistic preference rather than a graded difference between candidates.",
+        "S is better because R's response is too brief — interviewers want detailed implementation in extensibility discussions, not just structural pointers, especially for senior roles where depth of explanation is the key signal.",
+        "R is better — the framework prescribes pointing at *where in the design the change cleanly lands*, not rewriting code. R's response isolates the change, leaves existing methods untouched, and demonstrates that the design absorbs the new requirement without restructuring."
+      ],
+      "correctIndex": 3,
+      "explanation": "The framework's exact prescription: 'You're not rewriting code; you're pointing to the parts of your design that make the change clean.' R's response does exactly that — names the structural addition (ChatMessage value object + list + method), identifies what *doesn't* change (existing methods), and stops there. S's response ignores the existing design and re-architects, which is the opposite of the prescription. Option A treats pattern names as signal (the framework warns against pattern worship). Option B treats the two as stylistic (they're not — one matches the framework, the other doesn't).",
+      "interviewScript": "In your interview, say: 'For chat, I'd add a ChatMessage value object — { senderId, text, timestamp } — and a `messages: list<ChatMessage>` field on Game. A new method `sendMessage(player, text)` appends to the list. Existing methods don't change. If multi-room chat or persistence is needed, those are separate extensions.'",
+      "proTip": "Extensibility answers should look small, not big. Point at where the change lands; name what doesn't change. If your answer rewrites half the design, you've already failed the extensibility test."
+    },
+    {
+      "id": "q28",
+      "part": "F — Step 5: Extensibility",
+      "subtopic": "High-Level Pointing vs Rewriting",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["F2", "F4", "F7"],
+      "l5Pattern": null,
+      "question": "An interviewer asks 'how would you support multiplayer over a network?' You realize the answer involves significant changes (adding a NetworkAdapter, serializing state, handling disconnects). Should you start writing detailed code for the answer, or describe the approach at a high level?",
+      "options": [
+        "Write the detailed code — interviewers grade extensibility on the depth of the implementation, and a high-level answer signals you can't actually build it when challenged on details.",
+        "Refuse to answer — multiplayer is too large a topic for the extensibility step and should be deferred to a separate system-design conversation entirely, since it crosses into architectural concerns.",
+        "Write a partial implementation of NetworkAdapter to demonstrate that you understand the mechanics, then describe the rest at a high level once the partial code is on the board for reference.",
+        "Describe at a high level — point at where in your existing design the changes land (which classes get a NetworkAdapter, where serialization hooks exist), and concede that some parts (disconnect handling) would force a refactor of dispatch. Don't rewrite code in the extensibility discussion."
+      ],
+      "correctIndex": 3,
+      "explanation": "The framework explicitly says: 'At this stage you should stay high level. You're not rewriting code; you're pointing to the parts of your design that make the change clean.' Multiplayer is a large extension; the right move is to point at *where* it lands (NetworkAdapter holds a Game reference; serialization happens at state-mutation chokepoints; dispatch handles disconnects via timeouts). Option A is the rewrite trap. Option B refuses (always wrong). Option C does the partial-rewrite trap, which is just half-A.",
+      "interviewScript": "In your interview, say: 'High level: I'd add a NetworkAdapter that holds a Game reference and translates network messages into makeMove calls. Serialization hooks at the state-mutation chokepoint — same place undo would hook. Disconnect handling forces a small refactor of dispatch (a timeout is needed). I won't write the full implementation here, but those are the three places it touches.'",
+      "proTip": "Extensibility is a tour, not a build. Walk the interviewer through *where* changes land; trust them to imagine what those changes look like."
+    },
+    {
+      "id": "q29",
+      "part": "F — Step 5: Extensibility",
+      "subtopic": "Level-Appropriate Depth",
+      "difficulty": "L3",
+      "style": "Scenario-Based",
+      "conceptIds": ["F1", "F3"],
+      "l5Pattern": null,
+      "question": "Two candidates at different levels get the same follow-up: 'How would you add tournament mode (multiple games, ranking)?' Junior J answers: 'Add a `Tournament` class that holds a list of Games and a `rankings` field updated as each game completes.' Senior K answers: 'Tournament adds three things: (1) a Tournament class as a higher-level orchestrator over a list of Games, (2) a results-aggregation step that has to decide whether to update rankings during games or only after each completes — that's a sync vs async decision with ranking-staleness implications, (3) a tie-breaking rule that needs interviewer input. The first is structural; the second and third are decisions that require either a config or a clarification.' Why are both responses considered appropriate to their level, and what does this reveal about the F step?",
+      "options": [
+        "Both responses are appropriate because the framework explicitly says the depth of extensibility discussion scales with level — junior gets little or none, mid-level gets one or two follow-ups, senior gets several 'what if' rounds with deeper trade-off discussion. K's response surfaces decisions and trade-offs in addition to structure; J's is structure-only, which is sufficient at junior level for the question being asked.",
+        "K is right and J is wrong — Tournament always needs all three considerations, and J's incomplete answer would be marked down at any level regardless of seniority of the candidate or expected depth.",
+        "J is right and K is over-engineering — adding sync-vs-async and tie-breaking surfaces concerns that aren't in the requirements as stated by the interviewer at this point in the interview.",
+        "Both are wrong — neither candidate asked the interviewer to clarify what 'tournament mode' actually means before answering, which the framework prescribes as the first move on any extensibility question."
+      ],
+      "correctIndex": 0,
+      "explanation": "The framework explicitly tiers extensibility by level: 'Junior candidates may get little or no extensibility discussion. Mid-level candidates might get one or at most two small follow-ups. Senior candidates can expect several what if we... questions in a row.' J's structural-only answer is what's expected at junior level; K's surfacing of decisions and trade-offs is what's expected at senior. Both are *correct for their level*. The interviewer would push J for more depth if they were grading senior; would accept K's depth as senior-appropriate.",
+      "interviewScript": "In your interview at senior level, say: 'For tournament mode there are three things. Structurally, a Tournament class as a higher orchestrator over Games. Operationally, a sync-vs-async question on rankings: live updates mean staleness during games but freshness afterwards; batch-after-game means consistency but lag. Domain-wise, tie-breaking needs interviewer input. Want me to assume defaults or get your call on the tie-breaker?'",
+      "proTip": "At senior level, extensibility answers should distinguish *structural* additions (cheap to enumerate) from *decisions* (cheap to surface, expensive to assume). Surface both."
+    },
+    {
+      "id": "q30",
+      "part": "F — Step 5: Extensibility",
+      "subtopic": "Class Design Enables Extension",
+      "difficulty": "L4",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["D5", "F2", "F4", "F5", "F6", "F7", "F8"],
+      "l5Pattern": null,
+      "question": "A candidate's chess design has all state mutations going through `Game.applyMove()`. Another candidate's design lets the Board class also mutate state directly during certain operations. The interviewer asks both: 'How would you add a replay last 5 moves feature?' Why does the first design absorb this much more cleanly, and what does this reveal about the relationship between Class Design choices and Extensibility outcomes?",
+      "options": [
+        "The first design absorbs it cleanly because applyMove can simply log moves to a list as it runs; replay iterates the list and calls applyMove again. The second design has multiple mutation paths — each one needs its own logging hook, and replay has to know which path to call for which kind of change. Class Design choices about mutation discipline directly enable or block extensions like undo, replay, and audit. Class Design isn't graded in isolation; it pre-determines what Extensibility moves are even possible.",
+        "Both designs absorb it equally well — replay is a read-side feature, not a mutation-side concern, so where mutations happen doesn't affect it because reading historical state and reapplying doesn't depend on mutation discipline.",
+        "The second design absorbs it more cleanly — multiple mutation paths mean Board's direct mutations can be re-played without going through the orchestrator, which is faster at runtime than routing everything through Game.",
+        "Neither design absorbs it cleanly — replay always requires a separate event-sourcing layer regardless of where mutations happen, so the underlying mutation discipline is incidental to the extensibility outcome."
+      ],
+      "correctIndex": 0,
+      "explanation": "Single-chokepoint mutations (Game.applyMove only) make replay trivial: log moves at the chokepoint, replay them by calling applyMove again. Multiple mutation paths fragment the audit/replay surface — each path needs its own hook, and replay has to dispatch to the right one. The framework's exact insight: 'This works because you've isolated state mutations.' That insight chains: Class Design choices (where mutations live) *pre-determine* Extensibility outcomes (what changes can be added cleanly). Option B denies the connection. Option C inverts it. Option D claims event-sourcing is required (it isn't — chokepoint logging is enough for short replay).",
+      "interviewScript": "In your interview, say: 'Replay is trivial because all mutations go through Game.applyMove. I'd add `appliedMoves: list<Move>` as a field, log each move at applyMove, and replay calls applyMove(move) for the last 5 entries. Existing methods don't change. If mutations were scattered across Board too, this would need a separate event-sourcing layer — but they aren't, so this is one method addition.'",
+      "proTip": "Single-chokepoint mutation isn't just a stylistic preference. It's the structural choice that makes undo, replay, audit, and observability all trivial extensions later — and makes the absence of those features a refactor."
+    },
+    {
+      "id": "q31",
+      "part": "F — Step 5: Extensibility",
+      "subtopic": "What If Trap",
+      "difficulty": "L5",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["F2", "F4", "F5", "F7"],
+      "l5Pattern": "future-proofing",
+      "question": "An interviewer asks five 'what if' questions in succession: 'what if we add chess variants? What if we add multiplayer? What if we add an AI opponent? What if we add tournaments? What if we add spectator mode?' A candidate, sensing the pattern, starts proposing extension points for each (a Variant interface, a NetworkAdapter, an AIDecider, a Tournament class, a SpectatorObserver). After question 3 the interviewer says 'I think you're over-doing this.' What's the deeper trap and what's the senior+ adjustment?",
+      "options": [
+        "The trap is that the interviewer expected the candidate to push back after the third question and refuse to answer the rest; the senior+ adjustment is to refuse questions 4 and 5 explicitly so the interviewer sees boundary-setting maturity in the response.",
+        "The trap is that the candidate is preemptively adding extension points for *every* hypothetical future instead of pointing at *where in the existing design* each change lands. Adding interfaces speculatively is over-engineering even when prompted by the interviewer's questions. Senior+ adjustment: for each 'what if', answer 'here's the one place in the design that change would land, and whether it's a parameter, an extension, or a refactor' — and accept that some refactors are bounded and acceptable, not preventable in advance through preemptive abstraction.",
+        "The trap is that some 'what if' questions are red herrings the interviewer doesn't actually want answered; the senior+ adjustment is to identify which two of the five are real follow-ups and ignore the others by asking which questions matter most.",
+        "The trap is that the candidate should have proposed a single 'GameContext' god-class that absorbs all five futures into one extension point; the senior+ adjustment is to consolidate rather than fragment by extracting a shared abstraction over the five concerns."
+      ],
+      "correctIndex": 1,
+      "explanation": "Why the wrong answers are tempting: A is bizarre (refusing the interviewer's questions). C invents a 'red herring' theory the framework doesn't support. D misroutes (a god-class is the worst possible response — the framework explicitly warns against forcing structures, and consolidation around five orthogonal concerns produces an overloaded class). Deeper insight: extensibility is graded on *cleanly absorbing the change*, not on *extension points existing in advance*. Even when prompted with five 'what if' questions in a row, the right move is the same as the right move for one: point at where the change lands, name whether it's a parameter / extension / refactor, accept bounded refactors as a fine outcome. Adding extension points for each hypothetical compounds — five interfaces from five questions adds five permanent burdens to defend zero present requirements.",
+      "interviewScript": "In your interview, say: 'For each, let me point at where it lands. Variants — initial-board-setup is a parameter to BoardFactory, no new class. Multiplayer — NetworkAdapter holds a Game reference, hooks at the state-mutation chokepoint. AI — an AIPlayer that implements the Player interface, no Game changes. Tournaments — a higher orchestrator over Games. Spectator mode — a read-only listener at the same mutation chokepoint as multiplayer. Some of these are clean; AI may force a refactor depending on whether the interviewer wants real-time evaluation. None of them needs me to add abstract interfaces today.'",
+      "proTip": "Five extension points for five 'what if' questions is structurally worse than zero — each one is a permanent cognitive cost. Point at where things land; accept that some changes require bounded refactors. Refactor cost < speculative-abstraction cost."
+    },
+    {
+      "id": "q32",
+      "part": "Cross-Part Bridge (A + B + C)",
+      "subtopic": "Skipping Steps Cascades Across Parts",
+      "difficulty": "L4",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["A2", "B1", "B4", "C1", "C2", "C3"],
+      "l5Pattern": null,
+      "question": "A candidate skips the requirements step (says 'standard parking lot') and immediately jumps to entities, listing 14 of them: Vehicle, Spot, Floor, Section, Lot, Reservation, Permit, Subscriber, Fee, Receipt, Payment, Sensor, Display, Gate. The interviewer says 'I think you have too many entities — try to ground these in actual requirements.' What's the multi-step framework failure here and what's the recovery?",
+      "options": [
+        "Failure: skipped Requirements (Step 1), so entities aren't grounded in actual constraints; the candidate's enumeration is speculative. Recovery: pause, retroactively run the requirements themes (capabilities, rules, error handling, scope), then prune the entity list down to those that maintain state or enforce rules in the *confirmed* scope. Many of the 14 (Reservation, Permit, Subscriber, Sensor, Display, Gate) are likely out of scope for a 'standard' parking lot and should be removed.",
+        "Failure: only Step 2 (Entities); the candidate enumerated speculatively. Recovery: keep all 14 entities but add relationship arrows between them so the interviewer sees structure rather than a list, which will turn 'too many' into 'well-organized'.",
+        "Failure: only Step 1 (Requirements); recovery is to ask one fast question ('payments in scope?') and accept the rest of the entities as-is since the candidate has already committed to them on the whiteboard.",
+        "No failure — the candidate is being thorough; recovery is to push back and explain that more entities is always better than fewer, since under-modeling loses information that re-emerges later as bugs."
+      ],
+      "correctIndex": 0,
+      "explanation": "Two-step failure: skipping Step 1 (Requirements) cascades into Step 2 (Entities) because the entity filter ('maintains state or enforces rules') needs a *scope* to evaluate against. Without confirmed requirements, the candidate enumerates every plausible noun, including ones outside the scope they didn't establish. The recovery has to go back to Step 1 first — establish what's in scope (probably: vehicle types, spot assignment, full-lot handling, exit) and what's out (probably: reservations, permits, subscribers, sensors, displays, payments). Then prune. Option B fixes the symptom (too many entities) without addressing the cause (no scope). Option C softens the recovery dangerously. Option D denies the failure.",
+      "interviewScript": "In your interview, after this interviewer feedback, say: 'You're right — I skipped requirements. Let me back up. Quick clarifiers: payment in scope? Reservations? Multi-floor lots? Sensor-driven occupancy or manual? Once I have those confirmed, I'll prune the entity list. My guess is half of the 14 are out of scope for a standard lot.'",
+      "proTip": "Speculative entity lists are the visible failure of a skipped Requirements step. When you see one (in your own work or someone else's), the fix is always to go back to Step 1 first, then re-derive entities from the confirmed scope."
+    },
+    {
+      "id": "q33",
+      "part": "Cross-Part Bridge (E + F)",
+      "subtopic": "Implementation Choices Enable Extensions",
+      "difficulty": "L4",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["D5", "E10", "F2", "F4", "F5", "F6", "F7"],
+      "l5Pattern": null,
+      "question": "Two candidates implement makeMove. Candidate M includes inline state mutations: `if (winner) gameState = WON; lastMoveTime = now; consecutiveTurns[player]++;`. Candidate N goes through a single `mutateState(transition)` method that takes a transition object. Both look fine in implementation. At extensibility time, the interviewer asks 'how would you add an audit log of all state changes?' Why does N's design absorb this trivially while M's requires hunting through every method?",
+      "options": [
+        "N's design routes every mutation through one chokepoint, so adding `auditLog.append(transition)` inside `mutateState` instantly captures every state change everywhere — without touching makeMove or any other method. M's design has mutations scattered, so auditing requires finding each one and adding a hook beside it. The implementation-time choice (chokepoint vs scattered) directly determines the cost of an extension-time feature (audit). This is why the framework grades extensibility on *what existing boundaries enable*, not on *what features were anticipated*.",
+        "Both designs absorb it equally — audit log is just a logger added to the project, not a structural concern about where mutations happen, and either design can route logs to the same external system.",
+        "M's design is actually easier to audit because the inline mutations are visible and auditable in place; N's `mutateState` indirection hides the actual mutation, making auditing harder to verify is correct because it's one level removed from the actual change.",
+        "N's design is over-engineered for the original requirement (no audit was asked for at implementation time), so even though it's easier to extend now, it lost points at implementation for unnecessary indirection that wasn't justified by the spec."
+      ],
+      "correctIndex": 0,
+      "explanation": "Single-chokepoint mutation is the structural choice that makes an entire class of extensions trivial. Audit log: one `auditLog.append` inside mutateState. Undo: a stack of transitions, popped through the same method. Replay: the same. Observability metrics: same. M's scattered design pays the cost of every one of those extensions multiplied by the number of mutation sites. The framework's insight ('This works because you've isolated state mutations') generalizes far beyond undo. Option B denies the connection. Option C inverts (visibility is not auditability). Option D treats N's chokepoint as over-engineering — it isn't, because the design isn't speculative-extension; it's a *cleaner present design* that happens to also enable extensions.",
+      "interviewScript": "In your interview, say: 'N's chokepoint makes audit trivial — one line inside mutateState captures everything. M's scattered design needs N hooks for N mutation sites, plus the maintenance burden of keeping them in sync. The chokepoint isn't extra design for extensibility; it's a cleaner *present* design that happens to make audit, undo, and replay one-line additions later. That's the relationship between Class Design discipline and Extensibility — you don't have to anticipate the extension; you just have to keep mutations isolated.'",
+      "proTip": "Mutation-chokepoint isn't an extensibility pattern — it's a Class Design discipline that incidentally enables many extensions. The discipline pays for itself even with no extension; the extensions are a bonus."
+    }
+  ]
+}

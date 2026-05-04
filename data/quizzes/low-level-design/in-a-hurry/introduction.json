@@ -1,0 +1,525 @@
+{
+  "coverageManifest": {
+    "source": "/learn/low-level-design/in-a-hurry/introduction",
+    "totalQuestions": 22,
+    "parts": [
+      {
+        "id": "A",
+        "name": "What LLD is and how it differs from System Design",
+        "concepts": [
+          { "id": "A1", "description": "LLD = structuring code for a self-contained problem", "questions": ["q1", "q5"] },
+          { "id": "A2", "description": "LLD focus areas: right objects, interactions, methods, extensibility", "questions": ["q1"] },
+          { "id": "A3", "description": "OOD ≡ LLD (same interview, different name)", "questions": ["q1"] },
+          { "id": "A4", "description": "Substantive distinction: internal class structure vs service-level architecture at scale", "questions": ["q1", "q2", "q3", "q4", "q5", "q22"] },
+          { "id": "A5", "description": "SD medium = whiteboard boxes/arrows; LLD medium = classes/methods/state", "questions": ["q1", "q2"] },
+          { "id": "A6", "description": "SD discusses scaling/consistency/sharding; LLD discusses class APIs and state transitions", "questions": ["q2"] },
+          { "id": "A7", "description": "SD has no coding; LLD has at least pseudocode", "questions": ["q3"] },
+          { "id": "A8", "description": "Worked Uber example: SD = services + queue; LLD = Trip class + state enum + interfaces", "questions": ["q4"] },
+          { "id": "A9", "description": "Map vs blueprint metaphor — complementary slices of the same system", "questions": ["q22"] }
+        ],
+        "ladder": { "L1": ["q1"], "L2": ["q2"], "L3": ["q3"], "L4": ["q4"], "L5": ["q5"] }
+      },
+      {
+        "id": "B",
+        "name": "What this guide is and what 'modern' means",
+        "concepts": [
+          { "id": "B1", "description": "Guide is by interviewers/engineers, focused on real interviews", "questions": ["q7"] },
+          { "id": "B2", "description": "Most LLD content online is academic/exhaustive/outdated", "questions": ["q7"] },
+          { "id": "B3", "description": "Modern systems favor composition over inheritance", "questions": ["q6", "q8", "q9", "q10", "q20"] },
+          { "id": "B4", "description": "Modern systems favor simple state over deep hierarchies", "questions": ["q8", "q9", "q20"] },
+          { "id": "B5", "description": "Modern systems favor pragmatism over pattern worship", "questions": ["q6", "q7", "q8", "q10", "q20"] },
+          { "id": "B6", "description": "Only patterns that show up in real codebases are taught", "questions": ["q7"] },
+          { "id": "B7", "description": "Guide 'teaches to the mode' with regional callouts", "questions": ["q22"] },
+          { "id": "B8", "description": "Guide structure: Delivery Framework → refresher → problem breakdowns", "questions": ["q22"] }
+        ],
+        "ladder": { "L1": ["q6"], "L2": ["q7"], "L3": ["q8"], "L4": ["q9"], "L5": ["q10"] }
+      },
+      {
+        "id": "C",
+        "name": "Variants by region/company",
+        "concepts": [
+          { "id": "C1", "description": "US Big Tech expects partial real-language code", "questions": ["q11", "q12"] },
+          { "id": "C2", "description": "India/Asia leans structured pseudocode", "questions": ["q11", "q12"] },
+          { "id": "C3", "description": "Big Tech values reasoning over pattern vocabulary", "questions": ["q12", "q13", "q14", "q15"] },
+          { "id": "C4", "description": "Smaller/mid-size in India/Asia expect explicit pattern call-outs", "questions": ["q12", "q13", "q15"] },
+          { "id": "C5", "description": "Don't force patterns; recognize natural fit", "questions": ["q13", "q14", "q15"] },
+          { "id": "C6", "description": "Requirements vaguer in India/Asia; ask grounding questions", "questions": ["q12"] },
+          { "id": "C7", "description": "US prompts slightly more defined; scope-establishment still applies", "questions": ["q12"] },
+          { "id": "C8", "description": "Differences shouldn't dramatically change prep — ask the recruiter", "questions": ["q11", "q12", "q15"] }
+        ],
+        "ladder": { "L1": ["q11"], "L2": ["q12"], "L3": ["q13"], "L4": ["q14"], "L5": ["q15"] }
+      },
+      {
+        "id": "D",
+        "name": "Interview Assessment (5 graded areas)",
+        "concepts": [
+          { "id": "D1", "description": "Problem Analysis: extract entities, ask clarifying questions, frame before coding", "questions": ["q3", "q17", "q18"] },
+          { "id": "D2", "description": "Class Design: choose responsibilities, shape signatures, define ownership, keep boundaries clean", "questions": ["q9", "q16", "q17", "q18", "q19", "q20"] },
+          { "id": "D3", "description": "Class Design quality is load-bearing for everything downstream", "questions": ["q17", "q18"] },
+          { "id": "D4", "description": "Code Quality combines OO fundamentals + code hygiene", "questions": ["q17", "q18"] },
+          { "id": "D5", "description": "Encapsulation, state management, sensible composition/inheritance choices", "questions": ["q17"] },
+          { "id": "D6", "description": "Naming, consistency, dependency direction", "questions": ["q17"] },
+          { "id": "D7", "description": "Even pseudocode reflects discipline", "questions": ["q19"] },
+          { "id": "D8", "description": "Extensibility = small follow-up requirement; design absorbs new functionality without rewrite", "questions": ["q9", "q16", "q20", "q21", "q22"] },
+          { "id": "D9", "description": "Reward adaptability, not over-anticipation of futures", "questions": ["q9", "q16", "q20", "q21"] },
+          { "id": "D10", "description": "Communication: clear narrative, thoughtful reasoning, adjust under probing", "questions": ["q19", "q22"] },
+          { "id": "D11", "description": "Structured explanation often signals more than perfect code", "questions": ["q19", "q22"] },
+          { "id": "D12", "description": "Talk out loud; walk through thought process", "questions": ["q19"] }
+        ],
+        "ladder": { "L1": ["q16"], "L2": ["q17"], "L3": ["q18", "q19"], "L4": ["q20", "q22"], "L5": ["q21"] }
+      }
+    ],
+    "crossPart": ["q9", "q20", "q22"],
+    "l5PatternCoverage": {
+      "framing-is-wrong": ["q5"],
+      "two-levels-of-indirection": [],
+      "adversarial-pushback": [],
+      "trade-off-inversion": ["q10"],
+      "implementation-specific-gotcha": ["q15"],
+      "estimation-backed-scenario": [],
+      "future-proofing": ["q21"]
+    }
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "part": "A — LLD vs System Design",
+      "subtopic": "What LLD Is",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["A1", "A2", "A3", "A4", "A5"],
+      "l5Pattern": null,
+      "question": "Two interview prompts arrive in your inbox. (1) 'Design the class structure and key methods for a chess game — including how move validation, game state, and undo would work.' (2) 'Design a chess matchmaking platform that pairs 10 million users with appropriate opponents and tracks their global ratings.' Which one is a low-level-design (object-oriented design) interview, and what feature of the prompt makes it so?",
+      "options": [
+        "(1) is LLD because it mentions 'class structure' explicitly, while (2) avoids that phrase and only references the platform-level pairing logic that any backend service would need to implement.",
+        "(1) is LLD because it asks for the internal shape (classes, methods, state) of a single, self-contained program; (2) is system design because it asks how independent services interact at the scale of millions of users.",
+        "(1) is system design and (2) is LLD — the larger user count in (2) means the focus is on individual components like the matchmaking algorithm, while (1) is about the overall chess ecosystem and its many subsystems.",
+        "Both are LLD interviews because chess as a domain is small enough to fit inside a single program; the user count in (2) only adds throughput requirements, which doesn't change the interview format."
+      ],
+      "correctIndex": 1,
+      "explanation": "The defining feature of an LLD interview is that the system being designed is *self-contained* — its concerns are class boundaries, method signatures, and state transitions inside a single program. Prompt (1) asks for exactly that. Prompt (2) is asking how independent services pair, rate, and store data at scale, which is the territory of system design (architecture, throughput, consistency). Note that 'OOD' and 'LLD' are the same interview — different recruiters use different names.",
+      "interviewScript": "In your interview, say: 'Before I start, I want to confirm — this prompt is about the internal class shape for a self-contained chess engine, right? If you also wanted me to talk through how a matchmaking platform across millions of users works, that would be a different conversation about services, not classes.'",
+      "proTip": "If a prompt names 'class structure', 'methods', 'state', or 'rules of a single feature', it's LLD. If it names 'service', 'across users', 'at scale', or 'throughput', it's system design. The vocabulary leak is reliable."
+    },
+    {
+      "id": "q2",
+      "part": "A — LLD vs System Design",
+      "subtopic": "What LLD Is",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["A4", "A5", "A6"],
+      "l5Pattern": null,
+      "question": "Two interviewer questions about a ride-sharing system: (X) 'How does a ride request flow from the rider's app through your matching service, your pricing service, and your trip datastore?' (Y) 'Walk me through what state your Trip object holds, what methods it exposes, and how the state transitions when a driver accepts the ride.' Which is the low-level-design question, and what is the underlying distinction?",
+      "options": [
+        "(X) is LLD because it traces a request through code paths; (Y) is system design because object state is a high-level architectural concern that spans multiple services.",
+        "Both are LLD because both discuss code execution; (X) just covers more services and (Y) covers fewer — they're the same kind of question at different zoom levels of the same diagram.",
+        "(Y) is LLD because it focuses on the internal class structure (state, method API, transitions) of a single component; (X) is system design because it traces how independent services interact across the architecture.",
+        "(X) is system design and (Y) is LLD, but only because (X) names multiple services — if the entire request happened to stay inside one service, both would automatically be LLD interviews."
+      ],
+      "correctIndex": 2,
+      "explanation": "(X) is at the architecture layer — multiple services, request flow across them, the territory of distributed systems. (Y) is at the class layer — one object's state, its methods, its transitions, the territory of object-oriented design. The clue isn't the number of services named; it's *what is being modeled*. (X) models inter-service flow; (Y) models a single class's API and lifecycle.",
+      "interviewScript": "In your interview, say: 'When I'm describing the Trip object's state and method API, I'm doing low-level design. When I'm describing how requests flow between matching, pricing, and trip storage services, I'm doing system design. The same domain admits both kinds of design conversations, but the medium and the graded skills are different.'",
+      "proTip": "Ask 'am I describing inter-service traffic or intra-class structure?' If you switch midstream, it's worth narrating the switch so the interviewer doesn't think you've lost the thread."
+    },
+    {
+      "id": "q3",
+      "part": "A — LLD vs System Design",
+      "subtopic": "What LLD Is",
+      "difficulty": "L3",
+      "style": "Scenario-Based",
+      "conceptIds": ["A4", "A7", "D1"],
+      "l5Pattern": null,
+      "question": "You're given a 35-minute slot and the prompt 'Design Uber's trip system.' The recruiter only said 'design interview' without specifying the type. What is the single most useful clarifying question to ask before drawing or writing anything?",
+      "options": [
+        "'Should I focus on the matching algorithm specifically, or the broader trip system?' — narrows the scope so I can budget my time correctly between the components.",
+        "'Which language should I use, and should I worry about scaling to 100M users?' — covers the two most common ambiguities and lets me pick a concrete starting point.",
+        "'Do you want me to draw on the whiteboard or just talk through the design verbally?' — identifies the medium so I can plan my pacing for the rest of the interview.",
+        "'Are you looking for the architecture across services like matching and pricing, or the internal class structure for a single component like the Trip object — and which medium do you want, code or boxes-and-arrows?' — establishes which interview type and which medium up front."
+      ],
+      "correctIndex": 3,
+      "explanation": "The prompt is ambiguous between LLD and SD — and once you've picked the wrong type, every minute spent in the wrong medium is wasted. Option D is the single question that disambiguates both the *type* (services-at-scale vs internal class structure) and the *medium* (code vs boxes-and-arrows). The other options narrow within one frame but never resolve which frame you're in. Asking this up front signals exactly the Problem Analysis discipline interviewers grade.",
+      "interviewScript": "In your interview, say: 'Quick clarifier before I dive in — are we designing the inter-service architecture (matching, pricing, trip-storage interacting at scale), or the internal class structure of a piece like the Trip object? And do you want pseudocode or a boxes-and-arrows architecture diagram? That'll tell me which medium to set up.'",
+      "proTip": "When the prompt is ambiguous between LLD and SD, the *first* question is which type. Asking 'language' or 'scope' before that is asking the second question first."
+    },
+    {
+      "id": "q4",
+      "part": "A — LLD vs System Design",
+      "subtopic": "Recognising the Interview Type",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["A4", "A8"],
+      "l5Pattern": null,
+      "question": "You start an interview by drawing matching service, pricing service, location service, datastore, and queue with arrows showing data flow. Five minutes in, the interviewer says: 'Hold on — I want you to design the Trip class itself, including the state it holds and the methods it exposes.' What does this pushback tell you, and what is the correct recovery move?",
+      "options": [
+        "The interviewer wants more detail inside one of the services — keep your service diagram and add a sub-diagram showing the internal classes of the matching service first, then move to the Trip class if time allows.",
+        "You correctly identified this as a system-design problem and the interviewer is asking a follow-up about implementation — finish the architecture diagram with consistency and partition tradeoffs, then circle back to the Trip class with the remaining time.",
+        "You misread the interview type — what you're being asked is low-level design, so pause, set the service diagram aside without erasing it, and start with the entities, state, and behavior of the Trip object as the orchestrator.",
+        "The interviewer is testing whether you can handle interruption gracefully — push back politely, finish the architecture diagram you started so the picture is complete, and only then take questions about the Trip class structure."
+      ],
+      "correctIndex": 2,
+      "explanation": "When an interviewer interrupts to redirect from architecture-level work to class-level work, they're telling you the interview is LLD, not SD. The recovery is to acknowledge, switch medium without resistance, and start at the orchestrator entity (Trip in the Uber example). Defending the original frame burns time and signals you can't read interviewer feedback. The Uber worked example in the source is exactly this: SD draws services and queues; LLD designs the Trip class, TripState enum, PricingCalculator interface.",
+      "interviewScript": "In your interview, say: 'Got it — let me switch frames. I'll set the service diagram aside and start with the Trip object: what state it holds, what methods it exposes, and how its state transitions when a driver accepts. I'll come back to the architecture if you want, but I'll prioritize the class design.'",
+      "proTip": "When the interviewer redirects, never argue. Acknowledge in one sentence and pivot. The cost of arguing is paid in seconds you don't get back; the cost of acknowledging is zero."
+    },
+    {
+      "id": "q5",
+      "part": "A — LLD vs System Design",
+      "subtopic": "Recognising the Interview Type",
+      "difficulty": "L5",
+      "style": "Critical Failure Modes",
+      "conceptIds": ["A1", "A4"],
+      "l5Pattern": "framing-is-wrong",
+      "question": "For a 'design Uber' prompt, you immediately start sketching the Trip class — fields, methods, state transitions. Ten minutes in, the interviewer interrupts: 'I think we have a misunderstanding. I want to see how matching, pricing, and location services interact at scale. Can we step back?' Most candidates either defend their work or restart from scratch. What is the senior+ move and why does it preserve the most signal?",
+      "options": [
+        "Acknowledge the misalignment in one sentence, ask the single question that separates the two interview types ('are we designing the internal class structure of one component, or the interaction between independent services?'), then move into the appropriate medium for whichever they confirm — without arguing whose framing was correct.",
+        "Defend the work — explain that internal class design is the foundation of any system and the interviewer should reconsider; if you start over you lose ten minutes of work that may still be relevant later in the conversation.",
+        "Apologize, erase the board, and restart with a service diagram from scratch — speed matters now since 25 minutes are left and the interviewer needs to see the full architectural story before time runs out.",
+        "Switch immediately to the matching service implementation — write the matching algorithm in pseudocode, then justify the choice as 'the bridge between the two interview types' so the interviewer sees you can do both LLD and SD comfortably."
+      ],
+      "correctIndex": 0,
+      "explanation": "Why the wrong answers are tempting: B feels like principled defence (and ten lost minutes hurt) but reads as failure to read interviewer feedback. C is the panic move — it's *fast*, but it skips the diagnostic step and may still be wrong. D is over-clever — it tries to compromise, but the interviewer is asking for clarity, not creativity. The deeper insight: senior candidates *step out of the framing* rather than fight inside it. The recovery question separates 'whose understanding is correct' (which is a status fight nobody wins) from 'what is the actual frame we're in' (which is the only question that matters for the next 25 minutes). Once the frame is shared, the work resumes with both parties pointed at the same thing.",
+      "interviewScript": "In your interview, say: 'You're right, let me make sure we're aligned. Quick check — are we designing the internal class structure for a piece like Trip, or the inter-service architecture across matching, pricing, and storage? I want to confirm before I move forward, and I'll pivot to whichever you have in mind.'",
+      "proTip": "When framings collide, the move that earns senior signal is *neither* defending nor restarting — it's a single calibration question. The cheapest thing to verify is the most expensive thing to be wrong about."
+    },
+    {
+      "id": "q6",
+      "part": "B — Modern guide preferences",
+      "subtopic": "Composition over Inheritance",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["B3", "B5"],
+      "l5Pattern": null,
+      "question": "Two candidates model 'NotificationDeliverer' for an app that sends email, SMS, and push notifications. Candidate X writes an abstract `Notifier` base class with three subclasses that override `send()`. Candidate Y writes a `Notifier` class that holds a `Channel` interface, with three small classes implementing `Channel` (EmailChannel, SmsChannel, PushChannel). Which approach better reflects the design preference favored by modern production systems, and why?",
+      "options": [
+        "Y is better — modern production systems favor composition (holding a collaborator) over inheritance (extending a base class) because behavior is easier to swap, test, and combine without locking the subclass shape into the type system.",
+        "X is better — inheritance is the canonical OO pattern for shared behavior, and the textbook 'is-a' relationship between a subclass and its base is what interviewers grade for in low-level design interviews.",
+        "Both are equivalent — inheritance and composition produce the same runtime behavior here, so the choice is purely a stylistic preference with no production-quality or interview-grading implication.",
+        "X is better because inheritance generates less boilerplate; the trade-off only flips toward composition once you have more than five subclasses, and three is well below the threshold where the difference matters."
+      ],
+      "correctIndex": 0,
+      "explanation": "Modern production systems explicitly favor composition over inheritance — the source content lists this as one of the three things 'modern systems favor' over classical OOP. Y's design lets a Notifier hold any Channel that satisfies the interface (mock for testing, third channel added later, channel swapped at runtime). X's inheritance hierarchy locks each delivery mechanism into a separate subclass, which is harder to combine (what about a Notifier that sends both email AND SMS?) and harder to test in isolation. The 'is-a' textbook framing is exactly what the source pushes back against as outdated overfitting to classical OOP.",
+      "interviewScript": "In your interview, say: 'I'd model the Notifier as a class that holds a Channel — small interface, three implementations. That gives me runtime swappability for free, lets me mock the Channel in tests cleanly, and avoids locking the deliverer into a subclass per channel type.'",
+      "proTip": "Default to composition. Reach for inheritance only when there's a genuine 'is-a' shared behavior to lift, *and* when subclasses won't combine in unexpected ways."
+    },
+    {
+      "id": "q7",
+      "part": "B — Modern guide preferences",
+      "subtopic": "Pragmatism over Pattern Worship",
+      "difficulty": "L2",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["B1", "B2", "B5", "B6"],
+      "l5Pattern": null,
+      "question": "An LLD article online lists 23 Gang-of-Four design patterns and walks through how to apply each one to a parking lot system. A candidate studies all 23 and starts using them in interview practice. Why does this approach often hurt them in real interviews at large modern tech companies, even though they 'know more patterns'?",
+      "options": [
+        "The article taught patterns that are out of date — most modern systems use newer patterns like the Reactor and the Saga, which weren't in the GoF book; the candidate's repertoire is technically obsolete for current production work.",
+        "Real interviewers grade reasoning over pattern vocabulary — surfacing a pattern only earns points when it cleanly fits the problem, and a pattern-heavy answer for a small problem signals over-engineering rather than design maturity.",
+        "The article didn't cover concurrency patterns, which are the most-asked patterns in modern interviews; the candidate's gap is in the specific patterns chosen, not in the act of memorizing the GoF catalog itself.",
+        "Memorizing patterns is fine, but the candidate should also memorize the UML diagram for each one — interviewers expect the diagram, not just the prose explanation, especially in modern interviews at large companies."
+      ],
+      "correctIndex": 1,
+      "explanation": "The source explicitly warns that 'most LLD content online reads like a textbook' with 'exhaustive pattern catalogs' and that modern systems favor 'pragmatism over pattern worship'. Big Tech interviewers grade reasoning, not vocabulary — patterns earn points only when they cleanly fit. Memorizing 23 patterns produces the failure mode where candidates force-fit patterns into problems that don't need them, which signals immaturity rather than expertise. Options A, C, and D all assume the problem is *which patterns* to memorize; the source says the problem is the *act of memorization itself*.",
+      "interviewScript": "In your interview, say: 'I'd reach for a pattern only when I can name the concrete future requirement it pays for. If the problem doesn't have that future, the simpler shape is the better answer — and that's the signal I want to send.'",
+      "proTip": "Before you name a pattern in an interview, ask yourself: 'what concrete future requirement does this pattern earn its complexity for?' If you can't name one, drop the pattern."
+    },
+    {
+      "id": "q8",
+      "part": "B — Modern guide preferences",
+      "subtopic": "Avoiding Over-Engineering",
+      "difficulty": "L3",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["B3", "B4", "B5"],
+      "l5Pattern": null,
+      "question": "Designing a chess game in 30 minutes, a candidate sketches: a `Piece` abstract class with six subclasses (Pawn, Rook, Knight, Bishop, Queen, King); a `Move` abstract class with `RegularMove`, `CaptureMove`, `CastleMove`, `EnPassantMove`, `PromotionMove` subclasses; a `Strategy` pattern for move validation per piece type; a `Factory` for piece creation; and a `Visitor` for serialization. Where does this design most plausibly fail in an interviewer's eyes, even though every individual choice has textbook justification?",
+      "options": [
+        "Each individual pattern is well-chosen, but the failure is missing the `Observer` pattern for game-state notifications — without it, UI integration becomes fragile and the design isn't truly extensible to a real chess application that anyone would use.",
+        "The patterns are correct but the candidate didn't draw a UML diagram showing how they all relate; without the diagram, the interviewer can't verify that the patterns compose without conflict, which is the harder part of using them in combination.",
+        "Strategy and Visitor specifically conflict — Visitor expects a fixed type hierarchy, while Strategy lets behavior swap at runtime, so the candidate has built a design that won't compile in most strongly-typed languages without unchecked casts and type erasure.",
+        "The deep inheritance hierarchies and pattern-stacking ('Strategy + Factory + Visitor') exceed what a 30-minute interview problem with one set of well-known rules actually demands; the design signals 'pattern worship' over pragmatism, which is a louder negative signal than under-engineering would be."
+      ],
+      "correctIndex": 3,
+      "explanation": "The chess rules are fixed and well-known — there is no live requirement for runtime-swappable validation strategies, no live requirement for serialization across multiple formats, and no live requirement for piece creation from external configuration. Each pattern was correctly *understood* but applied to a problem that didn't ask for it. Modern interviewers grade *match between problem complexity and solution complexity*; over-engineering signals you can't tell when sophistication is warranted, which is a louder negative than a too-flat design. Option A piles on more patterns to fix a pattern-heavy design (wrong direction). Option B treats UML as the missing thing (the source explicitly disagrees). Option C invents a technical conflict that isn't real.",
+      "interviewScript": "In your interview, say: 'For a 30-minute chess design with fixed rules, I'd start with a single Piece class and a `kind` enum, and a Board class that owns move validation. If the rules became data-driven or variants needed pluggable validation, that's when I'd promote validation to a Strategy. Reaching for Strategy plus Factory plus Visitor up front would be solving problems the prompt didn't give me.'",
+      "proTip": "When you find yourself stacking three or more patterns on a small problem, stop and ask: 'what would break if I deleted any one of these?' If the answer is 'nothing this prompt asks for', delete it."
+    },
+    {
+      "id": "q9",
+      "part": "B — Modern guide preferences",
+      "subtopic": "Cross-Subtopic Bridge",
+      "difficulty": "L4",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["B3", "B4", "D2", "D8", "D9"],
+      "l5Pattern": null,
+      "question": "An interviewer says about your design: 'I see you used a deep abstract-class hierarchy for the rules. What if the rules become data-driven — loaded from a config file at startup instead of compiled in?' A candidate immediately starts adding more abstract layers (a `RuleLoader` base, a `RuleParser` interface, an `AbstractRuleAdapter`, a `RuleRegistry`...). What is going wrong here in terms of the assessment areas, and what is the better response?",
+      "options": [
+        "The candidate is correctly extending the design and demonstrating extensibility (a graded area); the interviewer just needs to see one or two more layers before they're satisfied with the depth and modularity of the answer.",
+        "The candidate is showing weakness in Class Design (over-deep hierarchies) and Extensibility (anticipating every future) at the same time; the better response is to acknowledge the new requirement, replace the hierarchy with a small composition (e.g. a `Rule` value object loaded from config and held by a single executor), and explain why the simpler shape absorbs the change.",
+        "The candidate is showing weakness only in Communication — the pattern stack is fine, but they should narrate it more clearly so the interviewer follows the layering; once narrated, the design itself is correct and the layering will be credited.",
+        "The candidate is showing strength in Problem Analysis by proactively decomposing the new requirement; what's missing is Code Quality — they should write the parser code in pseudocode now to demonstrate the layers actually work and that the design isn't vapourware."
+      ],
+      "correctIndex": 1,
+      "explanation": "Two assessment areas fail at once. Class Design fails because the response to a single new requirement (load rules from config) is to add four abstract layers — that violates the modern preference for composition over inheritance and simple state over deep hierarchies. Extensibility fails because the candidate is anticipating every possible future of the rule format instead of solving the *stated* requirement minimally. The senior+ move: a `Rule` value object loaded from config, held by a single executor. That absorbs the change with one new class, no new abstract layers. Option A enables the over-engineering. Option C misroutes the failure to Communication (the design is the problem, not the narration). Option D invents a 'strength' that isn't there — proactive decomposition into four layers is the failure, not the strength.",
+      "interviewScript": "In your interview, say: 'For data-driven rules, I'd introduce one Rule value object — name, predicate, action — loaded from the config at startup and held in a list inside a single RuleExecutor. That's the smallest change the requirement forces. If the config grew complex enough to justify a parser hierarchy later, I'd add it then; right now, an extra layer would solve a problem the requirement didn't actually hand me.'",
+      "proTip": "When a new requirement lands, the senior move is to ask 'what's the smallest structure that absorbs *this* change?' — not 'what's the most flexible structure that might absorb every future change?'"
+    },
+    {
+      "id": "q10",
+      "part": "B — Modern guide preferences",
+      "subtopic": "Composition over Inheritance",
+      "difficulty": "L5",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["B3", "B5"],
+      "l5Pattern": "trade-off-inversion",
+      "question": "You've insisted throughout the interview on composition over inheritance, and your design uses a `PaymentProcessor` class that holds a `PaymentMethod` interface. The interviewer asks: 'Now I want to add audit logging to every payment method, plus a test-mode wrapper that records but never charges, plus a retry-on-transient-failure wrapper that the test mode also needs. Walk me through how composition handles this.' What is the senior+ move when the requirement looks like it inverts the usual trade-off?",
+      "options": [
+        "Stick with composition — write three new `PaymentMethod` implementations (`AuditedX`, `TestX`, `RetryingX`) for each existing payment method type, since composition is always preferable to inheritance regardless of the wrapping or layering pattern involved.",
+        "Switch to inheritance — create an abstract `PaymentMethod` base, then a `LoggedPaymentMethod` subclass, then a `TestPaymentMethod` sub-subclass, then a `RetryingPaymentMethod` sub-sub-subclass; the orthogonal concerns naturally form a four-deep hierarchy that's straightforward to read.",
+        "Recognize that the requirement is about layered orthogonal behaviors that wrap a common interface — the canonical Decorator shape. Multiple `PaymentMethod` decorators stack via composition (still composition, no inheritance), each adding one concern. 'Composition over inheritance' is preserved because Decorator composes by *holding*, not by *extending*.",
+        "Use multiple inheritance (or interfaces with default methods if the language doesn't support multiple inheritance) — define `Auditable`, `Testable`, and `Retryable` traits and mix them into each payment method. This is the only design that handles three orthogonal concerns without combinatorial explosion of N×M classes."
+      ],
+      "correctIndex": 2,
+      "explanation": "Why the wrong answers are tempting: A is dogmatic application of 'composition over inheritance' that misses the actual point — the requirement *is* solvable by composition, just not by writing N×M flat implementations. B falls into a deep linear hierarchy that gets worse as more cross-cutting concerns are added (you can't easily combine 'logged + retrying' without 'logged' alone, etc.). D conflates trait/mixin systems (a language feature for code reuse) with composition (a runtime structural pattern). The deeper insight: 'composition over inheritance' doesn't forbid layering — it forbids using *extension* to share behavior. The Decorator pattern wraps via composition exactly to handle orthogonal cross-cutting concerns; recognizing it here shows pattern-knowledge in service of pragmatism (the modern preference) rather than pattern worship.",
+      "interviewScript": "In your interview, say: 'This is the canonical Decorator shape — three orthogonal wrappers (audit, test, retry) over a common PaymentMethod interface. Each wrapper *holds* a PaymentMethod and forwards to it, which is still composition. They stack in any order: `Audited(Test(Retrying(Stripe())))` for example. No inheritance, no N×M class explosion, and every concern lives in one place.'",
+      "proTip": "Composition over inheritance allows wrapping. The rule rejects extending base classes for shared behavior — it doesn't reject layering classes that hold each other. Decorator is composition, not an exception to it."
+    },
+    {
+      "id": "q11",
+      "part": "C — Regional and company variants",
+      "subtopic": "Format Expectations",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["C1", "C2", "C8"],
+      "l5Pattern": null,
+      "question": "You're interviewing for an SDE2 role at a US-based Big Tech company next week. The recruiter sent the prompt list but didn't say what code format to use. What's the most efficient single thing to do before the interview?",
+      "options": [
+        "Email the recruiter and ask whether the interview expects partial real-language code or structured pseudocode — the answer often differs by region/company and is the cheapest piece of information available to remove the format uncertainty.",
+        "Default to structured pseudocode for safety — it's accepted everywhere and avoids the risk of stumbling over syntax in an unfamiliar language during a stressful interview, even if some companies would have preferred real code.",
+        "Practice writing partial Java code regardless — Big Tech almost universally expects that format, so preparation effort is better spent on syntax fluency than on a recruiter exchange that might just confirm what you already assumed.",
+        "Skip asking and just check at the start of the interview itself — saves a recruiter touch-point and lets you adapt on the fly to whatever language or format the interviewer mentions in their first sentence."
+      ],
+      "correctIndex": 0,
+      "explanation": "The source explicitly says: 'In order to know exactly what your target company is expecting, just ask! Your recruiter and/or interviewer will be happy to give you a clear answer.' The recruiter is the cheapest, most direct source of format information, and it removes a real-time risk during the interview. Option B trades certainty for safety (you may be marked down for pseudocode at a place that wanted Java). Option C is overconfident — even within US Big Tech the format expectations vary. Option D defers a low-cost question into a high-stakes moment.",
+      "interviewScript": "Email the recruiter with: 'Quick logistics question — for the LLD interview, should I plan to write partial code in a specific language (Java, Python, C++), or is structured pseudocode the expected format? Want to make sure I prep the right syntax fluency.'",
+      "proTip": "Anything you can confirm with the recruiter for the cost of one email is something you should never have to guess at during the interview itself."
+    },
+    {
+      "id": "q12",
+      "part": "C — Regional and company variants",
+      "subtopic": "What Varies vs What Doesn't",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["C1", "C2", "C3", "C4", "C6", "C7", "C8"],
+      "l5Pattern": null,
+      "question": "An LLD interview's 'core graded skills' — extracting entities, defining clean class boundaries, walking through state transitions — are essentially identical across US Big Tech and a mid-sized Indian product company. What is more likely to vary between those two interviews, and how should it shape your preparation?",
+      "options": [
+        "The core skills don't actually vary — what varies is only the difficulty of the prompt itself, which tends to be harder in the US for senior roles and easier elsewhere; the preparation is the same regardless of where you're interviewing.",
+        "The format-level expectations vary: real-language partial code vs structured pseudocode, how directly design patterns are expected to be called out by name, and how vague the prompt arrives — preparation should ask the recruiter about format and pattern expectations, not redo the core skills.",
+        "The pattern catalog varies dramatically — US interviews focus on a small set of practical patterns while Indian interviews cover all 23 GoF patterns, so preparation should weight pattern memorization much heavier specifically when interviewing in India.",
+        "The interview length varies — US interviews are typically 60+ minutes while Indian interviews are 30 minutes, so preparation should focus on speed for one and depth for the other to match the time budget difference."
+      ],
+      "correctIndex": 1,
+      "explanation": "The source identifies three concrete axes of variation: (1) pseudocode vs real code, (2) how directly design patterns are expected to be named, (3) how vague the prompt arrives (more so in India/Asia). The core skills (entities, class boundaries, state transitions) stay the same. Option A denies the variation the source explicitly calls out. Option C overstates — the difference is *how directly patterns are expected to be called out*, not the catalog size. Option D invents a length difference the source does not claim.",
+      "interviewScript": "In your interview prep, ask the recruiter: 'Three quick logistics questions — code format (real language vs pseudocode), how prompts arrive (specific or open-ended), and whether you expect explicit design pattern call-outs. That'll let me match my style to what your interviewers grade for.'",
+      "proTip": "The *skills* you need are universal. The *presentation* changes. Don't conflate the two — your prep should be 90% on skills and 10% on presentation calibration."
+    },
+    {
+      "id": "q13",
+      "part": "C — Regional and company variants",
+      "subtopic": "Pattern Vocabulary by Region",
+      "difficulty": "L3",
+      "style": "Scenario-Based",
+      "conceptIds": ["C3", "C4", "C5"],
+      "l5Pattern": null,
+      "question": "Mid-interview at a mid-sized company in Bengaluru, you've designed a parking lot system with a `Vehicle` enum, a `ParkingSpot` class, and a `ParkingLot` orchestrator. You used Strategy internally for pricing and Factory for `Vehicle` creation but never said either word out loud. The interviewer asks: 'What design patterns did you use here?' Why is this question higher-stakes in this regional context, and what is the right reply?",
+      "options": [
+        "It's a low-stakes question — answer briefly that you 'used composition where appropriate' and pivot back to the design; pattern names rarely earn meaningful points and the interviewer is just making conversation while reviewing your code.",
+        "It's higher-stakes only because patterns are a Big Tech concept and you're not at Big Tech — admit you should have used Strategy and Factory and ask whether you can refactor now, since pattern-aware refactoring is the test that's actually being run.",
+        "It's higher-stakes because Indian interviews often grade on the count of patterns used — list the patterns you used and add Singleton for the `ParkingLot` instance plus Observer for spot-availability events, to demonstrate broader fluency across the GoF catalog.",
+        "It's a higher-stakes question because mid-sized companies in this region commonly expect explicit pattern call-outs as a maturity signal — name the patterns you actually used (Strategy for pricing, Factory for vehicle creation), and briefly justify each one's fit; do not invent patterns you didn't use."
+      ],
+      "correctIndex": 3,
+      "explanation": "The source notes that smaller and mid-size companies in India and Asia 'ask about patterns more directly and are more likely to expect you to call them out'. So the question carries real weight. The right move is to surface the patterns you genuinely used, with a brief justification, and *stop there* — the source also warns 'you do not need to force them into your answer'. Option A understates regional stakes. Option B falsely concedes a non-failure. Option C forces invented patterns (Singleton, Observer), which the source explicitly warns against.",
+      "interviewScript": "In your interview, say: 'Two patterns showed up. Pricing uses Strategy — different vehicle sizes have different rate functions, and the `PricingStrategy` interface lets each one plug in independently. Vehicle creation uses Factory because the input is a string (license plate format) that maps to a vehicle type at runtime. I didn't use any other GoF patterns because the rest of the design didn't need the indirection.'",
+      "proTip": "When asked to name patterns, name only the ones you genuinely used and explain *why* each fits. Naming patterns you didn't use is a louder negative signal than missing the question entirely."
+    },
+    {
+      "id": "q14",
+      "part": "C — Regional and company variants",
+      "subtopic": "Pattern Calibration Under Pushback",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["C3", "C5"],
+      "l5Pattern": null,
+      "question": "Halfway through a US Big Tech interview, you say 'this is a textbook case for the Strategy pattern' and start drawing the abstract interface and three concrete strategies. The interviewer asks 'are you sure?' twice. What is most plausibly happening, and what is the right adjustment?",
+      "options": [
+        "The interviewer is uncertain about the pattern themselves and wants you to defend it — restate the Strategy definition more precisely, then continue drawing; once the formalism is clear, they'll move on and accept the pattern.",
+        "The interviewer thinks pattern call-outs are a weakness in this region and is signaling that you should drop the pattern vocabulary — switch to writing the same design without naming Strategy, even though the underlying structure remains the same.",
+        "The interviewer is probing whether the pattern actually fits — at Big Tech, surfacing a pattern by name is judged on fit, not on vocabulary, and 'are you sure?' twice usually means the candidate has reached for a pattern the problem doesn't justify; the right move is to re-examine whether the strategy is genuinely runtime-swappable here, and either justify the fit or back off the pattern.",
+        "The interviewer is testing pattern-knowledge depth — answer 'yes' both times confidently and then immediately list two other patterns that could also apply (Decorator, Visitor) to demonstrate breadth; this is the standard senior signal at US Big Tech for design pattern questions."
+      ],
+      "correctIndex": 2,
+      "explanation": "At Big Tech, 'interviewers care more about the reasoning than the vocabulary'. Repeated 'are you sure?' is one of the strongest pushback signals a candidate gets — and in the context of a freshly named pattern, it almost always means 'I don't see why that pattern is the right fit here'. The right move is to re-examine the fit out loud: is the validation actually runtime-swappable, or is it fixed at design time? If runtime-swappable, justify why; if not, back off the pattern and use a simpler shape. Option A is arrogant (interviewer is questioning fit, not definition). Option B overcorrects (the pattern may be right; what's wrong is the assumption it's right). Option D piles on more patterns, which is exactly the failure mode the source warns about.",
+      "interviewScript": "In your interview, say: 'Good challenge — let me re-examine. For Strategy to earn its complexity here, validation rules need to be runtime-swappable. Looking at the requirements, validation is fixed at design time — there's no config or user choice that changes the rule set. So Strategy is over-engineering and a single validator with a switch is the cleaner fit. Let me revise.'",
+      "proTip": "Repeated 'are you sure?' from a Big Tech interviewer is the gentlest possible 'no'. Treat it as a free re-examination prompt, not as a defence trigger."
+    },
+    {
+      "id": "q15",
+      "part": "C — Regional and company variants",
+      "subtopic": "Same Design, Different Signal",
+      "difficulty": "L5",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["C3", "C4", "C5", "C8"],
+      "l5Pattern": "implementation-specific-gotcha",
+      "question": "A senior engineer interviews at two companies in the same week. Company X (US Big Tech): the candidate cleanly designs a movie ticket booking system, never names a pattern, and gets strong feedback on 'practical, modern engineering.' Company Y (mid-sized in India): the candidate uses the *same* design and gets feedback that 'the candidate didn't show pattern knowledge.' What deeper lesson is the regional gotcha pointing at, and what is the senior calibration?",
+      "options": [
+        "The lesson is that the *same* design produces different signal depending on what the interviewer is listening for; the senior calibration is to ask the recruiter (or interviewer up front) whether explicit pattern call-outs are expected, then narrate the patterns you naturally used — without inventing patterns you didn't use.",
+        "The lesson is that patterns matter more in some regions, so the senior calibration is to insert at least three named patterns (Strategy, Factory, Singleton) into every Indian interview regardless of fit — the cost of an extra pattern is much lower than the cost of being graded as 'no pattern knowledge'.",
+        "The lesson is that Indian interviews don't actually grade design quality the same way — they grade pattern-vocabulary fluency, so the senior calibration is to spend prep time memorizing GoF pattern names rather than improving design instincts, since the latter doesn't earn points there anyway.",
+        "The lesson is that the candidate's design was probably weaker in the second interview but the feedback was sugar-coated as 'no pattern knowledge'; the senior calibration is to redo the design from first principles after each interview, regardless of feedback wording, to find the real underlying gap."
+      ],
+      "correctIndex": 0,
+      "explanation": "Why the wrong answers are tempting: B overcorrects by forcing patterns — the source explicitly warns 'you do not need to force them into your answer'. C is dismissive and inaccurate (Indian mid-size companies *also* grade design quality; they additionally weight pattern call-outs). D is paranoid (assumes feedback is wrong rather than reflecting a real cultural difference the source documents). The deeper insight: same-design-different-signal is the classic implementation-specific gotcha — the underlying engineering skill (clean design) is identical across regions, but the *surface presentation* (whether to name patterns aloud) is the lever that changes. Senior+ candidates calibrate the presentation without changing the design quality. Calibration is a recruiter conversation, not a design rewrite.",
+      "interviewScript": "In your interview at Company Y, say at the start: 'Quick check before I start — should I narrate design patterns explicitly as I introduce them, or is reasoning about the design enough? Want to match what your team grades for.' Then if the answer is 'narrate explicitly', name the patterns you genuinely used as you introduce each.",
+      "proTip": "Never change your design to win pattern-vocabulary points. Change *what you say out loud* about the design. Those two adjustments live in different places."
+    },
+    {
+      "id": "q16",
+      "part": "D — Interview Assessment areas",
+      "subtopic": "Identifying What Is Being Probed",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["D8", "D9"],
+      "l5Pattern": null,
+      "question": "An interviewer is silent through your first 15 minutes of designing a parking lot, then asks: 'How would you add EV charging spots that need both a regular spot and a charging station?' Which of the five graded areas is this question primarily probing?",
+      "options": [
+        "Code Quality — they're checking whether your existing classes have clean enough structure to add a new feature without rewriting major sections of the implementation.",
+        "Problem Analysis — by adding a new requirement mid-interview, they want to see whether you re-extract entities cleanly the second time around for the EV concept.",
+        "Extensibility and Maintainability — the follow-up requirement is the canonical extensibility probe; they're seeing whether your design absorbs new functionality without major rewrites.",
+        "Communication — they want to see whether you can narrate a new feature clearly off the top of your head without writing anything down or pausing to think."
+      ],
+      "correctIndex": 2,
+      "explanation": "The source explicitly says 'most interviews include a small follow-up requirement' as the Extensibility/Maintainability probe. The interviewer is testing whether your design absorbs the new requirement cleanly. Code Quality is adjacent but not primary (they're not asking about hygiene of existing code). Problem Analysis is misread — re-extracting is incidental, not the goal. Communication is tangential — narration is graded everywhere, but it's not what *this specific question* is for.",
+      "interviewScript": "In your interview, say: 'Good extension — let me think about where it lands cleanly. EV charging adds two things: a sub-type of spot (or a property on the existing Spot — let me decide based on whether non-EV vehicles can also use these spots) and a charging-station resource. I'll add a `chargingStation` field on Spot that's nullable, and a `requiresCharging` flag on Vehicle. The dispatch logic stays the same; the matching rule gets one extra clause.'",
+      "proTip": "When a 'how would you add X?' question lands, you're being graded on Extensibility. Point at *where* in the design X lands cleanly, not how much new code X requires."
+    },
+    {
+      "id": "q17",
+      "part": "D — Interview Assessment areas",
+      "subtopic": "Class Design vs Code Quality",
+      "difficulty": "L2",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["D2", "D3", "D4", "D5", "D6"],
+      "l5Pattern": null,
+      "question": "Two interviewers grade the same candidate. Interviewer X says 'the responsibilities of your three core classes overlap and ownership of state is unclear.' Interviewer Y says 'your method names are inconsistent, you mutate state in surprising places, and the dependency arrows go in two directions.' Which one is flagging Class Design and which is flagging Code Quality, and why does the distinction matter?",
+      "options": [
+        "X is Code Quality (because it's about responsibilities) and Y is Class Design (because it's about state mutation and dependencies); the distinction matters because Code Quality issues are usually shallow and Class Design issues require a complete rewrite.",
+        "Both interviewers are flagging Code Quality — Class Design is about choosing what classes exist, while Y's complaints (naming, mutation, dependency direction) are sub-aspects of the same Code Quality area as X's complaints about responsibilities.",
+        "X is Class Design and Y is Communication — Y's complaints are all about whether the interviewer can read your code, which is fundamentally a communication problem expressed through the medium of code rather than spoken word.",
+        "X is Class Design (ownership of responsibilities and state across classes is the Class Design lens) and Y is Code Quality (encapsulation, naming, dependency direction are the hygiene-level lens); the distinction matters because Class Design failures are load-bearing — they make every downstream choice harder, while Code Quality failures are more localized and easier to repair."
+      ],
+      "correctIndex": 3,
+      "explanation": "Class Design is about *which classes exist and what each owns* — responsibilities, ownership of state, boundaries between classes. That's exactly what X is flagging. Code Quality is about *the hygiene inside and across classes* — encapsulation, naming, where mutations happen, dependency direction. That's what Y is flagging. The distinction matters because Class Design problems compound (every method written on a confused class is wasted effort), while Code Quality problems are mostly local and rename-able. The source explicitly says 'Weak class design makes everything downstream harder' — that's the load-bearing nature.",
+      "interviewScript": "In your interview, when designing classes say: 'For each class, I'm going to be explicit about (1) what state it owns, (2) which methods are part of its public API, and (3) which other class it depends on (and only one direction). If two classes seem to want the same state, I'll surface that out loud and pick which one owns it before writing methods on either.'",
+      "proTip": "Class Design failures cost more than Code Quality failures. Get classes right *first*; you can always rename and reorder code, but unclear ownership is a deeper rework."
+    },
+    {
+      "id": "q18",
+      "part": "D — Interview Assessment areas",
+      "subtopic": "Cascading Failures Across Areas",
+      "difficulty": "L3",
+      "style": "Failure Analysis",
+      "conceptIds": ["D1", "D2", "D3", "D4"],
+      "l5Pattern": null,
+      "question": "A candidate writes beautiful pseudocode for `Game.makeMove()` — clean encapsulation, proper state mutation, well-named variables — but gets feedback that they 'failed Problem Analysis.' On reflection, they realize they spent four minutes on requirements gathering, then jumped to coding without ever drawing the entities or class outline. What's the cascading failure here that explains why high Code Quality didn't rescue the candidate?",
+      "options": [
+        "Code Quality is graded last, so its strength can never offset earlier weaknesses — even a candidate with perfect code will fail if any preceding area is weak, regardless of the magnitude of the strength in the later area.",
+        "The failure is sequence: Problem Analysis frames what entities should exist, which sets up Class Design, which sets up the code being written. Skipping Problem Analysis means the candidate may have written clean code for the wrong objects entirely — a problem high Code Quality cannot retroactively repair.",
+        "The failure is cosmetic: the candidate didn't say the words 'requirements' or 'entities' out loud, so the interviewer didn't know to credit those steps; the work was done internally but the narration was missing from the visible output.",
+        "The failure is timing: spending only four minutes on requirements is below the recommended five, and the missing minute compounds — the interviewer infers from that single under-budgeted step that the rest of the work is similarly rushed and shallow."
+      ],
+      "correctIndex": 1,
+      "explanation": "Problem Analysis isn't a checkbox graded in isolation — it's the *foundation* that decides which entities the rest of the design will work with. If you've extracted the wrong entities (or skipped the step entirely and grabbed whatever entities the prompt mentions), every line of pseudocode below is implementing the wrong design. Code Quality grades the *hygiene* of the code, not whether the code is solving the right problem. So clean pseudocode for the wrong objects gets dinged on Problem Analysis no matter how clean it is. Option A invents a grading rigidity that doesn't exist (later strengths *can* sometimes rescue earlier weaknesses; this isn't one of those cases). Option C blames narration when the work itself was missing. Option D over-precises a non-issue (four vs five minutes isn't the problem).",
+      "interviewScript": "In your interview, say: 'Before I write any code, let me make sure I have the right entities. From the requirements, the things that hold state and enforce rules are X, Y, Z. The things that are just data attached to one of those are A, B, C. Let me confirm this entity list with you before I start defining their methods.'",
+      "proTip": "Pseudocode for the wrong objects is the most dangerous kind of beautiful code. Always pin down entities *before* writing a single method signature."
+    },
+    {
+      "id": "q19",
+      "part": "D — Interview Assessment areas",
+      "subtopic": "Communication Signal",
+      "difficulty": "L3",
+      "style": "Scenario-Based",
+      "conceptIds": ["D2", "D7", "D10", "D11", "D12"],
+      "l5Pattern": null,
+      "question": "Two candidates produce nearly identical pseudocode for an elevator controller. Candidate P writes it silently, then says 'done' and waits for questions. Candidate Q narrates as they go: 'I'm putting the floor-request queue inside the Controller because it owns the dispatching workflow; the Elevator class only knows about its current floor and its direction.' Why does Q's interview typically score higher even though the code is identical?",
+      "options": [
+        "Q reveals reasoning the interviewer can grade — placement decisions, ownership choices, what's deliberately excluded — so Q earns Communication points and gives the interviewer evidence of the *thought process* behind Class Design choices that P leaves hidden in the silent version.",
+        "Q produces more code per minute by talking through it — the narration acts as a forcing function for clarity, so Q's pseudocode is subtly cleaner than P's even if it looks identical at a casual glance.",
+        "Q's narration helps the interviewer pay attention; P's silence causes the interviewer to mentally drift, which leads them to miss good parts of P's code and grade only the parts they happened to notice during their own distractions.",
+        "P fails because of an unspoken interview convention — silent candidates are graded as 'lacking confidence' regardless of code quality, while talkative candidates are graded as 'mature' independent of what they actually say."
+      ],
+      "correctIndex": 0,
+      "explanation": "The source emphasizes that 'a structured explanation often signals confidence and maturity more than perfectly written code'. The interviewer can only grade *visible* signal. P's design choices — putting the queue inside Controller, restricting Elevator's state to floor/direction — are *also good Class Design*, but they're invisible if not narrated. Q makes those same choices visible, earning credit on Communication and giving the interviewer evidence of the Class Design reasoning behind the code. Option B invents a code-quality difference that isn't there. Option C psychologizes (interviewers don't drift in 30 minutes). Option D invents a stereotype that the source doesn't support.",
+      "interviewScript": "In your interview, say: 'I'm going to talk through placement decisions as I write. Putting the floor-request queue inside the Controller because dispatching is its workflow; keeping the Elevator class minimal because its only invariant is current floor and direction. If I'm putting something in a class, I'll say *why* that class, not just *what* the method does.'",
+      "proTip": "If you're going to make a non-obvious design choice, narrate the reason. Silent good choices look identical to silent lucky guesses."
+    },
+    {
+      "id": "q20",
+      "part": "D — Interview Assessment areas",
+      "subtopic": "Cross-Subtopic Bridge",
+      "difficulty": "L4",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["D2", "D8", "D9", "B3", "B4", "B5"],
+      "l5Pattern": null,
+      "question": "A candidate is asked a follow-up: 'Now imagine the parking lot supports both monthly subscribers and hourly visitors with different pricing.' They respond by adding an abstract `User` base class, two subclasses, an abstract `PricingPlan` base, two subclasses, a `PlanFactory`, a `BillingPolicyResolver`, and a new `BillingContext` carrying state across the layers. What's the multi-area failure here, and what would a senior+ candidate do instead?",
+      "options": [
+        "Failure: only Code Quality (the structures aren't *wrong*, just verbose); senior+ move is to keep the design as drawn and add explanatory comments on each layer so the interviewer can follow the reasoning more easily without losing track.",
+        "Failure: Problem Analysis — the candidate didn't ask whether monthly subscribers also need hourly billing on weekends; once they ask, the design will naturally collapse to a simpler shape, regardless of how they restructure right now in the moment.",
+        "Failure: Class Design (over-deep inheritance for two cases) and Extensibility (anticipating every future) compounded by violation of 'modern' preferences (composition over inheritance, simple state over hierarchies); senior+ move is to add a small `PricingRule` value object, hold it on the parking session at park-time, and explain that the abstraction will grow only when a third pricing model lands.",
+        "Failure: Communication — the candidate added the right structures but didn't narrate them; if they walked through each layer, the interviewer would credit the design as appropriately modular for the new requirement."
+      ],
+      "correctIndex": 2,
+      "explanation": "Three failures compound. Class Design fails because two pricing models do not justify abstract base + factory + resolver. Extensibility fails because the candidate is anticipating *every* future pricing model rather than absorbing the *current* requirement minimally. The modern preferences (composition over inheritance, simple state over deep hierarchies) are violated for symbolic reasons rather than load-bearing ones. The senior+ move: a `PricingRule` value object held at the session level, branched on at billing time. That solves the present requirement and stays trivially extensible — the third pricing model adds one line in the rule type, not a fourth layer.",
+      "interviewScript": "In your interview, say: 'For two pricing models, I'd add a PricingRule value object — { kind: monthly|hourly, params }. The session holds it at park-time, and the billing logic branches on the kind. If a third model lands later (e.g. validated hourly), it's a new kind plus a new branch — not a new layer in the hierarchy. Adding User subclasses and a PlanFactory now would be solving a problem we don't have yet.'",
+      "proTip": "When a follow-up adds two cases, the right structural addition is one value object, not a new abstract hierarchy. Hierarchies are paid for in cognitive overhead per layer; value objects are nearly free."
+    },
+    {
+      "id": "q21",
+      "part": "D — Interview Assessment areas",
+      "subtopic": "Extensibility Trap",
+      "difficulty": "L5",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["D8", "D9"],
+      "l5Pattern": "future-proofing",
+      "question": "A candidate completes a chess design and the interviewer asks: 'How would you support all 11 chess variants — Chess960, Crazyhouse, Three-check, Atomic, etc. — without rewriting?' The candidate spends the remaining 10 minutes adding extension points: an abstract `Variant` interface, a `RuleSet` configuration, a `BoardLayout` strategy, and a `MoveValidator` per variant. The interview feedback flags the candidate as 'over-engineered.' What is the deeper future-proofing trap, and what is the senior+ response?",
+      "options": [
+        "The trap is incomplete coverage — 11 variants mean at least 11 abstractions are needed; the candidate added only 4, so the interviewer correctly flagged 'over-engineered' as a euphemism for 'inconsistent depth of abstraction across variants'. Senior+ move is to add the missing 7 abstractions to make depth consistent.",
+        "The trap is using the wrong pattern — abstract interfaces are heavyweight, but a Strategy pattern alone (no interface hierarchy) would have been graded as appropriately extensible. Senior+ move is to refactor the abstract interfaces into Strategy implementations to swap pattern for pattern.",
+        "The trap is starting from variants instead of starting from rules — the candidate should re-derive a rule taxonomy first, then map each variant to a subset of rules, then build the abstract framework based on the rule taxonomy. This is more work up front but graded as the only correct approach.",
+        "The trap is mistaking 'extension points' for extensibility — sprinkling abstract interfaces in advance is the textbook over-engineering pattern. The senior+ response is to point at *one* place in the existing design where each variant's difference would land (e.g. 'Chess960 changes only initial board setup, so it's a parameter to BoardFactory, not a new class') and concede that some variants would force a refactor — which is *cheap* because boundaries are already clean."
+      ],
+      "correctIndex": 3,
+      "explanation": "Why the wrong answers are tempting: A reads 'over-engineered' as 'incomplete', missing the actual feedback (too much, not too little). B swaps one pattern for another without addressing the underlying issue (the abstractions weren't paying for themselves regardless of which pattern shape they took). C doubles down on the over-engineering by adding even more upfront design work (a rule taxonomy *before* any code is the heaviest possible front-loading). The deeper insight: extensibility is graded on *how cleanly the existing design absorbs change*, not on *how many extension points exist before change*. The senior+ move is to point to where boundaries already are clean and accept that some changes will force a bounded refactor — which is fine because the refactor is bounded, not because the refactor was preempted with abstraction.",
+      "interviewScript": "In your interview, say: 'For each variant, let me point at where the change lands. Chess960: only initial board setup differs — it's a parameter to BoardFactory, no new class. Three-check: a counter on Game and a check in the win-condition method. Crazyhouse: piece-drop is a new move kind plus an off-board reservoir on Player — that one is a real extension. Atomic: capture rules differ — that's a refactor of the capture logic, bounded to one method. Some are parameters, some are extensions, one is a refactor. None forces a top-to-bottom rewrite, which is what extensibility is actually graded on.'",
+      "proTip": "Extension points added speculatively are the most expensive over-engineering — they cost permanent cognitive load to defend zero present requirements. Always demonstrate extensibility by pointing at *the one place* a change lands, not by *the abstractions you preempted*."
+    },
+    {
+      "id": "q22",
+      "part": "Cross-Part Bridge (A + D)",
+      "subtopic": "Recognising and Adapting to Frame Shifts",
+      "difficulty": "L4",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["A4", "A9", "B7", "B8", "D8", "D10", "D11"],
+      "l5Pattern": null,
+      "question": "An interviewer says at minute 30 of a 35-minute LLD interview: 'I'm going to switch hats — pretend now we're doing system design and we're scaling your trip system to 50M users. What changes?' The candidate fluently sketches sharded datastores, regional caches, and an event queue. The feedback comes back: 'didn't show LLD signal.' Why does this failure matter for an LLD interview specifically, and what is the senior+ response when an interviewer tries to switch frames late?",
+      "options": [
+        "The candidate did the right thing — system-design fluency at the end of an LLD interview is bonus signal, and the feedback is calibrated to a junior LLD-only role; for senior roles, demonstrating both is the explicit point of the late-frame question.",
+        "The candidate over-pivoted — the interviewer is partly *testing* whether you stay anchored in the LLD work that's still being graded. The senior+ response is to acknowledge the shift, ask 'should I finish the class-design walkthrough first or move into scaling now?', and let them choose; switching silently sacrifices the only LLD signal you had left to demonstrate before time runs out.",
+        "The candidate misread the prompt — 'switch hats' meant continue LLD work but for a larger codebase, not move to system design; the candidate accidentally switched interview types and lost the entire LLD evaluation slot in the process.",
+        "The candidate showed weakness in Code Quality — pivoting to high-level architecture means abandoning the pseudocode that was being graded; the senior+ move is to keep writing LLD pseudocode regardless of what the interviewer asks for to finish the slot strong."
+      ],
+      "correctIndex": 1,
+      "explanation": "An LLD interview grades LLD signal. A late-stage 'switch hats' question is partly genuine curiosity and partly a test of whether you read which signals are still being graded. With five minutes left in an LLD interview, you've still got LLD work to finish — verification, edge cases, the extensibility discussion that's part of the graded rubric. Silently switching to SD throws away those minutes of LLD signal. The senior+ move is to surface the trade-off out loud and let the interviewer choose. Option A misreads (the slot is graded as LLD, not as 'either kind of signal counts'). Option C invents a bizarre reading. Option D is rigid (defying the interviewer is never the answer; the answer is asking them to choose).",
+      "interviewScript": "In your interview, say: 'Quick check — we've got about five minutes left and I haven't finished the verification trace or talked through extensibility for the original class design. Want me to finish the LLD work first and pivot to scaling at the end if there's time, or move to scaling now? Happy either way, just want to be efficient with the time.'",
+      "proTip": "Late-stage frame shifts are also time-management tests. Surface the trade-off rather than absorbing it silently; the act of surfacing earns Communication signal even if the interviewer says 'go ahead and switch'."
+    }
+  ]
+}

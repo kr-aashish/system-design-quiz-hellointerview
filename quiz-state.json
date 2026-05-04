@@ -361,7 +361,7 @@
       "status": "pending",
       "lastAttempt": null,
       "retryCount": 0,
-      "quizDataPath": null
+      "quizDataPath": "data/quizzes/low-level-design/in-a-hurry/introduction.json"
     },
     {
       "category": "In a Hurry",
@@ -371,7 +371,7 @@
       "status": "pending",
       "lastAttempt": null,
       "retryCount": 0,
-      "quizDataPath": null
+      "quizDataPath": "data/quizzes/low-level-design/in-a-hurry/delivery.json"
     },
     {
       "category": "In a Hurry",
