@@ -39,8 +39,49 @@ function getOptionText(option, idx) {
   return String(option ?? "");
 }
 
-function getGroupLabel(q) {
+function getQuestionTopicLabel(q) {
   return q.subtopic || q.category || q.part || "General";
+}
+
+function getSectionLabel(q) {
+  return q.part || q.category || q.subtopic || "General";
+}
+
+function getSectionDetailLabel(q) {
+  if (q.part) return q.subtopic || q.category || null;
+  if (q.category) return q.subtopic || null;
+  return null;
+}
+
+function orderedUnique(values, preferredOrder = []) {
+  const seen = new Set();
+  const unique = [];
+  for (const value of values) {
+    if (value && !seen.has(value)) {
+      seen.add(value);
+      unique.push(value);
+    }
+  }
+
+  const order = new Map((preferredOrder || []).map((value, index) => [value, index]));
+  return unique.sort((a, b) => {
+    const aIndex = order.has(a) ? order.get(a) : Number.MAX_SAFE_INTEGER;
+    const bIndex = order.has(b) ? order.get(b) : Number.MAX_SAFE_INTEGER;
+    if (aIndex !== bIndex) return aIndex - bIndex;
+    return 0;
+  });
+}
+
+function getTierCounts(questions) {
+  const counts = {};
+  for (const question of questions) {
+    const tier = question.difficulty || "L3";
+    counts[tier] = (counts[tier] || 0) + 1;
+  }
+
+  return TIER_ORDER
+    .map((tier) => ({ tier, count: counts[tier] || 0 }))
+    .filter((item) => item.count);
 }
 
 function StatChip({ icon: Icon, children }) {
@@ -93,7 +134,7 @@ function QuestionCard({ question, number }) {
         <span className={`text-xs px-2 py-1 rounded border ${diffStyle.chip}`}>
           {diffStyle.label}
         </span>
-        <Pill tone="blue">{getGroupLabel(question)}</Pill>
+        <Pill tone="blue">{getQuestionTopicLabel(question)}</Pill>
         {question.style && <Pill>{question.style}</Pill>}
         {question.l5Pattern && <Pill tone="purple">{question.l5Pattern}</Pill>}
         <span className="ml-auto text-[11px] uppercase tracking-wider text-gray-600">
@@ -177,6 +218,7 @@ function QuestionCard({ question, number }) {
 function GroupSection({ group, startNumber, defaultOpen = true }) {
   const [open, setOpen] = useState(defaultOpen);
   const anchor = `group-${slugify(group.name)}`;
+  const endNumber = startNumber + group.questions.length - 1;
 
   return (
     <section id={anchor} className="scroll-mt-6">
@@ -198,6 +240,46 @@ function GroupSection({ group, startNumber, defaultOpen = true }) {
 
       {open && (
         <div className="mt-4 space-y-4">
+          <div className="rounded-lg border border-gray-800 bg-gray-950/50 p-4">
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Section Details
+              </span>
+              <span className="rounded border border-gray-800 bg-gray-900 px-2 py-1 text-xs text-gray-400">
+                Questions #{startNumber}-{endNumber}
+              </span>
+              {group.details.length > 0 && (
+                <span className="rounded border border-gray-800 bg-gray-900 px-2 py-1 text-xs text-gray-400">
+                  {group.details.length} {group.details.length === 1 ? "topic" : "topics"}
+                </span>
+              )}
+              {group.tierCounts.map(({ tier, count }) => {
+                const style = DIFFICULTY_STYLE[tier] || DIFFICULTY_STYLE.L3;
+                return (
+                  <span key={tier} className={`rounded border px-2 py-1 text-xs ${style.chip}`}>
+                    {tier} · {count}
+                  </span>
+                );
+              })}
+            </div>
+
+            {group.details.length > 0 && (
+              <ol className="grid gap-2 sm:grid-cols-2">
+                {group.details.map((detail, index) => (
+                  <li
+                    key={detail}
+                    className="flex items-start gap-2 rounded-md border border-gray-800 bg-gray-900/50 px-3 py-2 text-sm text-gray-300"
+                  >
+                    <span className="mt-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded bg-gray-800 px-1 text-[11px] font-bold text-gray-500">
+                      {index + 1}
+                    </span>
+                    <span className="leading-relaxed">{detail}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+
           {group.questions.map((q, i) => (
             <QuestionCard key={q.id} question={q} number={startNumber + i} />
           ))}
@@ -212,21 +294,49 @@ export default function QuizReview({ quiz }) {
 
   const groups = useMemo(() => {
     const map = new Map();
+    const hasParts = questions.some((question) => question.part);
+    const hasCategories = questions.some((question) => question.category);
+    const groupOrder = hasParts
+      ? quiz.partsOrder
+      : hasCategories
+        ? quiz.categories
+        : quiz.subtopicsOrder;
+
     for (const q of questions) {
-      const name = getGroupLabel(q);
-      if (!map.has(name)) map.set(name, []);
-      map.get(name).push(q);
+      const name = getSectionLabel(q);
+      if (!map.has(name)) {
+        map.set(name, {
+          name,
+          questions: [],
+          details: [],
+          sourceIndex: map.size,
+        });
+      }
+
+      const group = map.get(name);
+      group.questions.push(q);
+
+      const detail = getSectionDetailLabel(q);
+      if (detail) group.details.push(detail);
     }
-    return [...map.entries()].map(([name, qs]) => ({ name, questions: qs }));
-  }, [questions]);
+
+    const order = new Map((groupOrder || []).map((name, index) => [name, index]));
+    return [...map.values()]
+      .sort((a, b) => {
+        const aIndex = order.has(a.name) ? order.get(a.name) : Number.MAX_SAFE_INTEGER;
+        const bIndex = order.has(b.name) ? order.get(b.name) : Number.MAX_SAFE_INTEGER;
+        if (aIndex !== bIndex) return aIndex - bIndex;
+        return a.sourceIndex - b.sourceIndex;
+      })
+      .map((group) => ({
+        ...group,
+        details: orderedUnique(group.details, quiz.subtopicsOrder),
+        tierCounts: getTierCounts(group.questions),
+      }));
+  }, [questions, quiz.partsOrder, quiz.categories, quiz.subtopicsOrder]);
 
   const tierCounts = useMemo(() => {
-    const counts = {};
-    for (const q of questions) {
-      const t = q.difficulty || "L3";
-      counts[t] = (counts[t] || 0) + 1;
-    }
-    return TIER_ORDER.map((t) => ({ tier: t, count: counts[t] || 0 })).filter((r) => r.count);
+    return getTierCounts(questions);
   }, [questions]);
 
   // Pre-compute starting question number for each group so numbering is global.

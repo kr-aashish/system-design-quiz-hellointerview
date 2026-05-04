@@ -15,6 +15,36 @@ function resolveQuizDataPath(quizDataPath) {
   return path.join(rootDir, quizDataPath);
 }
 
+function getPathSegments(topic) {
+  return String(topic.path || '').split('/').filter(Boolean);
+}
+
+function isLowLevelDesignTopic(topic) {
+  const segments = getPathSegments(topic);
+  return segments[0] === 'learn' && segments[1] === 'low-level-design';
+}
+
+function expectedLowLevelDesignQuizPath(topic) {
+  const segments = getPathSegments(topic);
+  const [, track, section, ...articleSegments] = segments;
+  const article = articleSegments.at(-1);
+
+  if (!track || !section || !article) {
+    throw new Error(`${topic.slug}: low-level-design topic path must include /learn/<track>/<section>/<article>`);
+  }
+
+  return `data/quizzes/${track}/${section}/${article}.json`;
+}
+
+function validateLowLevelDesignPath(topic) {
+  if (!isLowLevelDesignTopic(topic)) return;
+
+  const expectedPath = expectedLowLevelDesignQuizPath(topic);
+  if (topic.quizDataPath !== expectedPath) {
+    throw new Error(`${topic.slug}: quizDataPath must follow the index hierarchy: expected ${expectedPath}, found ${topic.quizDataPath}`);
+  }
+}
+
 function validateQuestion(question, quizPath, index) {
   if (!question || typeof question !== 'object') {
     throw new Error(`${quizPath}: question ${index + 1} must be an object`);
@@ -36,6 +66,8 @@ function validateQuestion(question, quizPath, index) {
 }
 
 function validateQuizData(topic) {
+  validateLowLevelDesignPath(topic);
+
   const absolutePath = resolveQuizDataPath(topic.quizDataPath);
   if (!absolutePath || !fs.existsSync(absolutePath)) {
     throw new Error(`${topic.slug}: missing quiz JSON at ${topic.quizDataPath}`);

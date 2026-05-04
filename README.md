@@ -8,6 +8,7 @@ Quiz content is stored as JSON, not JSX. There is one shared runtime (`QuizEngin
 
 - `quiz-state.json` is the source article index. Each article has a `quizDataPath` pointing at its quiz JSON, or `null` when no quiz exists yet.
 - `data/quizzes/<track>/<section>/<article>.json` stores source-of-truth quiz content.
+- The `<track>/<section>/<article>` folders mirror the article path in `quiz-state.json`. Low Level Design sections must follow the index path segments: `in-a-hurry`, `concurrency`, and `problem-breakdowns`.
 - `scripts/build-quiz-data.mjs` validates `quiz-state.json` and every referenced quiz JSON file. It does not generate a combined quiz database.
 - `App.jsx` renders every track, section, article, quiz route, and review route from `quiz-state.json` and `import.meta.glob('./data/quizzes/**/*.json')`.
 

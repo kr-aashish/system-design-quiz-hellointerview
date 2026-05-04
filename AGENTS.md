@@ -50,7 +50,7 @@ The shared `QuizEngine.jsx` supports `difficulty` chip rendering, a "Ladder" pla
 - `QuizEngine.jsx` — shared quiz UI runtime for every quiz.
 - `App.jsx` — router and index UI; it renders from `quiz-state.json` and the nested quiz JSON files, not from per-quiz components or a generated aggregate database.
 - `quiz-state.json` — source article catalog with category, slug, status, and `quizDataPath`.
-- `data/quizzes/<track>/<section>/<article>.json` — source-of-truth quiz content files.
+- `data/quizzes/<track>/<section>/<article>.json` — source-of-truth quiz content files. The path mirrors the article path in `quiz-state.json`; for Low Level Design, keep files under the index sections `in-a-hurry`, `concurrency`, or `problem-breakdowns`.
 - `quizProgressStore.js`, `useQuizProgress.js` — localStorage-backed progress
 - `quiz-generation-methodology.md` — **read this for every quiz**
 - `principles-of-learning.md` — **read this for every quiz**

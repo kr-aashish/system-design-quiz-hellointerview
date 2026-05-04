@@ -12,7 +12,7 @@
 2. **Exhaustive coverage.** Every concept, distinction, gotcha, and implication in the source content must be covered by at least one question. Coverage is *enforced*, not aspirational — see Section 4.
 3. **Difficulty climbs, never jumps.** Within each Part, the learner sees L1 (warm-up) before L5 (extreme). The learner is never demotivated by the hardest question first.
 4. **Hardest realistic SDE2/Senior/Staff questions are included.** No skipping the extremes. L5 questions follow the canon in Section 5.
-5. **Store quiz content as JSON only.** There are no per-quiz JSX files. New quizzes must be written under `data/quizzes/<track>/<section>/<article>.json` and referenced from `quiz-state.json` via `quizDataPath`.
+5. **Store quiz content as JSON only.** There are no per-quiz JSX files. New quizzes must be written under `data/quizzes/<track>/<section>/<article>.json` and referenced from `quiz-state.json` via `quizDataPath`. The path must mirror the article path in `quiz-state.json`; for Low Level Design, the section folder is one of `in-a-hurry`, `concurrency`, or `problem-breakdowns`.
 6. **Every question is gradable against the 16-point rubric** in `principles-of-learning.md` Section 9. No exceptions.
 
 ---
@@ -204,7 +204,7 @@ Write each question using the schema in Section 3. Every question must answer:
 Each quiz is a single JSON data file. Naming and location follow the article hierarchy:
 
 - High-level/System Design: `data/quizzes/system-design/<section>/<article>.json`
-- Low-Level Design: `data/quizzes/low-level-design/<section>/<article>.json`
+- Low-Level Design: `data/quizzes/low-level-design/<section>/<article>.json`, where `<section>` is the index path segment (`in-a-hurry`, `concurrency`, or `problem-breakdowns`)
 
 Examples:
 
@@ -260,7 +260,7 @@ Top-level field: **`coverageManifest`**. It is *the* enforcement mechanism. JSON
 
 Then store metadata and the `questions` array in **ladder order** (Part A: L1→L5, Part B: L1→L5, …). `partsOrder`, `subtopicsOrder`, and `difficultyTiers` are optional top-level arrays.
 
-The file must be referenced by the matching article in `quiz-state.json` using `quizDataPath`. Do **not** create a JSX component, import it in `App.jsx`, or register it in any `componentsMap`. `App.jsx` renders directly from `quiz-state.json` plus the nested quiz JSON files.
+The file must be referenced by the matching article in `quiz-state.json` using `quizDataPath`. Do **not** create a JSX component, import it in `App.jsx`, or register it in any `componentsMap`. `App.jsx` renders directly from `quiz-state.json` plus the nested quiz JSON files. For Low Level Design, keep the JSON path aligned with the index URL hierarchy, for example `/learn/low-level-design/concurrency/correctness` maps to `data/quizzes/low-level-design/concurrency/correctness.json`.
 
 ---
 

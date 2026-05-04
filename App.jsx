@@ -31,8 +31,6 @@ const TRACK_ICONS = {
   Boxes,
 };
 
-const LLD_SECTION_ORDER = ['In a Hurry', 'Concurrency', 'Problem Breakdowns'];
-
 function normalizeQuizPath(modulePath) {
   return modulePath.replace(/^\.\//, '');
 }
@@ -63,13 +61,6 @@ function orderSectionEntries(trackId, sectionEntries) {
       ...sectionEntries.filter(([category]) => category === 'In a Hurry'),
       ...sectionEntries.filter(([category]) => category !== 'In a Hurry' && category !== 'Advanced Topics'),
       ...sectionEntries.filter(([category]) => category === 'Advanced Topics'),
-    ];
-  }
-
-  if (trackId === 'low-level-design') {
-    return [
-      ...LLD_SECTION_ORDER.map(category => sectionEntries.find(([name]) => name === category)).filter(Boolean),
-      ...sectionEntries.filter(([category]) => !LLD_SECTION_ORDER.includes(category)),
     ];
   }
 
