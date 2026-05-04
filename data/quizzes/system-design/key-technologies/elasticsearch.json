@@ -1,0 +1,1271 @@
+{
+  "slug": "key-tech-elasticsearch",
+  "name": "Elasticsearch",
+  "title": "Elasticsearch Quiz",
+  "description": "Practice scenario-based system design questions for Elasticsearch.",
+  "category": "Key Technologies",
+  "path": "/learn/system-design/deep-dives/elasticsearch",
+  "estimatedTime": null,
+  "difficultyLabel": null,
+  "categories": [],
+  "partsOrder": [
+    "A — Documents, Indices, Mappings",
+    "B — Indexing API & Concurrency",
+    "C — Search & Geospatial",
+    "D — Sort, Relevance & Pagination",
+    "E — Cluster Architecture",
+    "F — Data Nodes Internals",
+    "G — Lucene Segments",
+    "H — Inverted Index & Doc Values",
+    "I — Coordinating Nodes & Query Planning",
+    "J — Using Elasticsearch in an Interview"
+  ],
+  "subtopicsOrder": [
+    "Field Type Choice (text vs keyword)",
+    "Mapping & Memory",
+    "Nested vs Separate Index",
+    "Mapping Anti-Patterns (Cross-Part)",
+    "Document Versioning",
+    "Partial vs Full Update",
+    "Optimistic Concurrency Control",
+    "Distributed Update Semantics",
+    "Update Mechanics (Cross-Part)",
+    "Bool Query Composition",
+    "Nested Queries",
+    "Geo-Distance Search",
+    "Geo Indexing Internals",
+    "Geo Scaling (Cross-Part)",
+    "Default Relevance Sort",
+    "Deep Pagination Cost",
+    "search_after Cursor",
+    "Point in Time (PIT)",
+    "Pagination Pitfalls",
+    "Pagination Trade-off Inversion (Cross-Part)",
+    "Coordinating Node Role",
+    "Master vs Coordinating",
+    "Hot/Warm/Cold Tiers",
+    "Node Specialization & Sizing",
+    "Master Election (Cross-Part)",
+    "Query vs Fetch Phase",
+    "Replicas: HA + Throughput",
+    "Shards & Lucene 1:1",
+    "Source vs Index Separation",
+    "Phase Bottleneck (Cross-Part)",
+    "Segment Immutability",
+    "Soft Deletes & Merges",
+    "Update Penalty",
+    "Rapidly-Updating Data Misfit",
+    "Hot Counters Anti-Pattern (Cross-Part)",
+    "Inverted Index Purpose",
+    "Doc Values Purpose",
+    "Columnar vs Row Layout",
+    "Sort-Heavy Workloads",
+    "Future-Proofing the Mapping (Cross-Part)",
+    "Order Optimization",
+    "Statistics-Driven Planning",
+    "When the Planner Helps (Cross-Part)",
+    "ES Is Not a Database",
+    "CDC Integration Pattern",
+    "Eventual Consistency",
+    "Denormalization Discipline",
+    "When NOT to Use ES (Cross-Part)"
+  ],
+  "difficultyTiers": [
+    "L1",
+    "L2",
+    "L3",
+    "L4",
+    "L5"
+  ],
+  "coverageManifest": {
+    "source": "Hello Interview — Key Technologies — Elasticsearch deep dive",
+    "totalQuestions": 49,
+    "parts": [
+      {
+        "id": "A",
+        "name": "Documents, Indices, Mappings",
+        "concepts": [
+          { "id": "A1", "description": "Document = JSON unit; Index = collection; analogy to DB table", "questions": ["es_A_q01"] },
+          { "id": "A2", "description": "Mapping defines field types and how they're processed/indexed", "questions": ["es_A_q01", "es_A_q02"] },
+          { "id": "A3", "description": "keyword vs text: whole-value lookup vs tokenized full-text", "questions": ["es_A_q01", "es_A_q05"] },
+          { "id": "A4", "description": "Mapping unused fields wastes memory and increases costs", "questions": ["es_A_q02", "es_A_q03"] },
+          { "id": "A5", "description": "Specialized field types: nested, geo_point/geo_shape, custom analyzers, embeddings", "questions": ["es_A_q04"] },
+          { "id": "A6", "description": "Nested vs separate index = normalization/denormalization trade-off driven by query/update patterns", "questions": ["es_A_q04"] },
+          { "id": "A7", "description": "'Index' is overloaded — ES index vs auxiliary index data structures", "questions": ["es_H_q37"] }
+        ],
+        "ladder": {
+          "L1": ["es_A_q01"],
+          "L2": ["es_A_q02"],
+          "L3": ["es_A_q03"],
+          "L4": ["es_A_q04"],
+          "L5": ["es_A_q05"]
+        }
+      },
+      {
+        "id": "B",
+        "name": "Indexing API & Concurrency",
+        "concepts": [
+          { "id": "B1", "description": "POST /_doc returns id, _version, _shards info", "questions": ["es_B_q06"] },
+          { "id": "B2", "description": "_version field enables atomic updates", "questions": ["es_B_q06", "es_B_q08"] },
+          { "id": "B3", "description": "Full PUT vs POST /_update — partial updates avoid full doc fetch", "questions": ["es_B_q07"] },
+          { "id": "B4", "description": "Optimistic concurrency control — version check + retry on mismatch", "questions": ["es_B_q08"] },
+          { "id": "B5", "description": "ES is distributed/async/concurrent — out-of-order requests demand explicit semantics", "questions": ["es_B_q09", "es_B_q10"] },
+          { "id": "B6", "description": "Default ?version not specified ⇒ unconditional overwrite (lost-update risk)", "questions": ["es_B_q08", "es_B_q10"] }
+        ],
+        "ladder": {
+          "L1": ["es_B_q06"],
+          "L2": ["es_B_q07"],
+          "L3": ["es_B_q08"],
+          "L4": ["es_B_q09"],
+          "L5": ["es_B_q10"]
+        }
+      },
+      {
+        "id": "C",
+        "name": "Search & Geospatial",
+        "concepts": [
+          { "id": "C1", "description": "match, range, bool/must compose multi-condition queries", "questions": ["es_C_q11"] },
+          { "id": "C2", "description": "Nested queries: path + inner query operate on nested objects", "questions": ["es_C_q12"] },
+          { "id": "C3", "description": "geo_point (lat/lon) vs geo_shape (polygons, lines, circles)", "questions": ["es_C_q13"] },
+          { "id": "C4", "description": "geo_distance: radius search around a point; combines with bool filters", "questions": ["es_C_q13"] },
+          { "id": "C5", "description": "geo_point uses BKD trees — 2D narrowing without B-tree-on-each-axis limitation", "questions": ["es_C_q14"] },
+          { "id": "C6", "description": "Standard B-tree on lat/lon separately can't efficiently narrow in two dimensions", "questions": ["es_C_q14"] },
+          { "id": "C7", "description": "GET-with-body or POST — pedantic proxies need POST", "questions": ["es_C_q11"] }
+        ],
+        "ladder": {
+          "L1": ["es_C_q11"],
+          "L2": ["es_C_q12"],
+          "L3": ["es_C_q13"],
+          "L4": ["es_C_q14"],
+          "L5": ["es_C_q15"]
+        }
+      },
+      {
+        "id": "D",
+        "name": "Sort, Relevance & Pagination",
+        "concepts": [
+          { "id": "D1", "description": "Default sort = relevance _score (TF-IDF derivative)", "questions": ["es_D_q16"] },
+          { "id": "D2", "description": "Explicit sort param — single or multi-field; nested sort with mode", "questions": ["es_D_q17"] },
+          { "id": "D3", "description": "from/size pagination expensive past ~10k results — must sort and discard prior docs", "questions": ["es_D_q17", "es_D_q18"] },
+          { "id": "D4", "description": "search_after — cursor of last sort values; forward-only; cheap deep pagination", "questions": ["es_D_q18", "es_D_q20"] },
+          { "id": "D5", "description": "search_after risks: skipping/duplicating docs if data changes underneath", "questions": ["es_D_q20"] },
+          { "id": "D6", "description": "PIT (point in time) + search_after = stateful cursor with consistent view", "questions": ["es_D_q19", "es_D_q21"] },
+          { "id": "D7", "description": "PIT keep_alive lifetime; close PIT when done", "questions": ["es_D_q19"] },
+          { "id": "D8", "description": "Painless script sort and nested sort exist for computed/nested fields", "questions": ["es_D_q16"] }
+        ],
+        "ladder": {
+          "L1": ["es_D_q16"],
+          "L2": ["es_D_q17"],
+          "L3": ["es_D_q18", "es_D_q19"],
+          "L4": ["es_D_q20"],
+          "L5": ["es_D_q21"]
+        }
+      },
+      {
+        "id": "E",
+        "name": "Cluster Architecture",
+        "concepts": [
+          { "id": "E1", "description": "Five node types: master, data, coordinating, ingest, ML", "questions": ["es_E_q22", "es_E_q23"] },
+          { "id": "E2", "description": "Master = cluster admin (add/remove nodes, create/delete indices); only one active", "questions": ["es_E_q23", "es_E_q26"] },
+          { "id": "E3", "description": "Coordinating = client frontend; parses query, fans out, merges results", "questions": ["es_E_q22"] },
+          { "id": "E4", "description": "Master election from seed master-eligible nodes", "questions": ["es_E_q26"] },
+          { "id": "E5", "description": "One instance can hold multiple roles; dedicated hosts in big deployments", "questions": ["es_E_q25"] },
+          { "id": "E6", "description": "Data tiers: hot/warm/cold/frozen by query likelihood and mutability", "questions": ["es_E_q24"] },
+          { "id": "E7", "description": "Different roles → different hardware sizing (CPU vs disk vs memory)", "questions": ["es_E_q25"] }
+        ],
+        "ladder": {
+          "L1": ["es_E_q22"],
+          "L2": ["es_E_q23"],
+          "L3": ["es_E_q24"],
+          "L4": ["es_E_q25"],
+          "L5": ["es_E_q26"]
+        }
+      },
+      {
+        "id": "F",
+        "name": "Data Nodes Internals",
+        "concepts": [
+          { "id": "F1", "description": "Two-phase request: query (find IDs) + fetch (pull _source)", "questions": ["es_F_q27", "es_F_q31"] },
+          { "id": "F2", "description": "Ideal queries skip fetch by serving needed fields from the index", "questions": ["es_F_q27", "es_F_q31"] },
+          { "id": "F3", "description": "Replicas serve HA + extra read throughput; coordinating load-balances across them", "questions": ["es_F_q28"] },
+          { "id": "F4", "description": "Indices = shards; shards distribute data and indexes across hosts", "questions": ["es_F_q29"] },
+          { "id": "F5", "description": "Searches run in parallel across shards; coordinator merges/sorts", "questions": ["es_F_q29"] },
+          { "id": "F6", "description": "Shards are 1:1 with Lucene indexes; ES operations proxy to Lucene", "questions": ["es_F_q30"] }
+        ],
+        "ladder": {
+          "L1": ["es_F_q27"],
+          "L2": ["es_F_q28"],
+          "L3": ["es_F_q29"],
+          "L4": ["es_F_q30"],
+          "L5": ["es_F_q31"]
+        }
+      },
+      {
+        "id": "G",
+        "name": "Lucene Segments",
+        "concepts": [
+          { "id": "G1", "description": "Segments are immutable; writes batched into new segments and flushed", "questions": ["es_G_q32"] },
+          { "id": "G2", "description": "Deletes are soft (deleted-IDs set); cleanup happens at merge", "questions": ["es_G_q33"] },
+          { "id": "G3", "description": "Updates = soft delete + insert; updates cost more than inserts", "questions": ["es_G_q34"] },
+          { "id": "G4", "description": "ES is a poor fit for rapidly-updating data because of update bookkeeping", "questions": ["es_G_q35", "es_G_q36"] },
+          { "id": "G5", "description": "Immutability benefits: write perf, caching, concurrency, recovery, compression, search opts", "questions": ["es_G_q32"] },
+          { "id": "G6", "description": "Segment merges = costs (I/O, temporary extra storage) but reclaim deleted docs", "questions": ["es_G_q33"] }
+        ],
+        "ladder": {
+          "L1": ["es_G_q32"],
+          "L2": ["es_G_q33"],
+          "L3": ["es_G_q34"],
+          "L4": ["es_G_q35"],
+          "L5": ["es_G_q36"]
+        }
+      },
+      {
+        "id": "H",
+        "name": "Inverted Index & Doc Values",
+        "concepts": [
+          { "id": "H1", "description": "Inverted index: token → list of doc IDs; turns O(n) scan into O(1) lookup", "questions": ["es_H_q37"] },
+          { "id": "H2", "description": "Two ways to make finds fast: organize originals OR organize a copy. Inverted index uses the latter.", "questions": ["es_H_q37"] },
+          { "id": "H3", "description": "Doc values: columnar layout of one field across all docs in a segment", "questions": ["es_H_q38"] },
+          { "id": "H4", "description": "Columnar > row layout for sort/aggregation: read only the column, contiguous memory (Spark/Redshift)", "questions": ["es_H_q39"] },
+          { "id": "H5", "description": "Inverted index handles match/filter; doc values handle sort/aggregation", "questions": ["es_H_q39", "es_H_q40"] },
+          { "id": "H6", "description": "Disabling doc_values for a field means cheap memory but blocks sort/aggregation later", "questions": ["es_H_q41"] }
+        ],
+        "ladder": {
+          "L1": ["es_H_q37"],
+          "L2": ["es_H_q38"],
+          "L3": ["es_H_q39"],
+          "L4": ["es_H_q40"],
+          "L5": ["es_H_q41"]
+        }
+      },
+      {
+        "id": "I",
+        "name": "Coordinating Nodes & Query Planning",
+        "concepts": [
+          { "id": "I1", "description": "Order optimization: scan smaller posting list first, intersect against larger", "questions": ["es_I_q42"] },
+          { "id": "I2", "description": "Query planner uses statistics on field types, popular tokens, doc lengths", "questions": ["es_I_q43"] },
+          { "id": "I3", "description": "Statistics + indirection let DBs respond dynamically to data; why DBs are powerful", "questions": ["es_I_q44"] }
+        ],
+        "ladder": {
+          "L1": [],
+          "L2": [],
+          "L3": ["es_I_q42"],
+          "L4": ["es_I_q43"],
+          "L5": ["es_I_q44"]
+        }
+      },
+      {
+        "id": "J",
+        "name": "Using Elasticsearch in an Interview",
+        "concepts": [
+          { "id": "J1", "description": "ES is a search engine, not a primary database; durability/consistency are weaker", "questions": ["es_J_q45", "es_J_q46"] },
+          { "id": "J2", "description": "Typical pattern: CDC from Postgres/DynamoDB into ES", "questions": ["es_J_q46"] },
+          { "id": "J3", "description": "ES is read-heavy by design; write-heavy needs other tools or write buffer", "questions": ["es_J_q47"] },
+          { "id": "J4", "description": "ES is eventually consistent; results can be significantly stale", "questions": ["es_J_q47"] },
+          { "id": "J5", "description": "Denormalize for ES; aim for 1–2 queries to satisfy a request", "questions": ["es_J_q48"] },
+          { "id": "J6", "description": "Sync drift between source-of-truth and ES is a common bug source", "questions": ["es_J_q46"] },
+          { "id": "J7", "description": "Not all search needs ES: small (<100K) or rarely-changing data → simpler tools", "questions": ["es_J_q49"] }
+        ],
+        "ladder": {
+          "L1": ["es_J_q45"],
+          "L2": ["es_J_q46"],
+          "L3": ["es_J_q47"],
+          "L4": ["es_J_q48"],
+          "L5": ["es_J_q49"]
+        }
+      }
+    ],
+    "crossPart": ["es_A_q05", "es_B_q10", "es_C_q15", "es_D_q21", "es_E_q26", "es_F_q31", "es_G_q36", "es_H_q41", "es_I_q44", "es_J_q49"],
+    "l5PatternCoverage": {
+      "framing-is-wrong": ["es_A_q05", "es_G_q36", "es_J_q49"],
+      "two-levels-of-indirection": ["es_F_q31", "es_I_q44"],
+      "adversarial-pushback": ["es_E_q26"],
+      "trade-off-inversion": ["es_D_q21"],
+      "implementation-specific-gotcha": ["es_B_q10"],
+      "estimation-backed-scenario": ["es_C_q15"],
+      "future-proofing": ["es_H_q41"]
+    }
+  },
+  "questions": [
+    {
+      "id": "es_A_q01",
+      "part": "A — Documents, Indices, Mappings",
+      "subtopic": "Field Type Choice (text vs keyword)",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["A1", "A2", "A3"],
+      "l5Pattern": null,
+      "question": "You're modelling a `books` index. The `id` field will be used only to look up a single book by its exact identifier; the `title` field will be searched with queries like 'great gatsby' that should match documents containing those words anywhere in the title. Which mapping decision matches the access pattern best?",
+      "options": [
+        "Make both `id` and `title` of type `text` so Elasticsearch tokenizes both and can fuzzy-match either.",
+        "Make `id` a `keyword` (treated as a whole atomic value) and `title` a `text` field (tokenized and indexed for word-level matches).",
+        "Make `id` a `text` field and `title` a `keyword` field so that only exact-title matches succeed.",
+        "Leave both unmapped and rely on dynamic mapping to make every field equally searchable."
+      ],
+      "correctIndex": 1,
+      "explanation": "`keyword` stores the value as a single atomic token — the right choice for ID-style lookups that should match the whole value. `text` is tokenized (broken into words and analyzed) — the right choice for full-text search where queries match parts of the value. Reversing them would make `id` lookups behave like fuzzy text searches and `title` searches require exact-string matches, which fits neither access pattern.",
+      "interviewScript": "In your interview, say: 'I'd map `id` as a keyword because I look it up by whole value — that's a hash-table-style access pattern. I'd map `title` as text so it's tokenized and full-text queries match individual words. The right field type follows from how I'm going to query the field.'",
+      "proTip": "When you see 'looked up by exact value' think keyword (hash-table-shaped). When you see 'matches a query that contains the words' think text (inverted-index-shaped)."
+    },
+    {
+      "id": "es_A_q02",
+      "part": "A — Documents, Indices, Mappings",
+      "subtopic": "Mapping & Memory",
+      "difficulty": "L2",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["A2", "A4"],
+      "l5Pattern": null,
+      "question": "Your `users` document has 30 fields, but the product only ever searches by 4 of them (handle, country, signup_date, plan_tier). A teammate suggests 'just map all 30 fields — it's simpler.' What is the strongest objection to that approach in an Elasticsearch context?",
+      "options": [
+        "Mapping more fields will make Elasticsearch reject the document until every field is queried at least once during indexing.",
+        "Mapping more fields forces Elasticsearch to convert the document into a relational schema, which breaks document-style storage.",
+        "Each indexed field carries a memory and indexing cost — mapping fields you don't search inflates the per-shard footprint and amplifies cluster cost without any query benefit. The mapping should reflect what you actually search on, with the rest left in `_source` so you can still return them in results.",
+        "Mapping more than ~10 fields is incompatible with cluster-mode sharding and causes the index to be confined to a single node."
+      ],
+      "correctIndex": 2,
+      "explanation": "Mappings drive what Elasticsearch builds in-memory and on-disk index structures for. Mapping 26 fields you'll never search wastes memory, increases indexing cost, and makes the cluster more expensive — all for no query benefit. The `_source` document still carries the unindexed fields so they can be returned in search hits. (a), (b), (d) describe limits Elasticsearch does not have.",
+      "interviewScript": "In your interview, say: 'I'd map only the fields I actually query — the rest live in `_source` and are returned in hits without being indexed. Each indexed field has a memory cost; over-mapping inflates the cluster footprint without buying anything on the query side.'",
+      "proTip": "Treat the mapping as a per-field decision: every field added is paying memory rent. If you wouldn't search it, don't index it."
+    },
+    {
+      "id": "es_A_q03",
+      "part": "A — Documents, Indices, Mappings",
+      "subtopic": "Mapping & Memory",
+      "difficulty": "L3",
+      "style": "Failure Analysis",
+      "conceptIds": ["A2", "A4"],
+      "l5Pattern": null,
+      "question": "An ES cluster that was running fine has started seeing query latency spike and JVM heap pressure climb after a feature added 80 new fields to the document — almost none of which are used in queries today. The team says 'we'll search them eventually, so we mapped them.' What's the most precise diagnosis?",
+      "options": [
+        "The cluster has too many shards per index — the fix is to reduce shard count, which will release heap memory regardless of mapping changes.",
+        "Recent ES versions cache document IDs in heap proportional to total document count; fewer documents per index will lower the pressure.",
+        "JVM heap pressure is from too many open file descriptors caused by adding fields; raising the per-process FD ulimit will resolve it.",
+        "Mappings expand the in-memory state Elasticsearch holds per shard — each indexed field consumes heap and adds work at indexing time. 'Mapping for future use' inflates that footprint today; the fix is to map only fields you query now and add new mappings when the use case actually arrives."
+      ],
+      "correctIndex": 3,
+      "explanation": "The article calls this out directly: 'a lot of fields in your mapping that aren't actually used in search… increases the memory overhead of each index. This can lead to performance issues and increased costs.' The right mental model is that mapping is what you pay for; query patterns drive mapping, not anticipated future ones. (a)–(c) describe unrelated knobs.",
+      "interviewScript": "In your interview, say: 'Mappings cost heap. The team mapped 80 fields they don't query — that's pure overhead per shard. I'd narrow the mapping to fields actually used in queries today and add new fields to the mapping only when a search use-case lands. Future-proofing the mapping pays full memory cost up front.'",
+      "proTip": "When ES heap pressure spikes after a schema change, the first place to look is whether the mapping grew faster than actual query needs."
+    },
+    {
+      "id": "es_A_q04",
+      "part": "A — Documents, Indices, Mappings",
+      "subtopic": "Nested vs Separate Index",
+      "difficulty": "L4",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["A5", "A6"],
+      "l5Pattern": null,
+      "question": "You have `books` and `reviews`. Reviews are added every few seconds across the catalog, but most search use-cases — 'books with at least one 5-star review,' 'books with the word excellent in any review' — query them together with the parent book. Which structure is the better default, and why?",
+      "options": [
+        "Keep reviews as a separate index. The high write rate on reviews would force Elasticsearch to re-index the parent book document on every review write if reviews were nested inside books, which is more expensive than indexing a small standalone review document.",
+        "Nest reviews inside the book document. Frequent writes don't matter here because Elasticsearch updates only the changed nested object in place without rewriting the rest of the document.",
+        "Always keep reviews in the relational source-of-truth and avoid indexing them in Elasticsearch at all — search across nested or separate indexes is too expensive.",
+        "Always nest, regardless of update patterns — `nested` is a strict requirement for any field that is conceptually a list of objects, otherwise queries that filter on inner object fields will silently match across objects."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article frames this as a normalization/denormalization trade-off: 'If reviews are infrequently updated and frequently queried, it may be more efficient to nest them within the book documents. Otherwise you'll probably want to create a separate index for reviews.' Frequent writes argue against nesting because every review write rewrites the parent document. (b) is wrong: ES does not update nested objects in place — the parent document is re-indexed (soft-deleted + re-inserted at the segment level). (d) names a real concern (object vs nested type matters for query semantics) but turns it into an absolute that doesn't reflect the trade-off the source actually frames.",
+      "interviewScript": "In your interview, say: 'I treat this like SQL normalization. Nest when the child is rarely updated and almost always queried with the parent — the cross-cut query is fast and the write penalty is small. Split when the child writes are frequent — every nested write re-indexes the whole parent document, which gets expensive at the article's review rate.'",
+      "proTip": "If an interviewer asks about nested types, the trap they're often probing is: do you know that updating a nested child rewrites the whole parent at the segment level?"
+    },
+    {
+      "id": "es_A_q05",
+      "part": "A — Documents, Indices, Mappings",
+      "subtopic": "Mapping Anti-Patterns (Cross-Part)",
+      "difficulty": "L5",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["A2", "A3", "A4"],
+      "l5Pattern": "framing-is-wrong",
+      "question": "A team can't decide which fields are searchable yet, so they map every field as `text` 'to be safe — text supports more queries than keyword.' Six months later, exact-match lookups on `user_id` are slow, the same `user_id` value is sometimes lowercased on retrieval, and aggregations over `country` return surprising buckets. What is the framing-level mistake here, and what is the senior+ move?",
+      "options": [
+        "The mistake is they didn't enable doc_values; flipping doc_values on for the existing text fields will recover exact-match and aggregation performance.",
+        "The mistake is shard count is too low; reindexing into more shards would distribute work and resolve the slowness on user_id lookups.",
+        "'Text supports more queries' is the wrong framing. `text` is for tokenized full-text matching — it analyzes values (lowercasing, splitting on whitespace, etc.), which is exactly why an ID looks lowercased and aggregations return analyzed sub-tokens instead of whole values. The senior+ move is to step back and admit field type follows the access pattern: ID-style and faceted fields are `keyword`, prose fields are `text`, and 'be safe' isn't a mapping strategy — it's avoidance.",
+        "The mistake is missing replicas; adding read replicas will mask the latency on user_id lookups and the analyzer behavior will become invisible."
+      ],
+      "correctIndex": 2,
+      "explanation": "Framing-is-wrong pattern. The team chose `text` thinking it was the more capable type, but text and keyword are not 'more vs less capable' — they are the *wrong-shape* and *right-shape* index for two different access patterns. Text is built on tokenization and analysis; using it for IDs makes exact-match and aggregations behave incorrectly because the analyzer is mutating the stored tokens. Why (a), (b), (d) tempt: each one is a real ES knob that *would* matter in some other context, but here the structural error is upstream of any of those. The deeper insight: mapping decisions are access-pattern decisions, not 'which type is more powerful' decisions.",
+      "interviewScript": "In your interview, say: 'The framing is off. text and keyword aren't more vs less capable — they're shaped for different access patterns. text tokenizes, which is why an ID looks lowercased and country aggregations bucket by sub-tokens. The senior move is to map by access pattern: keyword for IDs and exact facets, text for prose. \"Be safe\" hides the question instead of answering it.'",
+      "proTip": "When a mapping decision is being deferred with 'we'll be safe and pick the more flexible type,' name the access pattern out loud — it almost always disambiguates the choice."
+    },
+    {
+      "id": "es_B_q06",
+      "part": "B — Indexing API & Concurrency",
+      "subtopic": "Document Versioning",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["B1", "B2"],
+      "l5Pattern": null,
+      "question": "You POST a new book to `/books/_doc` and the response contains `\"_version\": 1`. You update the same book and the response now shows `\"_version\": 2`. What is `_version` doing for you in this pattern?",
+      "options": [
+        "`_version` is the schema version of the index mapping — it increments each time the mapping is changed and is unrelated to individual documents.",
+        "`_version` is a per-document monotonic counter Elasticsearch maintains so writers can guard updates against concurrent overwrites — it's the field that makes optimistic concurrency control possible.",
+        "`_version` is the Lucene segment generation number — it lets the cluster decide which segment is newest when a query is run.",
+        "`_version` is the cluster-wide write-order sequence — every operation across every index and document increments the same global counter."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article calls it a 'special field that Elasticsearch uses to ensure the document can be updated atomically.' It's per-document and monotonically increases on each successful write, which lets a writer condition an update on the version they last saw — the basis for optimistic concurrency control. (a), (c), (d) name real concepts (mapping versions, Lucene segment IDs, sequence numbers) but mis-attribute them to `_version`.",
+      "interviewScript": "In your interview, say: 'Each ES document has a _version that bumps on every successful write. It's the per-doc handle for optimistic concurrency: I read the version, modify the doc, and write back with `?version=N` so my write succeeds only if nobody else updated in between.'",
+      "proTip": null
+    },
+    {
+      "id": "es_B_q07",
+      "part": "B — Indexing API & Concurrency",
+      "subtopic": "Partial vs Full Update",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["B3"],
+      "l5Pattern": null,
+      "question": "A pricing service needs to bump `price` on a book by $1 in response to thousands of small price-tweak events per minute. Each event already knows the book ID and the new price. Which API shape is the better fit for this write pattern?",
+      "options": [
+        "POST /books/_update/{id} with `{ \"doc\": { \"price\": <new> } }` — partial-update path that lets the client send only the changed field, without first fetching the rest of the document.",
+        "PUT /books/_doc/{id} with the entire book document and the new price — the full-replace path that overwrites whatever the document used to be.",
+        "Delete the existing document with DELETE /books/_doc/{id} and then POST a fresh document with the new price under a new generated ID.",
+        "Open a Point in Time (PIT) on `/books`, run a search to get the document, then POST a replacement back referencing the PIT ID for atomicity."
+      ],
+      "correctIndex": 0,
+      "explanation": "The `_update` endpoint exists exactly for this case: 'allows you to update some fields of a document without having to fetch the entire document.' The full-replace PUT path requires sending the whole document, which means a fetch-modify-write loop and a much larger network/disk footprint. (c) creates a different document and breaks any references to the old ID; (d) confuses pagination cursors with write atomicity.",
+      "interviewScript": "In your interview, say: 'For a small field-level change like a price bump, I'd use POST /books/_update/{id} with a partial doc. The full-replace PUT requires me to ship the whole document each write, which costs more bandwidth and storage and tempts a stale fetch-modify-write race.'",
+      "proTip": "Partial update is also nicer for concurrency — you're declaring 'change this field' rather than 'replace the whole record,' which leaves less room for accidental clobbering."
+    },
+    {
+      "id": "es_B_q08",
+      "part": "B — Indexing API & Concurrency",
+      "subtopic": "Optimistic Concurrency Control",
+      "difficulty": "L3",
+      "style": "Failure Analysis",
+      "conceptIds": ["B2", "B4", "B6"],
+      "l5Pattern": null,
+      "question": "Two background workers both read a book at `_version: 4`, both decide to raise the price, and both issue PUT /books/_doc/{id} with their new price (no version parameter). Worker B's request lands second. What outcome should you expect, and what's the standard Elasticsearch fix?",
+      "options": [
+        "Elasticsearch detects the concurrent writes via internal locks and the second writer waits until the first commits, after which both updates apply in order.",
+        "Both writes succeed but Elasticsearch automatically merges the documents field-by-field, taking the larger price value.",
+        "The second write is rejected with a 409 Conflict because Elasticsearch enforces that two consecutive writes from different clients within one second are not allowed.",
+        "Worker B's write silently overwrites Worker A's — A's price increase is lost. The fix is for both workers to pass `?version=4` (or use `if_seq_no`/`if_primary_term`) so the second write fails with a version-conflict error and the loser can re-read and retry — that's the optimistic concurrency control pattern."
+      ],
+      "correctIndex": 3,
+      "explanation": "Without a version parameter, ES applies the write unconditionally — second writer clobbers first, and A's update is lost. The article describes this as 'risky! If another process is updating the same document concurrently, you could overwrite their changes.' The conditional update with `?version=N` (or the newer if_seq_no / if_primary_term) gives the loser an explicit error to retry on. (a), (b), (c) describe lock-based or merge semantics ES does not have.",
+      "interviewScript": "In your interview, say: 'Without version guards, the later write wins and the earlier update is lost. I'd have both workers read the version, then write with `?version=N`. The losing write returns a conflict; the losing worker re-reads and retries. That's optimistic concurrency control — exactly the pattern Elasticsearch is built for here.'",
+      "proTip": "Whenever you see 'two writers, no coordination, last write wins' in a Postgres or DynamoDB context — the same fix lives in ES, just with different field names."
+    },
+    {
+      "id": "es_B_q09",
+      "part": "B — Indexing API & Concurrency",
+      "subtopic": "Distributed Update Semantics",
+      "difficulty": "L4",
+      "style": "Multi-Hop Reasoning",
+      "conceptIds": ["B5"],
+      "l5Pattern": null,
+      "question": "Your service issues two updates to the same document — first set `status: 'shipped'`, then set `status: 'delivered'` — within milliseconds, in that order. The interviewer asks: 'In a distributed, asynchronous, concurrent system like Elasticsearch, why isn't it sufficient to assume the second update wins simply because it was sent later?' What is the senior answer?",
+      "options": [
+        "It is sufficient — Elasticsearch processes writes in arrival order at the coordinating node, so the second write is guaranteed to land after the first.",
+        "Requests can be routed to different nodes, retried after transient failures, or reordered by intermediate proxies — 'sent later' does not imply 'applied later.' To make the intent unambiguous, condition the second write on the version (or seq_no) of the first or use a partial update with an explicit field-level operation, so the order is enforced by the contract instead of by clock-time hope.",
+        "Updates from the same client are colocated by default — the second write is always pinned to the same shard and node as the first, eliminating reorder risk.",
+        "Elasticsearch uses logical clocks (vector clocks) on every document, so any out-of-order delivery is automatically corrected by the coordinator before commit."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article warns: 'Elasticsearch is distributed, asynchronous, and concurrent. Your request is potentially sent to many different nodes and the requests can arrive out of order. Being explicit about the update semantics makes sure that the updates happen as you expect.' Wall-clock send order does not imply apply order. The right move is to make the dependency explicit — condition update 2 on the version observed after update 1, or use field-level partial updates that aren't order-sensitive. (a), (c), (d) describe ordering guarantees Elasticsearch does not provide.",
+      "interviewScript": "In your interview, say: 'Send-order doesn't equal apply-order in a distributed system — retries, routing, and node failures can reorder the writes. I'd make the dependency explicit: write 2 conditional on the version returned by write 1, or use a partial update that names the field and value. That way the contract enforces the order, not hopeful timing.'",
+      "proTip": "Whenever a design relies on 'A then B' across a network, name what makes B conditional on A. If you can't, you don't have ordering — you have a race."
+    },
+    {
+      "id": "es_B_q10",
+      "part": "B — Indexing API & Concurrency",
+      "subtopic": "Update Mechanics (Cross-Part)",
+      "difficulty": "L5",
+      "style": "Implementation-Specific Nuance",
+      "conceptIds": ["B5", "B6", "G3"],
+      "l5Pattern": "implementation-specific-gotcha",
+      "question": "Your team picks PUT /books/_doc/{id} with the *full* document for every update because 'it's simpler than learning _update.' Months later, you notice writes are running noticeably slower than the read SLO would predict, and segment merges are spiking after every batch of these writes. What ES-specific mechanism explains this, and what is the senior+ move?",
+      "options": [
+        "ES rebuilds the entire shard's inverted index on each full-document write; the fix is to disable replicas during the write window so only the primary takes the cost.",
+        "Updates in Lucene are not in-place: the old document is soft-deleted and a new one is inserted into a fresh segment. Full-document PUTs trigger this for every field even when only one field changed, accumulating soft-deletes that drive expensive segment merges later. The senior+ move is to use POST /_update for field-level changes (still soft-delete + re-insert at the segment level, but at least the network/serialization side is small) and to recognize that ES is poorly suited to write paths that look like 'rewrite the whole doc many times per second.'",
+        "Full-document PUTs are routed through the master node by ES, which serializes them globally; switching to a coordinating-only client will parallelize the writes.",
+        "ES copies the full document to every replica synchronously for full-PUTs but lazily for partial updates; reducing replica count from 2 to 0 is the standard fix."
+      ],
+      "correctIndex": 1,
+      "explanation": "Implementation-specific gotcha. The article: 'updates actually have worse performance than insertions because we need to handle the bookkeeping of soft deletions… part of why Elasticsearch isn't a great fit for data that is rapidly updating.' Full-document PUT and partial _update both produce a soft-delete plus a new document at the Lucene level, but the partial path keeps the network/serialization cost smaller and surfaces the smaller intent. The deeper insight is recognizing that 'simpler API' at the surface can hide an expensive segment-level mechanism. Why (a), (c), (d) tempt: each is a knob someone has heard of in another context, but none describes the actual cost model. The interviewer is listening for: 'I know updates are soft-delete plus insert in Lucene, and that drives the merge tax.'",
+      "interviewScript": "In your interview, say: 'In Lucene, every update is a soft-delete plus an insert into a new segment. A full-doc PUT costs the same at the segment level as a _update but ships more bytes and serializes more fields. The merge tax later is real either way. The senior move is recognizing the underlying mechanism — ES is fundamentally not friendly to high-rate per-document overwrites — and choosing the API and write path with that cost model in mind.'",
+      "proTip": "Whenever you see 'simpler API' framed as 'why bother learning the alternative?' — check whether the simpler one is hiding a structural cost the alternative was specifically designed to avoid."
+    },
+    {
+      "id": "es_C_q11",
+      "part": "C — Search & Geospatial",
+      "subtopic": "Bool Query Composition",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["C1", "C7"],
+      "l5Pattern": null,
+      "question": "You want to find books whose title contains 'great' AND whose price is at most $15. Which query shape expresses both conditions correctly?",
+      "options": [
+        "A nested query with `path: 'title'` containing both the match and range clauses, since multi-condition queries in ES require a nested boundary.",
+        "Two separate searches — one for the title match and one for the price range — followed by client-side intersection of the result IDs.",
+        "A `bool` query with two `must` clauses: one `match` on `title: 'great'` and one `range` on `price` with `lte: 15`.",
+        "A scripted sort that ranks all books by 'matches title AND under $15 = 1, else 0' and takes the top hits."
+      ],
+      "correctIndex": 2,
+      "explanation": "The bool/must shape is exactly the example the article gives: a `bool` with `must: [match, range]` is the standard way to AND multiple conditions in ES. (a) misuses `nested`, which is for searching inside nested document fields, not as a boundary for ANDing top-level conditions. (b) and (d) describe ways to reach the same result that throw away ES's optimized intersection of the underlying posting lists.",
+      "interviewScript": "In your interview, say: 'I'd use a bool query with two must clauses — one match on title, one range on price. ES intersects the matching doc sets at the index level, which is much cheaper than client-side intersection or any kind of scripted sort.'",
+      "proTip": "`bool` is the universal AND/OR/NOT in ES. Most multi-condition queries in interviews are some shape of bool with must / should / must_not."
+    },
+    {
+      "id": "es_C_q12",
+      "part": "C — Search & Geospatial",
+      "subtopic": "Nested Queries",
+      "difficulty": "L2",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["C2"],
+      "l5Pattern": null,
+      "question": "You want books that have *at least one* review with `comment: 'excellent'` AND `rating >= 4` — both conditions met by the *same* review. The reviews live in a nested-typed field. Which query shape gives the correct semantics?",
+      "options": [
+        "A flat bool query: `must: [match(reviews.comment, 'excellent'), range(reviews.rating, gte: 4)]`. Because both conditions reference the reviews path, ES will require them to match the same nested object.",
+        "A `nested` query with `path: 'reviews'` whose inner query is a bool `must: [match on reviews.comment, range on reviews.rating]` — this scopes both predicates to the same nested object.",
+        "A scripted query that loads each review as a sub-document and applies the predicates in Painless, since nested fields cannot be queried with bool/range.",
+        "Two separate queries — one for the comment, one for the rating — joined by an `AND` at the application layer over the returned hit IDs."
+      ],
+      "correctIndex": 1,
+      "explanation": "Without the `nested` query wrapper, a flat bool query on `reviews.comment` and `reviews.rating` would match a book where one review says 'excellent' and a *different* review has rating ≥ 4 — wrong semantics. The `nested` query scopes both predicates to the same inner object. (a) is the classic trap; (c) and (d) throw away ES's nested-query support.",
+      "interviewScript": "In your interview, say: 'I'd wrap a nested query at path reviews with a bool inside it. That guarantees both predicates apply to the *same* review. A plain bool over reviews.comment and reviews.rating would falsely match books where one review has the word and a different review has the rating.'",
+      "proTip": "If a multi-field condition needs to hold *together within one inner object*, the `nested` wrapper is what enforces that — bool alone won't."
+    },
+    {
+      "id": "es_C_q13",
+      "part": "C — Search & Geospatial",
+      "subtopic": "Geo-Distance Search",
+      "difficulty": "L3",
+      "style": "Scenario-Based",
+      "conceptIds": ["C3", "C4"],
+      "l5Pattern": null,
+      "question": "You're building 'Italian restaurants within 2 miles, sorted by rating.' Restaurants have a `location` field of type `geo_point` and a `cuisine` keyword field. Which query shape best reflects the access pattern?",
+      "options": [
+        "A `bool` with a `geo_distance` filter (2 miles around the user's lat/lon) AND a `match` on `cuisine: 'Italian'`, sorted by `rating` descending.",
+        "A `geo_shape` polygon describing a 2-mile circle around the user, intersected with a separate scripted-sort query that ranks Italian restaurants higher than other cuisines.",
+        "A `match_all` query, then a client-side filter that computes haversine distance for each returned restaurant and keeps those within 2 miles.",
+        "A `geo_bounding_box` covering the entire metro area, with `cuisine` filtering applied client-side after results are returned."
+      ],
+      "correctIndex": 0,
+      "explanation": "geo_distance is the exact tool: 'You can combine this with other filters in a bool query — find Italian restaurants within 2 miles, sorted by rating.' (b) misapplies geo_shape (intended for stored polygons) and uses script-sort instead of a sort param; (c) and (d) push work to the client that ES already accelerates with BKD-tree-backed indexes on geo_point.",
+      "interviewScript": "In your interview, say: 'I'd use a bool with two filter clauses — geo_distance for 2 miles around the user, and match on cuisine — and sort by rating descending. ES indexes geo_point with a BKD tree so the radius narrowing is fast even at scale.'",
+      "proTip": "geo_point + geo_distance + bool is the canonical 'location-based service' shape; whenever you see Yelp/Uber-style filters in an interview, this is the first pattern to reach for."
+    },
+    {
+      "id": "es_C_q14",
+      "part": "C — Search & Geospatial",
+      "subtopic": "Geo Indexing Internals",
+      "difficulty": "L4",
+      "style": "Multi-Hop Reasoning",
+      "conceptIds": ["C5", "C6"],
+      "l5Pattern": null,
+      "question": "An interviewer says: 'You have a Postgres table with B-tree indexes on `lat` and `lon` separately. Why does Elasticsearch use a BKD tree on geo_point instead, and what changes when the workload is *radius search at scale*?' Which response captures the senior nuance?",
+      "options": [
+        "BKD trees are just a faster B-tree implementation — Postgres could match the performance simply by enabling parallel index scans on its lat and lon B-trees.",
+        "B-trees are one-dimensional: a B-tree on lat can narrow by latitude, and a B-tree on lon can narrow by longitude, but neither narrows in 2D. The query planner is forced to pick one axis, scan, then re-filter on the other — and at high cardinality that's an expensive intersection. BKD trees (block k-d trees) recursively partition in *both* dimensions at once and store leaves in disk-friendly blocks, which is exactly what radius search needs.",
+        "BKD trees and B-trees on lat/lon are equivalent for radius search; the real reason ES uses BKD is that B-trees don't compress well on disk and consume more memory.",
+        "BKD trees are required because geo_point fields are immutable in Elasticsearch and B-trees only support immutable keys."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article: 'The geo_point type specifically uses a BKD tree to index coordinates, which allows Elasticsearch to efficiently narrow the search space in two dimensions without the limitations of a standard B-tree index on latitude and longitude separately.' B-trees are 1-D; radius search inherently needs 2-D narrowing, and a single 2-D structure (BKD or R-tree variants) wins over two 1-D structures intersected. (a) misframes BKD as a flavor of B-tree; (c) and (d) attribute the choice to unrelated properties.",
+      "interviewScript": "In your interview, say: 'A B-tree narrows in one dimension. A radius search is inherently two-dimensional, so a B-tree on lat and a B-tree on lon force the planner to scan one then re-filter on the other — an expensive intersection at high cardinality. BKD trees partition both dimensions together and pack the leaves into disk-friendly blocks. That's why ES picks them for geo_point.'",
+      "proTip": "When an interviewer probes geo, they're usually testing whether you understand *why* generic B-trees aren't enough for spatial queries — not whether you can name the BKD acronym."
+    },
+    {
+      "id": "es_C_q15",
+      "part": "C — Search & Geospatial",
+      "subtopic": "Geo Scaling (Cross-Part)",
+      "difficulty": "L5",
+      "style": "Estimation-Backed Reasoning",
+      "conceptIds": ["C4", "C5", "C6"],
+      "l5Pattern": "estimation-backed-scenario",
+      "question": "You're designing ride dispatch: ~10M active drivers worldwide, each emitting a location update every 5s (~2M updates/sec at peak). The product wants 'find every driver within 1 km of a rider' p99 < 50ms. A teammate proposes Postgres with btree(lat) + btree(lon). Why does this break, and what's the structural fix?",
+      "options": [
+        "Postgres handles the writes fine but the radius read is the problem — adding a GiST index on (lat, lon) brings it in line with Elasticsearch's BKD performance.",
+        "Two separate B-trees on lat and lon are 1-D — the planner picks one axis, narrows, then re-filters; at 10M points and a 1 km radius the post-filter set is large and the intersection is the bottleneck. ES with geo_point on a BKD tree narrows in 2D directly. But the *write* side of 2M updates/sec is also a problem — ES's update mechanism is soft-delete + insert per change, so frequent location pings will flood segments and merges. The senior+ move is two-tier: a hot, write-friendly store for live driver positions (Redis GEO or an in-memory grid) and ES (or a relational geo index) for slower, longer-lived geo data.",
+        "The fix is to shard by geographic region in Postgres so each shard sees a smaller subset; this preserves B-tree performance and avoids the need for a BKD tree.",
+        "The fix is to do all geo math client-side: stream all driver locations to the rider's app and filter locally — Elasticsearch is unnecessary at this scale."
+      ],
+      "correctIndex": 1,
+      "explanation": "Estimation-backed scenario. Two separate scalar problems compose: (1) read side — radius search at 10M points with a 1km radius gets killed by the 1-D scan + re-filter pattern of separate B-trees; ES's BKD tree on geo_point fixes this because it narrows in 2D natively. (2) write side — 2M location updates/sec maps to 2M soft-delete-plus-inserts in Lucene, which floods segments with deletes and forces expensive merges. The numbers force a different recommendation: ES is good for the read pattern but bad for the write rate; you split into a hot live-position tier (Redis GEO, in-memory grid) and an ES (or geo-RDBMS) layer for slower data. Why (a), (c), (d) tempt: each fixes one slice (read OR write OR neither) but misses that the numbers force *both* to be addressed and only the two-tier split does that. The deeper insight: numbers tell you when one tool isn't enough.",
+      "interviewScript": "In your interview, say: 'Two B-trees on lat and lon force a 1-D narrow plus 2-D re-filter, which collapses at 10M points and 1km radius. ES with BKD on geo_point handles the read. But 2M location updates per second is a write pattern ES is bad at — every update is soft-delete plus insert, which murders segment merges. I'd split: a hot in-memory geo tier — Redis GEO or a sharded grid — for live positions, and ES for slower, longer-lived geo data. Numbers force a two-tier answer.'",
+      "proTip": "When numbers force the recommendation, walk the interviewer through the *write* path and the *read* path separately. A single index that's right for one is often wrong for the other."
+    },
+    {
+      "id": "es_D_q16",
+      "part": "D — Sort, Relevance & Pagination",
+      "subtopic": "Default Relevance Sort",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["D1", "D8"],
+      "l5Pattern": null,
+      "question": "You issue a `match` query for books with the word 'great' and don't include any sort parameter. ES returns hits with a `_score` field. What is `_score` and how is it being used?",
+      "options": [
+        "It's the random ID assigned to the document when it was indexed; results are returned in insertion order.",
+        "It's the document's age in milliseconds since it was indexed — fresher documents come first.",
+        "It's the segment generation number — newer segments float to the top of the result list.",
+        "It's a relevance score — by default ES sorts hits in descending _score order, computed from a TF-IDF–derivative scoring algorithm that ranks documents most likely to match the query."
+      ],
+      "correctIndex": 3,
+      "explanation": "The article: 'If we don't specify a sort order, Elasticsearch sorts results by relevance score (_score). This is configurable, but the default scoring algorithm is related closely to TF-IDF.' (a)–(c) name unrelated identifiers (insertion order, recency, segment generation) that ES does not use as the default ordering.",
+      "interviewScript": "In your interview, say: 'Default sort is by _score descending — relevance, computed via a TF-IDF derivative. If I want explicit ordering — by price, by date — I add a sort parameter, which overrides relevance ordering.'",
+      "proTip": null
+    },
+    {
+      "id": "es_D_q17",
+      "part": "D — Sort, Relevance & Pagination",
+      "subtopic": "Deep Pagination Cost",
+      "difficulty": "L2",
+      "style": "Failure Analysis",
+      "conceptIds": ["D2", "D3"],
+      "l5Pattern": null,
+      "question": "You paginate book search results with `from: 0, size: 20` and the user clicks 'page 5' (`from: 80`). Performance is fine. They keep clicking until they reach `from: 50000`. The cluster slows dramatically. What's actually expensive about deep pagination here?",
+      "options": [
+        "ES has to retrieve and sort every document from 0 up to `from + size` across all relevant shards, then discard the leading `from` results. The work scales with offset, not with page size — so deep offsets cost the cluster orders of magnitude more than shallow ones.",
+        "Each page increment forces the cluster to re-execute the entire query against disk because shard-level result caches expire after one page.",
+        "ES applies a hard limit of 10 pages per query, so anything beyond `from: 200` requires the cluster to spin up new index shards on the fly, which is what causes the slowdown.",
+        "The slowdown is unrelated to pagination — it reflects ES re-tokenizing the query on every page, which is O(query_length × from) per request."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article: 'this method becomes inefficient for deep pagination (e.g., beyond 10,000 results) due to the overhead of sorting and fetching all preceding documents.' Each page request must rank everything up to `from + size` from every relevant shard and merge it before discarding the leading `from`. (b)–(d) invent mechanisms ES does not use.",
+      "interviewScript": "In your interview, say: 'from/size makes the cluster sort and fetch everything from 0 up to from+size, then throw away the first from. The work scales with offset, not with page size, so deep pages get expensive fast — past about 10K results it falls apart. For deep pagination I switch to search_after.'",
+      "proTip": "from/size is great for the first few pages of search UIs. The moment a use case wants 'jump to page 500' or 'export everything,' it's the wrong tool."
+    },
+    {
+      "id": "es_D_q18",
+      "part": "D — Sort, Relevance & Pagination",
+      "subtopic": "search_after Cursor",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["D3", "D4"],
+      "l5Pattern": null,
+      "question": "You're building 'next page' for an export job that may produce 2M results. Throughput matters, random page-jumping does not. Which pagination strategy fits, and why?",
+      "options": [
+        "from/size with `from: page * 1000, size: 1000` — easiest to implement and the cluster will figure out the right path on its own.",
+        "Run the same query repeatedly with `size: 1000` and a higher `min_score` filter on each call to push the result window forward.",
+        "search_after: include the sort values of the last document of the previous page in `search_after` on the next call. The cluster filters documents whose sort values come strictly after that boundary, so the work per page is proportional to page size, not offset. The trade-off is that you lose random page access — only forward iteration.",
+        "Open one Point in Time (PIT) per page; the PIT ID is the cursor and it implicitly tracks the offset for you with no other parameters."
+      ],
+      "correctIndex": 2,
+      "explanation": "search_after fits the export shape exactly: 'It uses the sort values of the last result as the starting point for the next page. With these values we can restrict each page to only fetch the documents that come after the last document of the previous page.' Cost is per page, not per offset. (a) is the wrong tool for 2M results. (b) misuses min_score, which is about relevance threshold not pagination boundary. (d) misunderstands PITs — the PIT itself doesn't advance; it pairs with search_after for state.",
+      "interviewScript": "In your interview, say: 'For deep pagination over a large export, search_after is the right tool. I sort by some stable field plus _id, and on each page I send the last hit's sort values back as search_after on the next call. Work is per-page, not per-offset. The trade-off is no random page access — only forward iteration — but for an export that's fine.'",
+      "proTip": "search_after is the equivalent of a stateless keyset cursor in SQL ('WHERE (sort_field, id) > (last_value, last_id) ORDER BY sort_field, id LIMIT N'). Same idea, same trade-off."
+    },
+    {
+      "id": "es_D_q19",
+      "part": "D — Sort, Relevance & Pagination",
+      "subtopic": "Point in Time (PIT)",
+      "difficulty": "L3",
+      "style": "Scenario-Based",
+      "conceptIds": ["D6", "D7"],
+      "l5Pattern": null,
+      "question": "Your export job runs for ~10 minutes and the underlying index is being updated continuously. You need each page to come from a *consistent snapshot* of the data, not from whatever happens to be live when the page is fetched. Which mechanism does Elasticsearch provide for this?",
+      "options": [
+        "A standard search_after pagination automatically pins to a consistent snapshot — no extra mechanism is required.",
+        "Open a Point in Time (PIT) with a `keep_alive` (e.g. 1m), pass the PIT ID on every search call along with `search_after`, and close the PIT when finished. The PIT pins a consistent view of the index for the duration of keep_alive, so pagination sees the index as it looked at PIT creation.",
+        "Set `read_consistency: snapshot` on the search request — ES will produce a consistent view for the lifetime of the request.",
+        "Run the search inside a `transaction` block (`POST /_transaction`); all subsequent searches in the same transaction see the same data."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article: 'Using PITs with search_after provides a consistent view of the data throughout the pagination process, even if the underlying index is being updated.' PIT + search_after is the cursor-with-snapshot pattern. (a) is wrong — search_after alone does not pin a snapshot, which is exactly the failure mode addressed by PIT. (c) and (d) describe APIs ES does not have.",
+      "interviewScript": "In your interview, say: 'For pagination over a moving target, I open a PIT with a sensible keep_alive, pass the PIT id with each search call alongside search_after, and close the PIT when done. The PIT pins a consistent view of the index, so the export sees a stable snapshot even if writes are landing during the run.'",
+      "proTip": "PIT + search_after is the closest thing ES has to a cursor with snapshot isolation. The keep_alive is the lifetime of that snapshot — choose it to comfortably exceed your expected pagination window."
+    },
+    {
+      "id": "es_D_q20",
+      "part": "D — Sort, Relevance & Pagination",
+      "subtopic": "Pagination Pitfalls",
+      "difficulty": "L4",
+      "style": "Gotcha/Trap",
+      "conceptIds": ["D4", "D5"],
+      "l5Pattern": null,
+      "question": "You implemented search_after pagination — sort by `created_at` desc, then `_id` desc — and you do *not* open a PIT. Documents are being inserted, updated, and deleted under the index while users paginate. The interviewer asks: 'What can go wrong?' Which answer most precisely captures the pitfall?",
+      "options": [
+        "Nothing goes wrong — search_after sorts by a stable composite key, so even active writes can't perturb the result ordering across pages.",
+        "Pages will randomly skip an entire shard until the cluster finishes rebuilding the slot map after each insert, leading to occasional empty pages.",
+        "search_after will start returning results from the wrong index, because without a PIT the cursor is matched by index name and that name can be aliased mid-pagination.",
+        "Without a PIT, search_after sees the live index. Documents inserted with sort values *between* a previously-seen boundary and the next page are silently skipped (they fall in the already-paged-past region); deleted documents leave gaps; updates that change the sort field can move a doc into or out of the search window. You can also miss documents in pages already returned if their sort values change."
+      ],
+      "correctIndex": 3,
+      "explanation": "The article: 'This style of pagination also risks missing documents in prior pages if the underlying data is updated or deleted.' Without a snapshot, the cursor is interpreted against the live index. New documents that should belong to an earlier page end up un-paginated; updated docs whose sort values shift across the boundary can be skipped or duplicated. PIT pins a consistent view exactly to prevent this. (a)–(c) describe failure modes search_after does not have.",
+      "interviewScript": "In your interview, say: 'Without a PIT, search_after operates on the live index. New documents whose sort values fall between cursor positions get skipped. Updates that change the sort field can move docs across the boundary, causing skips or duplicates. Deletes leave gaps. PIT pins a consistent view — that's why the two are paired for export-style workloads.'",
+      "proTip": "Whenever a candidate proposes search_after for an export, the senior follow-up is 'and is the index changing while you paginate?' If yes, the answer needs PIT."
+    },
+    {
+      "id": "es_D_q21",
+      "part": "D — Sort, Relevance & Pagination",
+      "subtopic": "Pagination Trade-off Inversion (Cross-Part)",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["D3", "D4", "D5", "D6", "G1"],
+      "l5Pattern": "trade-off-inversion",
+      "question": "Your search UI uses from/size for the first 5 pages — fine. Then product reframes the requirement: 'analysts must scroll *backward and forward* through the entire result set with stable ordering, even as new data lands.' The candidate proposes 'just switch to search_after; it's faster.' Why does that response now miss the senior+ move?",
+      "options": [
+        "search_after is forward-only and stateless against the live index — it gives you efficient deep pagination but not random access AND not a stable view under writes. The new requirement *flips both* of the constraints search_after lets you trade away. The senior+ move is to recognize the requirement no longer fits the same tool: open a PIT for snapshot stability, and accept that 'backward and forward' will need either client-side caching of returned pages or a different storage that supports random access — Elasticsearch's pagination model is fundamentally cursor-shaped, not page-shaped.",
+        "search_after supports backward pagination natively when you reverse the sort order, so the proposal is correct as stated.",
+        "search_after is the right tool — backward pagination concerns can be ignored because analysts will only scroll forward in practice.",
+        "search_after with a PIT is identical to from/size pagination plus consistency, so the proposal is correct after adding a PIT."
+      ],
+      "correctIndex": 0,
+      "explanation": "Trade-off inversion. The original constraints (forward-only, willingness to live with live index) made search_after the obvious win over from/size. The new requirements (random access AND stability under writes) flip both constraints, which means search_after by itself is the wrong shape: PIT addresses stability but not random access. Why (b)–(d) tempt: each is a near-miss — (b) confuses sort reversal with random access; (c) ignores the requirement; (d) treats PIT as if it added page-jump semantics. The deeper insight: when constraints flip, don't add fixes onto the original tool — re-pick the tool against the new constraints, and acknowledge what ES's pagination model fundamentally cannot do.",
+      "interviewScript": "In your interview, say: 'The requirement just flipped both constraints search_after was relying on. PIT can give me snapshot stability, but search_after is still forward-only — backward+forward random access is not how ES pagination works. The senior move is to acknowledge ES gives a cursor model, not a page model. Either the UI caches returned pages client-side and treats backward as cache lookup, or the access pattern is wrong for ES and belongs in a system designed for random page access.'",
+      "proTip": "When a requirement flip happens, name what the *current* tool actually offers — 'forward-only, snapshot-pinned' is the truthful description of PIT+search_after — before deciding whether to layer or to switch."
+    },
+    {
+      "id": "es_E_q22",
+      "part": "E — Cluster Architecture",
+      "subtopic": "Coordinating Node Role",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["E1", "E3"],
+      "l5Pattern": null,
+      "question": "A user issues a search to your ES cluster. Which node is the *first* one to receive that request and is responsible for parsing it, fanning it out to the right shards, and returning the merged result?",
+      "options": [
+        "The master node, because it owns cluster state and must approve every request before any shard sees it.",
+        "A coordinating node, which is the cluster's frontend for client requests — it parses the query, distributes it to the right data nodes, and merges the results.",
+        "The ingest node, because every read travels through ingest first to ensure the latest writes have been applied.",
+        "Whichever data node holds the primary shard for the document — the client always connects to it directly, with no other node in the path."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article: 'Coordinating Node is responsible for coordinating the search requests across the cluster. It's the node that receives the search request from the client and sends it to the appropriate nodes. This is the frontend for your cluster.' (a) confuses cluster admin (master) with request routing; (c) misuses ingest; (d) misdescribes routing — clients hit a coordinator, not a primary shard.",
+      "interviewScript": "In your interview, say: 'Coordinating nodes are the front door. They receive the request, parse and plan it, fan it out to the data nodes that own the relevant shards, then merge and return results.'",
+      "proTip": null
+    },
+    {
+      "id": "es_E_q23",
+      "part": "E — Cluster Architecture",
+      "subtopic": "Master vs Coordinating",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["E1", "E2"],
+      "l5Pattern": null,
+      "question": "Two operations: (1) creating a new index `orders-2026`, and (2) executing a `match` query on `orders-2025`. Which node is responsible for each, and why is the distinction important?",
+      "options": [
+        "Both are handled by the master node — every cluster operation, read or write, flows through it as the source of truth.",
+        "Both are handled by the coordinating node — the master only exists for master election and has no role at runtime.",
+        "Index creation is a *cluster-level* operation — performed by the master, which manages cluster state (indices, mappings, shard allocation). The query is a *data-plane* operation — handled by the coordinating node, which fans it out to data nodes. Putting cluster-state operations on the master keeps the data path off the admin path, which is what lets the admin path stay light enough to remain consistent.",
+        "Index creation is handled by ingest nodes (since they accept writes); queries are handled by data nodes directly without a coordinator."
+      ],
+      "correctIndex": 2,
+      "explanation": "The article: master is responsible for 'cluster-level operations like adding or removing nodes, and creating or deleting indices,' while coordinating nodes handle the request path. The separation is design-relevant: the master deals with consistency-sensitive cluster state, the coordinator with throughput-sensitive request fan-out. (a) and (b) collapse the roles; (d) misattributes both.",
+      "interviewScript": "In your interview, say: 'Creating an index is a cluster-state change — the master does it. The query is a data-plane operation — a coordinating node fans it out to the right shards on the data nodes. Keeping the admin path light is what lets the master stay consistent without bottlenecking reads and writes.'",
+      "proTip": "Whenever an interviewer asks about ES roles, lead with the split: cluster-state vs data-plane. Most questions reduce to one of the two."
+    },
+    {
+      "id": "es_E_q24",
+      "part": "E — Cluster Architecture",
+      "subtopic": "Hot/Warm/Cold Tiers",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["E6"],
+      "l5Pattern": null,
+      "question": "Your logging cluster ingests 1 TB/day. Yesterday's logs are queried constantly; logs from a month ago are queried once a week; logs older than 6 months are kept for compliance and almost never queried. A teammate says 'just run all data nodes the same — same hardware, same config.' What's the better default?",
+      "options": [
+        "Keep one configuration but compress older indices to free disk; the storage savings make tiered hardware unnecessary.",
+        "Run separate clusters per age band so each cluster can be sized independently; tiering within a single cluster is not supported.",
+        "Use ES's data-tier specializations: hot nodes for recent, frequently-queried data on fast disks and ample memory; warm/cold/frozen nodes for older, lower-query-rate data on slower, cheaper storage. Lifecycle policies migrate indices through the tiers as they age.",
+        "Send the cold data to a separate read-replica cluster and keep only hot data in the primary cluster — there's no need for tiers."
+      ],
+      "correctIndex": 2,
+      "explanation": "The article: 'data nodes can be hot, warm, cold, or frozen depending on how likely the data is to be queried (e.g. recent or not) and whether it can change.' Tiers allow paying for fast hardware only on the data that earns it, and parking cold/frozen data on cheap storage. (a) addresses one cost only; (b) reinvents what tiers solve; (d) confuses replicas with tiers.",
+      "interviewScript": "In your interview, say: 'Tier the data nodes — hot for recent queryable data on fast disks, warm/cold/frozen for progressively older, less-queried data on cheaper storage. Use index lifecycle management to migrate indices through tiers automatically. You pay for fast hardware only where queries actually justify it.'",
+      "proTip": "When you see 'recent data hot, old data rarely queried' in a system-design discussion, data tiering is the lever. It's the same principle as S3 → Glacier."
+    },
+    {
+      "id": "es_E_q25",
+      "part": "E — Cluster Architecture",
+      "subtopic": "Node Specialization & Sizing",
+      "difficulty": "L4",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["E5", "E7"],
+      "l5Pattern": null,
+      "question": "A 50-node ES cluster runs every node as 'master-eligible + data + coordinating + ingest + ML' to keep the deployment simple. Throughput is poor, ingest spikes correlate with query latency, and master elections sometimes flap during heavy indexing. What's the architectural diagnosis, and what's the senior+ move?",
+      "options": [
+        "Mixing roles on a single instance class means every workload competes for the same CPU, memory, and disk on every node — heavy ingest steals from queries, heavy queries steal from cluster-state work, and master elections compete with data-plane traffic. The senior+ move is to dedicate roles to instance classes sized to that role: master-eligible nodes on small, stable hosts; ingest on CPU-heavy hosts; data on disk- and memory-heavy hosts; coordinating on network-heavy hosts. Roles can stay co-located only when the workload is small enough that one profile fits all.",
+        "Adding 50 more nodes of the same all-roles class will resolve the contention by halving per-node work; role separation is not necessary.",
+        "Running every node as master-eligible is incompatible with cluster-mode operation — only odd numbers of master-eligible nodes are supported and 50 violates that.",
+        "The fix is to disable replicas during high-write periods so data nodes have less work, leaving headroom for queries and master elections."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article calls this out: 'In more sophisticated deployments, you might have dedicated hosts for each of these types (e.g. your ingest node host might be CPU bound and have many processors while your data node host might have high disk I/O or more memory).' Mixing roles makes resource interference a feature, not a bug. (b) treats node count as a substitute for role separation; (c) invents a constraint ES does not have; (d) sacrifices availability to mask a structural issue.",
+      "interviewScript": "In your interview, say: 'Every node doing every job means every workload competes for the same resources. Heavy ingest steals from queries; heavy queries steal from master elections. The senior move is role separation matched to hardware shape: small stable masters, CPU-heavy ingest, disk-heavy data, network-heavy coordinators. Co-location is only fine when the cluster is small enough that one profile fits all.'",
+      "proTip": "If an interviewer hands you a cluster where ingest spikes hurt query latency, the question is almost always 'why are these workloads sharing a CPU?' — role separation is the answer."
+    },
+    {
+      "id": "es_E_q26",
+      "part": "E — Cluster Architecture",
+      "subtopic": "Master Election (Cross-Part)",
+      "difficulty": "L5",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["E2", "E4"],
+      "l5Pattern": "adversarial-pushback",
+      "question": "Your interviewer says: 'You said only one node is the active master at a time. Couldn't you just let *all* master-eligible nodes act as masters in parallel — wouldn't that be more available and faster?' What is the senior response?",
+      "options": [
+        "Yes — Elasticsearch already supports an active-active master configuration in cluster mode for higher availability; it's an opt-in setting on the master-eligible nodes.",
+        "No — and the reason is pricing. Multi-master is a paid feature in the commercial license tier and most production clusters can't afford it.",
+        "No — multiple concurrent masters would mean multiple authoritative views of cluster state. Two masters could allocate the same shard, accept conflicting index-creation requests, or remove each other's nodes — classic split-brain. Elasticsearch elects a single active master and keeps the others on standby precisely because cluster state has to be linearly consistent. Availability comes from fast re-election, not from running multiple writers in parallel.",
+        "No — but the reason is that the gossip protocol used by ES has an O(N²) message cost per master, so two masters is twice the network overhead and is rejected for performance reasons only."
+      ],
+      "correctIndex": 2,
+      "explanation": "Adversarial pushback. The 'couldn't you just' alternative is the textbook split-brain scenario. Cluster state (indices, mapping, shard allocation) needs single-writer semantics; two concurrent masters would violate that and produce divergent allocations or contradictory state changes. The article: 'Only one node should be the active master at a time, while the other master-eligible nodes are on standby.' Why (a), (b), (d) tempt: (a) sounds like a 'you should know this is supported' trap; (b) attaches a plausible-sounding licensing constraint; (d) hides behind an unrelated performance number. The deeper insight: cluster state is a CP problem, not an AP problem — availability comes from fast failover, not parallel writers.",
+      "interviewScript": "In your interview, say: 'Multiple concurrent masters means multiple authoritative views of cluster state — split-brain. Two masters could allocate the same shard or accept conflicting index creations. ES elects a single master and keeps the others on standby because cluster state has to be linearly consistent. Availability comes from fast re-election, not from running multiple writers in parallel.'",
+      "proTip": "Whenever an interviewer suggests 'just let all the leaders be active,' the senior answer is to identify the invariant that requires a single writer. For cluster metadata, that invariant is consistency of allocation."
+    },
+    {
+      "id": "es_F_q27",
+      "part": "F — Data Nodes Internals",
+      "subtopic": "Query vs Fetch Phase",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["F1", "F2"],
+      "l5Pattern": null,
+      "question": "An ES search runs in two phases. The first phase finds *which* documents match; the second phase *retrieves* the actual document content. Which two terms describe these phases, and why is the distinction useful?",
+      "options": [
+        "Index phase + scan phase — used to optimize sharding decisions but invisible to clients in normal use.",
+        "Query phase (identifies matching document IDs from index data structures) + fetch phase (pulls the `_source` bodies for those IDs). Knowing the split lets you optimize: an ideal query satisfies the request from the index alone (e.g. via included fields) and skips the fetch phase entirely.",
+        "Read phase + write phase — every search counts as a read followed by a journal write for query auditing.",
+        "Plan phase + execute phase — the planner decides what to do and the executor reads the document blob; both phases are mandatory for every result returned."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article: 'Requests proceed in two phases: first the \"query\" phase is when the relevant documents are identified using the optimized index data structures and the \"fetch\" phase is when those document IDs are (optionally) pulled from the nodes.' The fetch is *optional* if the data you need is in the index itself — the senior optimization point. (a), (c), (d) misname the phases or attribute mandatory work to fetch.",
+      "interviewScript": "In your interview, say: 'Search runs as query then fetch. Query identifies the matching IDs from index structures; fetch pulls the source bodies. The senior optimization is to keep the data you actually return inside the index so fetch can be skipped — that's how the fastest queries avoid touching _source at all.'",
+      "proTip": "When ES queries are slow at scale, ask: am I returning fields that aren't in the index, forcing a fetch? Often you can move the field into the index and the fetch evaporates."
+    },
+    {
+      "id": "es_F_q28",
+      "part": "F — Data Nodes Internals",
+      "subtopic": "Replicas: HA + Throughput",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["F3"],
+      "l5Pattern": null,
+      "question": "Your `books` index has 3 primary shards and 0 replicas. Read traffic doubles. Adding 1 replica per shard improves *both* availability and read throughput. Why both?",
+      "options": [
+        "Availability: a primary shard's host can fail without losing data because a replica holds the same data. Throughput: the coordinating node load-balances reads across both primary and replica copies of each shard, so one logical query of N shards can be served by 2N physical shards working in parallel.",
+        "Availability comes from replicas; throughput is unchanged because reads always go to the primary shard. The 'doubled throughput' claim is wrong.",
+        "Throughput doubles because writes are sharded across both primary and replica; availability is identical because a replica is just a backup that isn't queried.",
+        "Both improvements come from the master node automatically routing reads to whichever copy has the freshest data — a property unique to ES's gossip-based consistency model."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article: 'A replica is an exact copy of a shard. Replicas serve two primary purposes: high availability and increased throughput… The coordinating node can leverage replicas to improve search performance by distributing search requests across all available shard copies.' (b) and (c) collapse one of the two purposes; (d) attributes the routing to the master and invents a consistency property.",
+      "interviewScript": "In your interview, say: 'A replica is an exact copy of a primary shard. It gives me availability if the primary host dies, and it gives me extra read throughput because the coordinating node load-balances reads across all copies. With one replica each, a 3-shard index has 6 read-eligible shard copies.'",
+      "proTip": "Replicas don't help with write throughput — they're additional write fan-out. The lever is reads. If your bottleneck is writes, you shard, not replicate."
+    },
+    {
+      "id": "es_F_q29",
+      "part": "F — Data Nodes Internals",
+      "subtopic": "Shards & Lucene 1:1",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["F4", "F5"],
+      "l5Pattern": null,
+      "question": "Your single-node prototype has one shard and works fine. Production needs 10× the data and 10× the QPS. Adding nodes alone doesn't help much; queries are still bottlenecked. What property of shards explains this, and what's the right move?",
+      "options": [
+        "Shards have nothing to do with parallelism; the cluster always parallelizes work across all data nodes regardless of shard count. The fix is to add coordinating nodes, not shards.",
+        "A shard is the unit of parallelism — searches fan out to all relevant shards in parallel. With one shard, the work for a query is bounded to one node no matter how many other nodes are in the cluster. The right move is to reindex into more shards (so work distributes) AND replicate them (so multiple shard copies can serve reads), then add nodes that absorb the new shards.",
+        "A shard is the unit of replication only; the fix is to add replicas — that creates more parallelism per shard without needing to reindex.",
+        "A shard is fundamentally a Lucene-index identifier; ES already shards every index automatically into 1024 logical shards, so the bottleneck must be in coordinating-node CPU rather than shard layout."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article: 'Shards allow Elasticsearch to split data (and the accompanying indexes) across hosts… Searches will be executed across all relevant shards in parallel.' One shard means one unit of parallelism — adding nodes doesn't help if the work isn't divisible. The fix is reindex into more shards, replicate, and add nodes that can host the new shards/replicas. (a) and (c) confuse what shards do; (d) invents an automatic 1024-shard default that doesn't exist.",
+      "interviewScript": "In your interview, say: 'Shards are the unit of parallelism. With one shard, queries fan out to one node and adding more nodes doesn't help. I'd reindex into more shards so the work splits, replicate so multiple copies serve reads, and add nodes to host them. Shard count is fixed at index creation, so the reindex is unavoidable.'",
+      "proTip": "Shard count is fixed at index creation. Pick it carefully — too few caps parallelism, too many costs heap and overhead per query."
+    },
+    {
+      "id": "es_F_q30",
+      "part": "F — Data Nodes Internals",
+      "subtopic": "Shards & Lucene 1:1",
+      "difficulty": "L4",
+      "style": "Multi-Hop Reasoning",
+      "conceptIds": ["F6"],
+      "l5Pattern": null,
+      "question": "An interviewer asks: 'When ES says it's a distributed search engine, what is it actually distributing on top of?' What's the most precise senior answer?",
+      "options": [
+        "ES is a fully custom storage engine — Lucene is a dependency only at the API level for query syntax compatibility.",
+        "ES is a thin protocol layer on top of Postgres-compatible storage; Lucene provides the connector but not the actual indexing.",
+        "ES is essentially distributed coordination, APIs, aggregations, and real-time capabilities layered on top of *Apache Lucene*. Each ES shard is 1:1 a Lucene index. Many ES operations on shards — merging, splitting, refreshing, searching — are proxy operations on the underlying Lucene indexes. ES gives you availability and scalability on top of 'a big bag of Lucene indexes.'",
+        "ES is a key-value store that stores Lucene indexes as opaque blobs; queries unmarshal blobs at search time but ES never inspects their internals."
+      ],
+      "correctIndex": 2,
+      "explanation": "The article: 'Elasticsearch can be thought of as a high-level orchestration framework for Apache Lucene, the highly optimized low-level search library… Elasticsearch shards are 1:1 with Lucene indexes.' The senior framing is to recognize the layering: distributed-systems concerns at the ES layer, search algorithms and storage at the Lucene layer. (a), (b), (d) misdescribe the relationship.",
+      "interviewScript": "In your interview, say: 'ES is distribution, APIs, aggregations, and real-time on top of Lucene. Each shard is one Lucene index. Most shard operations — merge, split, refresh, search — are proxy operations on the Lucene side. The clean way to think about ES is as availability and scalability layered onto a big bag of Lucene indexes.'",
+      "proTip": "Knowing the ES↔Lucene split is a quick signal of whether a candidate has actually opened the hood. It also explains why ES inherits Lucene's strengths and constraints — including segment immutability."
+    },
+    {
+      "id": "es_F_q31",
+      "part": "F — Data Nodes Internals",
+      "subtopic": "Phase Bottleneck (Cross-Part)",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["F1", "F2", "H3"],
+      "l5Pattern": "two-levels-of-indirection",
+      "question": "Your search endpoint is slow at p99: queries that match thousands of documents take a long time even though indexes are 'hot' and the cluster has plenty of CPU. The team's first instinct is 'the inverted index must be the bottleneck — let's add nodes.' What's the *real* indirection happening, and what's the senior+ move?",
+      "options": [
+        "The bottleneck is almost certainly the master node serializing requests — adding more master-eligible nodes will let cluster state writes parallelize and queries will speed up.",
+        "The 'hot' framing is the bug. Hot data still pays a fetch-phase tax: query phase is fast (matching IDs from the inverted index), but the fetch phase pulls full _source documents for every hit. At thousands of hits per query, fetch dominates. The senior+ move is to stop fetching what you don't need — return only specific fields stored in doc values, narrow the size, or move the displayed fields into the index so the request is satisfied in the query phase. Throwing nodes at fetch-phase work doesn't change the per-query cost.",
+        "The bottleneck is replica count — increasing replicas to 5 will let the cluster fan out the query to many more shard copies and reduce per-query work proportionally.",
+        "The bottleneck is JVM heap fragmentation; restarting data nodes weekly resets the heap and is the standard fix."
+      ],
+      "correctIndex": 1,
+      "explanation": "Two levels of indirection. Surface bottleneck: 'matching is slow.' Real bottleneck: matching (query phase) is cheap; pulling _source bodies (fetch phase) for thousands of hits is what's expensive. The article makes this explicit: 'The ideal queries are ones that can be answered without ever touching the source documents, sometimes by pulling the relevant data into the index via included fields.' Why (a), (c), (d) tempt: each is a knob that *could* matter in another shape of bottleneck, but none addresses fetch dominance. The deeper insight: in ES, query and fetch are different cost models — recognize which one your symptom is in.",
+      "interviewScript": "In your interview, say: 'The query phase is matching IDs from the inverted index — usually fast on hot data. The fetch phase is pulling _source documents for every hit. At thousands of hits, fetch dominates and adding nodes doesn't change per-query work. The senior move is to make the request satisfiable in the query phase: include the fields I need in the index via doc values, return only those fields, and skip _source. Then fetch never runs.'",
+      "proTip": "When p99 looks bad on 'hot' indexes, the second question to ask is: how big is the per-hit payload, and is _source being pulled? Fetch-phase fixes are usually about *not asking for what you don't need*."
+    },
+    {
+      "id": "es_G_q32",
+      "part": "G — Lucene Segments",
+      "subtopic": "Segment Immutability",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["G1", "G5"],
+      "l5Pattern": null,
+      "question": "A teammate asks: 'How does Lucene let me add new documents to an index if its segments are immutable?' What's the right one-line mental model?",
+      "options": [
+        "Lucene buffers new documents in memory, then writes them to *new* segments rather than modifying existing ones — old segments stay untouched, immutable, and cacheable.",
+        "Lucene rewrites the entire index file in place every time a document is added — that's why ES indexing is slow on big indexes.",
+        "Lucene marks each existing segment as 'mutable' for one minute after each insert, allowing in-place edits; the segment becomes immutable after the window expires.",
+        "Lucene pages new documents into the operating system's file cache and lets the OS fsync them into existing segments at random — eventual consistency at the segment level."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article: 'When we insert a document, we don't immediately store it in the index. Instead, we add it to a segment. When we have a batch of documents, we construct a segment and flush it out to disk.' New writes always land in new segments; old ones are never modified. Immutability is what enables aggressive caching and concurrency simplicity. (b)–(d) describe behaviors Lucene does not have.",
+      "interviewScript": "In your interview, say: 'Segments are immutable — new documents go into a new segment, not into existing ones. Lucene batches writes, builds a segment, and flushes. Old segments are never edited, which is why they cache well and read paths don't have to lock.'",
+      "proTip": null
+    },
+    {
+      "id": "es_G_q33",
+      "part": "G — Lucene Segments",
+      "subtopic": "Soft Deletes & Merges",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["G2", "G6"],
+      "l5Pattern": null,
+      "question": "A document is deleted from an ES index. Immediately afterward, you query for it and get 0 hits — but a `du` on the data directory shows no disk space was reclaimed. What's actually happening at the Lucene level?",
+      "options": [
+        "Deleted documents are immediately removed from disk; the unchanged `du` is a kernel-level inode caching artifact.",
+        "Deletes are soft — Lucene records the document's ID in a per-segment 'deleted' set. Queries skip deleted IDs (so the doc looks gone), but the data still occupies disk until a segment merge rewrites the affected segments and drops the deleted entries. Disk reclamation is asynchronous.",
+        "Deletes are silently lost on the primary and only succeed on replicas; the next refresh will rebalance both copies.",
+        "Deletes invalidate the entire segment that contained the document; the storage is reclaimed, and a new segment is built for the surviving documents on the next write."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article: 'Each segment actually has a set of deleted identifiers. When a segment is queried for data against a deleted document, it pretends it doesn't exist — but the data is still there! During merge operations, the merged segments clean up deleted documents.' Soft delete is fast (just adds an ID to a set) but storage reclamation is deferred to merge time. (a), (c), (d) describe behaviors Lucene does not have.",
+      "interviewScript": "In your interview, say: 'Deletes are soft — Lucene marks the document ID in the segment's deleted set. Queries skip deleted IDs so the doc is invisible immediately, but the data stays on disk until the segment is merged. That's why disk doesn't shrink in real time after a delete.'",
+      "proTip": "Soft delete is part of why Lucene's read path stays simple — readers don't have to coordinate with deletes, they just consult the deleted set."
+    },
+    {
+      "id": "es_G_q34",
+      "part": "G — Lucene Segments",
+      "subtopic": "Update Penalty",
+      "difficulty": "L3",
+      "style": "Failure Analysis",
+      "conceptIds": ["G3"],
+      "l5Pattern": null,
+      "question": "Your benchmark shows that updates against ES are noticeably slower than fresh inserts of the same document size. What Lucene-level mechanic explains the gap?",
+      "options": [
+        "Updates hit a different code path that runs on a single thread, while inserts can use the cluster's parallel ingest pipeline.",
+        "Updates are blocked by replicas being out of sync; until all replicas confirm the prior version, the new write is queued.",
+        "Updates require pre-fetching the document over the network even when the API caller didn't ask to read it, and that round-trip is what dominates the benchmark.",
+        "Lucene doesn't update documents in place — an update is a soft-delete of the old document plus an insert of the new one. The bookkeeping (mark old as deleted, write new doc, eventually clean up at merge) is strictly more work than a fresh insert. Updates carry a deferred merge tax that pure inserts don't."
+      ],
+      "correctIndex": 3,
+      "explanation": "The article: 'For update events we don't actually update the segment. Instead, we soft delete the old document and insert a new document with the updated data… updates actually have worse performance than insertions because we need to handle the bookkeeping of soft deletions.' The merge tax is real and accumulates with update rate. (a)–(c) invent mechanisms that don't exist.",
+      "interviewScript": "In your interview, say: 'Updates in Lucene are soft-delete plus insert — there's no in-place edit. That's strictly more work than an insert, and it accumulates a merge tax later as the deleted IDs add up. That's why ES isn't a great fit for write paths that look like rapid in-place mutation.'",
+      "proTip": "Soft-delete + insert also means updates increase storage temporarily — the old doc lives on until the next merge. Plan disk headroom around merge cycles."
+    },
+    {
+      "id": "es_G_q35",
+      "part": "G — Lucene Segments",
+      "subtopic": "Rapidly-Updating Data Misfit",
+      "difficulty": "L4",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["G4"],
+      "l5Pattern": null,
+      "question": "A team wants to use ES as the source of truth for inventory counts on millions of SKUs, with hundreds of decrements per second per popular SKU as items are sold. What's the most precise critique?",
+      "options": [
+        "The cluster will run out of inverted-index space — each decrement creates a new posting list entry that consumes heap.",
+        "Inventory math requires strong consistency, and ES has no consistency model at all — every read returns a random replica's value.",
+        "ES is a poor fit because every update is soft-delete-plus-insert in Lucene. At hundreds of decrements per second per popular SKU, segments fill with deleted entries and merge cost spikes — a high-rate counter workload is exactly what immutable-segment storage is bad at. The senior move is to keep counts in a write-friendly store (Redis, DynamoDB with atomic counters, Postgres with a tuned hot row) and feed ES from CDC if search over inventory is needed.",
+        "ES will work fine as long as replicas are increased to 3 and the index is reindexed nightly — both of which are standard mitigations."
+      ],
+      "correctIndex": 2,
+      "explanation": "The article: 'Elasticsearch isn't a great fit for data that is rapidly updating.' Hot counters are the textbook case — every decrement is a soft-delete + insert, segments fill with deletes, merges spike, and the system degrades exactly where it's most loaded. (a) misnames the cost; (b) overstates ES's consistency lack; (d) treats nightly reindex as a substitute for not using ES this way at all.",
+      "interviewScript": "In your interview, say: 'Inventory counters are a high-rate update workload, and ES updates are soft-delete plus insert. At hundreds of decrements per second per SKU, segments fill with deletes and merge cost spikes. I'd put counts in Redis or a Postgres hot row with proper concurrency, and use ES — fed by CDC — only for searching across inventory, not as the source of truth for the count itself.'",
+      "proTip": "Whenever an interviewer suggests storing a *counter* in ES, the senior reflex is to surface the soft-delete-plus-insert cost model. Counters belong in stores designed for in-place writes."
+    },
+    {
+      "id": "es_G_q36",
+      "part": "G — Lucene Segments",
+      "subtopic": "Hot Counters Anti-Pattern (Cross-Part)",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["G4", "J3"],
+      "l5Pattern": "framing-is-wrong",
+      "question": "A team adds a `like_count` field to their `posts` index and updates it on every like. Engagement spikes; the cluster starts thrashing on segment merges; query latency degrades. A teammate proposes 'just batch the like updates every 5 seconds.' Why does this miss the framing-level move, and what is the senior+ alternative?",
+      "options": [
+        "Batching is correct as stated — once the per-second rate drops below segment-merge cost, the cluster will recover and the design is sound.",
+        "The fix is to disable doc_values on `like_count`; merging won't have to recompute the column and the latency will resolve.",
+        "Batching reduces the rate but doesn't fix the framing: ES is being asked to store a hot mutable counter, which is precisely the workload it's worst at. Even at lower rates, like_count is a write-shaped value living inside a read-shaped store. The senior+ move is to keep the counter in a write-shaped store (Redis INCR, DynamoDB atomic counters, a Postgres hot row with concurrency control) and either (a) accept that ES sees a stale or denormalized snapshot of the count, refreshed via CDC, or (b) compute count at query time from a separate event store. ES's job is search, not state.",
+        "ES already supports atomic counter fields via a `counter` mapping type; the team just used the wrong type — switching to it will make merges cheap."
+      ],
+      "correctIndex": 2,
+      "explanation": "Framing is wrong. Putting like_count in an ES doc treats ES as a counter store; batching reduces the rate but doesn't reshape the workload. The article: 'While it might be convenient that you can add field for e.g. the number of likes on a post or impression counts, there's a lot of reasons this will cause ElasticSearch to struggle.' Why (a), (b), (d) tempt: (a) accepts the framing and treats the symptom; (b) mistakes a knob for a fix; (d) invents a feature ES doesn't have. The deeper insight: 'use the right tool for the workload's shape' — high-rate counters live in write-shaped stores; ES sees them via CDC if needed at all.",
+      "interviewScript": "In your interview, say: 'Batching just reduces the rate of the wrong-shape workload. ES is a search engine, not a counter store. Hot counters belong in Redis INCR, DynamoDB atomic counters, or a Postgres hot row. ES can see a stale count via CDC if it's needed in search results. The framing is: search engine for search, write-shaped store for counters.'",
+      "proTip": "If you find yourself batching writes to ES to cope with merge cost, ask whether the underlying value belongs in ES at all. Often the answer is no."
+    },
+    {
+      "id": "es_H_q37",
+      "part": "H — Inverted Index & Doc Values",
+      "subtopic": "Inverted Index Purpose",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["A7", "H1", "H2"],
+      "l5Pattern": null,
+      "question": "You have 1 billion books and want to find every book whose description contains the word 'lazy.' What property of an inverted index makes this fast at this scale?",
+      "options": [
+        "The inverted index is a sorted balanced binary tree of documents, allowing O(log n) navigation to the matching books.",
+        "The inverted index is a copy of every document compressed with a dictionary, allowing fast streaming scans of all 1B books in parallel.",
+        "The inverted index relies on the cluster running 1 shard per word, so each word lookup is naturally O(1) due to shard isolation.",
+        "The inverted index maps each unique token (e.g. 'lazy') to the list of document IDs containing it. Looking up 'lazy' is constant-time access to its posting list — turning an O(n) scan over 1B documents into an O(1) lookup of the relevant IDs (then linear in the size of the posting list, which is far smaller)."
+      ],
+      "correctIndex": 3,
+      "explanation": "The article: 'It lists every unique word that appears in any document and identifies all the documents each word occurs in… we can just look up the inverted index and find the documents that contain the word \"lazy\" in constant time.' The inverted index is the canonical 'organize a copy so the find is fast' move. (a), (b), (c) describe data structures the index is not.",
+      "interviewScript": "In your interview, say: 'An inverted index maps each token to the list of documents containing it. Looking up lazy is constant-time access to its posting list, then linear in the (much smaller) posting list. We turn an O(n) scan over a billion docs into a hash-lookup plus a small-set traversal.'",
+      "proTip": "The two ways to make finds fast: organize the originals (sort, hash) or organize a copy (inverted index, materialized view). Most search engines pick the second."
+    },
+    {
+      "id": "es_H_q38",
+      "part": "H — Inverted Index & Doc Values",
+      "subtopic": "Doc Values Purpose",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["H3", "H5"],
+      "l5Pattern": null,
+      "question": "You used the inverted index to find 10,000 books matching 'lazy.' Now you want to *sort* them by `price`. The inverted index isn't the right structure for that. Which Lucene structure handles it, and how is it laid out?",
+      "options": [
+        "Doc values — a columnar, contiguous representation of a single field across all documents in a segment. Sorting reads only the price column, not the full document, and contiguous-memory access makes it cache-friendly.",
+        "A second inverted index keyed on `price` — Lucene transparently builds one for every numeric field, and sorts traverse it in order.",
+        "The `_source` blob — Lucene parses each matched document's source field-by-field at sort time and extracts the price for comparison.",
+        "A B-tree index on price — built lazily the first time a sort is requested, and discarded when the segment is merged."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article: 'The doc values structure does just this with a columnar, contiguous representation of a single field for all documents across the segment.' Inverted index handles match/filter; doc values handle sort/aggregation. (b) misdescribes how Lucene structures price; (c) is what slow naive engines do — touch _source — which is exactly what doc values exists to avoid; (d) fabricates a Lucene mechanism.",
+      "interviewScript": "In your interview, say: 'Doc values is the columnar projection of one field across all docs in a segment. Sort by price reads only the price column — contiguous memory, cache-friendly — without touching _source. Inverted index handles match; doc values handle sort and aggregation.'",
+      "proTip": "Inverted index = posting lists for matching. Doc values = columnar field arrays for sorting and aggregation. Same segment, two complementary structures."
+    },
+    {
+      "id": "es_H_q39",
+      "part": "H — Inverted Index & Doc Values",
+      "subtopic": "Columnar vs Row Layout",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["H4", "H5"],
+      "l5Pattern": null,
+      "question": "You've heard 'analytical engines like Spark and Redshift are fast because they're columnar.' Lucene's doc values applies the same idea inside ES. Which framing best captures *why* columnar wins for sort/aggregation?",
+      "options": [
+        "Columnar is faster because columns are pre-sorted; sorting becomes a no-op if the data is already columnar.",
+        "When you sort or aggregate by one field, you only need that field's values. A row layout reads each whole row from disk to extract one value (cache-unfriendly, lots of waste); a columnar layout stores one field's values contiguously, so you read only the bytes you need and sequential prefetching helps. The win is bandwidth and cache locality, not cleverness.",
+        "Columnar storage compresses 100× better than row storage in every case, which makes any field-level operation cheap regardless of access pattern.",
+        "Columnar is faster because Lucene runs one CPU core per column in parallel; row layouts can't be parallelized at all."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article: 'When you query a column, you're really just reading a contiguous chunk of memory. The doc values structure does just this.' The win is access-pattern alignment: read what you need, contiguously, with the cache helping. (a) overstates pre-sortedness; (c) overstates compression as the cause; (d) invents a parallelism story.",
+      "interviewScript": "In your interview, say: 'Sort by price needs price for every doc, not the whole row. Row layout reads whole rows from disk to extract one field — wasted bandwidth and cache misses. Columnar lays the same field contiguously, so the read pattern matches the access pattern. Bandwidth and cache locality, not cleverness.'",
+      "proTip": "Whenever a query touches one or two fields out of many, columnar wins. Whenever a query needs the whole record, row layout wins. ES uses both because it has both kinds of queries."
+    },
+    {
+      "id": "es_H_q40",
+      "part": "H — Inverted Index & Doc Values",
+      "subtopic": "Sort-Heavy Workloads",
+      "difficulty": "L4",
+      "style": "Multi-Hop Reasoning",
+      "conceptIds": ["H5"],
+      "l5Pattern": null,
+      "question": "An interviewer says: 'You used the inverted index to find books containing lazy. Now you want the *cheapest* book among them. Walk through the data structures involved and where each one's strength shows up.' Which response demonstrates senior depth?",
+      "options": [
+        "The inverted index returns the list of doc IDs matching `lazy`. Then for each matched doc ID, doc values for `price` are consulted in order — contiguous, cache-friendly access on the price column — to compute the minimum. The two structures are complementary: inverted handles 'which docs match' (set membership), doc values handles 'what's the field value' (sort/aggregation). Without doc values, the cheapest-of-N problem would force a fetch of `_source` for every match — a row-layout penalty.",
+        "ES uses only the inverted index for both filter and sort — it's a self-balancing structure that supports range queries on numeric fields directly.",
+        "ES iterates _source for every matched document and reads price from JSON; that's why ES is bad at aggregations.",
+        "ES converts the matched doc IDs into a B-tree on price at query time, builds a temporary index, and finds the minimum in the temporary structure."
+      ],
+      "correctIndex": 0,
+      "explanation": "Senior depth means knowing the layered structures: inverted index for set membership, doc values for column-wise scanning of the matched IDs. The article makes this explicit: 'Our inverted index gives us the mapping of tokens to documents, and doc values give us the data we need to perform that final sort.' (b)–(d) describe mechanisms ES doesn't use.",
+      "interviewScript": "In your interview, say: 'Inverted index gives me the matching doc IDs for lazy. Doc values is a columnar projection of price per segment — I scan only the price values for the matched IDs, contiguously, cache-friendly. Inverted handles set membership; doc values handles sort. Without doc values I'd have to pull _source for every match, which is the row-layout penalty.'",
+      "proTip": "When an interviewer asks 'which data structures are involved,' the senior cue is to name *both* and identify which one each phase of the query relies on."
+    },
+    {
+      "id": "es_H_q41",
+      "part": "H — Inverted Index & Doc Values",
+      "subtopic": "Future-Proofing the Mapping (Cross-Part)",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["A4", "H3", "H5", "H6"],
+      "l5Pattern": "future-proofing",
+      "question": "To reduce memory cost on a high-cardinality `external_ref_id` field, a teammate suggests `\"doc_values\": false` in the mapping. The team only filters on the field today. What's the future-proofing risk that the senior+ engineer surfaces?",
+      "options": [
+        "Disabling doc_values silently corrupts the inverted index for that field; queries that filter on `external_ref_id` will start returning wrong results within hours.",
+        "Disabling doc_values blocks writes to the field — once set, the field becomes read-only and any document that includes a value for it fails to index.",
+        "Disabling doc_values makes range queries 100× slower without affecting sort or aggregation; the trade-off is fine for filtering use cases.",
+        "Filtering uses the inverted index and is unaffected — but doc_values is what serves *sorting and aggregations*. The day a product manager asks 'top external_ref_ids by volume' or 'sort the export by external_ref_id,' the cluster cannot answer it without a reindex of every existing document. The senior+ move is to disable doc_values only when you can confidently say sort/aggregation on this field will never be needed — and to weigh the future reindex cost against today's memory savings."
+      ],
+      "correctIndex": 3,
+      "explanation": "Future-proofing pattern. Disabling doc_values is a memory-saver today; the cost shows up later when a sort/aggregation requirement lands and the only fix is reindexing all existing documents. The article: 'a lot of the control that you will exert over query performance depends on adjustments to the mapping…' (a) and (b) invent failure modes that don't exist; (c) inverts which workload is affected.",
+      "interviewScript": "In your interview, say: 'Filtering uses the inverted index, so disabling doc_values doesn't break that. But sort and aggregation are doc_values workloads. The day someone asks for top external_ref_ids by volume, we'd need a reindex of every existing doc to enable doc_values retroactively. I'd disable it only when I'm confident sort/agg will never be needed on the field, and document that decision.'",
+      "proTip": "Disabling doc_values is a one-way door for sort/aggregation workloads. Cheap today, expensive later — make sure 'never needed' is a real prediction, not a default."
+    },
+    {
+      "id": "es_I_q42",
+      "part": "I — Coordinating Nodes & Query Planning",
+      "subtopic": "Order Optimization",
+      "difficulty": "L3",
+      "style": "Scenario-Based",
+      "conceptIds": ["I1"],
+      "l5Pattern": null,
+      "question": "Searching for the phrase 'bill nye' across millions of docs: 'bill' has millions of postings, 'nye' has a few hundred. The query planner has many possible plans. Which plan is best, and why?",
+      "options": [
+        "Load every document containing 'bill' into memory, then filter for those that also contain 'nye' — concentrating the work on the larger posting list lets ES use vectorized SIMD scans.",
+        "Build the postings set for 'nye' (small) and intersect against 'bill' postings, then run a phrase-position check on the intersection. The work scales with the smaller posting list, not the larger one — picking the rarer term as the seed minimizes the candidate set the rest of the work walks over.",
+        "Load every document containing 'nye' into memory and run a string match for 'bill nye' against each — skip the inverted-index intersection entirely.",
+        "The plan choice doesn't matter — ES always intersects in posting-list order regardless of size, so any of the four plans takes the same time."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article walks through this exact decision: 'You could generate a hash set of all the documents that contain \"nye\" and then scan over the documents that contain \"bill\" looking for an intersection… the difference in performance between these options can vary by orders of magnitude.' Seeding with the smaller posting list bounds the candidate set; the planner then validates the phrase position. (a) and (c) seed with the bigger or wrong set; (d) denies that planning matters.",
+      "interviewScript": "In your interview, say: 'Seed the intersection with the rarer term — nye — because it bounds the candidate set tightly. Then check phrase position on those candidates. Scaling the work with the smaller posting list, not the larger one, is what makes the order of operations matter so much for query latency.'",
+      "proTip": "In query planning, the cheapest plan is almost always 'narrow first, refine later.' Whether it's ES or a SQL planner, that intuition transfers."
+    },
+    {
+      "id": "es_I_q43",
+      "part": "I — Coordinating Nodes & Query Planning",
+      "subtopic": "Statistics-Driven Planning",
+      "difficulty": "L4",
+      "style": "Multi-Hop Reasoning",
+      "conceptIds": ["I2"],
+      "l5Pattern": null,
+      "question": "ES's query planner makes the decision in the previous question — 'narrow with the rarer term first' — automatically. What does the planner *need* in order to decide that, and how does it stay correct as data changes?",
+      "options": [
+        "Statistics: it tracks (per-segment / per-field) the size and frequency of each term's posting list, the field's data type, and document length distributions. With that bookkeeping, it estimates the cost of each plan and picks the cheapest. As segments are added, merged, and refreshed, the statistics refresh with them — so the planner adapts to the data without the application having to retune the query.",
+        "It runs every plan in parallel and keeps the result of whichever finishes first; the slower plans are discarded.",
+        "It hard-codes the plan in the query DSL when the developer writes it; if the data shifts, the developer must re-author the query.",
+        "It samples a few thousand documents at query time and extrapolates — there are no precomputed statistics."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article: 'By keeping statistics on the types of fields that are present, the keywords that are popular, and the length of documents, Elasticsearch's query planner will choose between options so as to minimize the time it takes to return results to the user.' Stats + cost model is the same machinery a SQL planner uses, applied at the index/segment layer. (b)–(d) misdescribe how the planner works.",
+      "interviewScript": "In your interview, say: 'The planner needs statistics — posting-list sizes, term frequencies, doc lengths, field types. With that, it estimates the cost of each plan and picks the cheapest. Stats refresh as segments are merged and refreshed, so the planner stays correct as data changes without the developer retuning the query.'",
+      "proTip": "Whenever you hear 'the planner is smart,' the substance under that sentence is always 'it keeps statistics and uses a cost model.' That's true for ES, Postgres, Spark, and Redshift."
+    },
+    {
+      "id": "es_I_q44",
+      "part": "I — Coordinating Nodes & Query Planning",
+      "subtopic": "When the Planner Helps (Cross-Part)",
+      "difficulty": "L5",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["I2", "I3", "F1"],
+      "l5Pattern": "two-levels-of-indirection",
+      "question": "An interviewer asks: 'You've leaned hard on the query planner being smart. Couldn't you just always intersect smallest-set-first by hand and skip the planner? What does the planner actually buy you that hand-tuning doesn't?' What's the senior+ answer?",
+      "options": [
+        "Hand-tuning is identical to the planner — ES exposes the same APIs the planner uses, so smallest-set-first is what every well-written ES query already does.",
+        "The planner buys nothing for production workloads; it exists only for one-off analytical queries where developers don't know which fields exist.",
+        "Hand-tuning a single query is fine — the planner buys you *adaptation as data changes*. The 'rarer' term in your query today may not be the rarer term six months later as data distributions shift; the planner picks the right plan now AND continues to pick the right plan as cardinalities, doc lengths, and segment shape evolve. The cost of the planner is one indirection per query; the value is correctness across time without re-writing the query. It also generalizes — bool queries with 5+ predicates have orders-of-magnitude differences across plans; a human can't hand-tune every shape.",
+        "Hand-tuning is faster but unsafe — the planner exists primarily to enforce security policies on which fields a query is allowed to see, not for performance."
+      ],
+      "correctIndex": 2,
+      "explanation": "Two levels of indirection. Surface answer: 'just hand-tune it.' Real answer: hand-tuning is fine for *this query against today's data*; the planner gives you *robustness across time and shapes you didn't anticipate*. The article: 'Query planners, by adding a layer of statistics and an indirection allow the system to dynamically respond to the data in the index. Being able to handle data dependence is why database systems in general tend to be so powerful!' Why (a), (b), (d) tempt: each undersells what indirection-plus-statistics buys; the deeper insight is that adaptive plans are the entire reason DBs are reusable across changing workloads.",
+      "interviewScript": "In your interview, say: 'Hand-tuning works for one query against today's data. The planner gives me adaptation across time — what's rare today may not be rare in six months, and the planner re-picks the right plan as cardinalities and doc lengths shift. It also generalizes to query shapes I didn't pre-tune. Indirection plus statistics is exactly why DBs are reusable across changing workloads.'",
+      "proTip": "Whenever you hear 'just hand-tune it,' ask 'what about six months from now?' Hand-tuning is a snapshot; planners are a feedback loop."
+    },
+    {
+      "id": "es_J_q45",
+      "part": "J — Using Elasticsearch in an Interview",
+      "subtopic": "ES Is Not a Database",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["J1"],
+      "l5Pattern": null,
+      "question": "In a system design interview, a candidate proposes 'use Elasticsearch as the primary store for orders — it has a great API and is fast.' What's the right interviewer-side critique?",
+      "options": [
+        "The critique is that ES doesn't support REST — orders APIs need REST, so a different store is required.",
+        "The critique is that ES requires a Java client and the candidate's chosen language doesn't support it.",
+        "The critique is throughput-based — ES can't sustain order writes, but if writes are batched it's fine as the primary store.",
+        "ES is a search engine, not a primary database. Earlier versions had real consistency and durability problems and even today the recommendation is 'put data that must persist somewhere else and use ES for search.' The standard pattern is a primary store of record (Postgres, DynamoDB) plus ES populated via CDC."
+      ],
+      "correctIndex": 3,
+      "explanation": "The article: 'It's usually not a good idea to use Elasticsearch as your database. It's a search engine first and foremost… if you need the data to persist, put it somewhere else.' (a)–(c) name unrelated objections; (d) is the canonical critique.",
+      "interviewScript": "In your interview, say: 'ES is a search engine, not a primary database. Earlier versions had consistency and durability issues and the recommendation is still that data that must persist belongs somewhere else. The pattern is: primary store of record — Postgres or DynamoDB — plus ES populated via CDC for search.'",
+      "proTip": null
+    },
+    {
+      "id": "es_J_q46",
+      "part": "J — Using Elasticsearch in an Interview",
+      "subtopic": "CDC Integration Pattern",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["J1", "J2", "J6"],
+      "l5Pattern": null,
+      "question": "Your design has Postgres as the system of record and ES for full-text search over orders. The interviewer asks how data flows from Postgres into ES. Which pattern is the standard answer, and what's its main risk?",
+      "options": [
+        "Change Data Capture (CDC) from Postgres feeds an event stream that's projected into ES. The main risk is *sync drift* — failures in the projection (consumer crashes, mapping mismatches, missed events) cause ES to fall out of sync with Postgres, and queries against ES start returning answers that disagree with the source of truth.",
+        "Dual-write from the application: every write goes to Postgres and ES in parallel. The main risk is performance — dual writes are slower than single writes.",
+        "Periodic batch ETL: a nightly job dumps Postgres and rebuilds the ES index. The main risk is that the rebuild takes too long.",
+        "Direct queries from ES to Postgres on demand — ES doesn't store the data itself, it just routes search to the source-of-truth. The main risk is Postgres latency."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article: 'The majority of the time Elasticsearch is invoked in interviews it will be attached via Change Data Capture (CDC) to an authoritative data store like Postgres or DynamoDB.' And: 'You need to be careful you're keeping Elasticsearch in sync with the underlying data. Failures in synchronization can lead to drift and are a common source of bugs with Elasticsearch.' (b) is a real anti-pattern (dual-write race conditions); (c) is too coarse; (d) misdescribes ES.",
+      "interviewScript": "In your interview, say: 'Postgres is the system of record. CDC reads the Postgres WAL into an event stream and a projector writes to ES. The risk is sync drift — if the projector falls behind or fails, ES disagrees with Postgres. Mitigations are observability on lag, idempotent projection, and a periodic full re-projection as a safety net.'",
+      "proTip": "Dual-write looks easier than CDC but introduces classic two-phase problems — partial failures leave Postgres and ES inconsistent and the application has no clean recovery. CDC is the standard answer."
+    },
+    {
+      "id": "es_J_q47",
+      "part": "J — Using Elasticsearch in an Interview",
+      "subtopic": "Eventual Consistency",
+      "difficulty": "L3",
+      "style": "Failure Analysis",
+      "conceptIds": ["J3", "J4"],
+      "l5Pattern": null,
+      "question": "A user updates their email address in your `users` Postgres table; the UI reloads the user's profile by searching ES; the search returns the *old* email. The team blames a bug. What's the more accurate diagnosis?",
+      "options": [
+        "It's a CDC bug — properly configured CDC pipelines deliver writes synchronously and the new email should be visible immediately.",
+        "ES is eventually consistent. The CDC pipeline takes time to deliver and ES takes time to refresh new documents into searchable segments — so a read against ES immediately after a Postgres write can legitimately see stale data. The fix is architectural: read user-profile data from Postgres (or a cache that points at Postgres) and use ES only for queries where staleness is tolerable.",
+        "It's a permissions issue — the new email isn't visible until the user re-authenticates and the cached principal in ES is refreshed.",
+        "ES indexes are immutable, so updates to existing fields require dropping and recreating the user document; the team didn't run the migration."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article: 'Ensure you account for the eventual consistency model of Elasticsearch. Your results will be stale, sometimes significantly. If your use-case can't tolerate this, you may need to consider alternatives.' Read-your-own-writes against ES is fundamentally not guaranteed. Architectural fix is to route freshness-critical reads to the source of truth. (a), (c), (d) misattribute the problem.",
+      "interviewScript": "In your interview, say: 'ES is eventually consistent. Between CDC delivery and ES refresh, a read right after a write can see stale data — that's the design, not a bug. For freshness-critical reads — read-your-own-writes on profile changes — I'd serve from Postgres or a Postgres-backed cache. ES is for queries where staleness is tolerable.'",
+      "proTip": "Whenever a use case implies read-your-own-writes, ES alone is the wrong layer. Layer ES for search behind the source-of-truth for freshness."
+    },
+    {
+      "id": "es_J_q48",
+      "part": "J — Using Elasticsearch in an Interview",
+      "subtopic": "Denormalization Discipline",
+      "difficulty": "L4",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["J5"],
+      "l5Pattern": null,
+      "question": "Your `orders` index needs queries like 'show all orders by customers in the EU with total > $500.' A teammate proposes 'store orders in ES with just `customer_id`, then look up `customer.country` from the Postgres customers table at query time.' What's the senior critique?",
+      "options": [
+        "The proposal is fine — ES is fast enough that even per-result Postgres lookups don't show up at p99.",
+        "The proposal is correct — ES doesn't support filtering on numeric fields like `total > 500`, so the filter has to happen in Postgres anyway.",
+        "ES is not a relational database. Forcing per-result lookups against Postgres collapses ES's value — every search becomes a fan-out to the source of truth and the latency profile follows Postgres, not ES. Denormalize: write `customer_country` into the ES order document at projection time so the filter is a single ES query. Aim for the request to be answered by 1–2 ES queries, not by ES + a join.",
+        "The proposal is correct — ES requires every searchable field to live in a separate index, so the customer fields have to come from Postgres at query time."
+      ],
+      "correctIndex": 2,
+      "explanation": "The article: 'Elasticsearch is not a relational database. You'll want to denormalize your data as much as possible to make search queries efficient… You should aim for your results to be provided by 1 or 2 queries.' Per-result joins to Postgres reintroduce the latency ES was meant to bypass. (a) ignores fan-out cost; (b) and (d) invent ES limits.",
+      "interviewScript": "In your interview, say: 'ES isn't relational. If I do a Postgres lookup per result, I've replaced ES's fast inverted-index intersection with N round-trips to a relational store, and my latency follows Postgres. I'd denormalize — write customer_country onto the order document during the CDC projection. Then the filter is a single ES query.'",
+      "proTip": "Denormalization in ES is paid at write time and reaped at read time. If your read pattern is the dominant cost, that's exactly the trade you want."
+    },
+    {
+      "id": "es_J_q49",
+      "part": "J — Using Elasticsearch in an Interview",
+      "subtopic": "When NOT to Use ES (Cross-Part)",
+      "difficulty": "L5",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["J7"],
+      "l5Pattern": "framing-is-wrong",
+      "question": "A design proposal lists 80,000 product SKUs with infrequent catalog updates and adds Elasticsearch 'for search.' The candidate justifies it as 'we'll need it eventually at scale.' What's the framing-level critique a senior interviewer is listening for?",
+      "options": [
+        "ES is wrong because 80,000 documents fits on a single shard, which collapses ES's value proposition. The fix is to start with two shards so the data fans out properly.",
+        "The proposal is fine — ES adds future-proofing at marginal cost, and a small dataset doesn't preclude using it.",
+        "Adding ES means dealing with eventual consistency, sync drift, denormalization, mapping evolution, and an extra cluster to run — all real costs paid today, against a future scaling problem that may never materialize. With 80K SKUs and infrequent updates, full-text search is comfortably handled by Postgres with a GIN/trigram or a `tsvector` full-text index. The senior+ move is to recognize 'eventually at scale' isn't a justification — it's a 'no decision' dressed as one. Use the simpler tool today; add ES when the data, query patterns, or scale actually demand it.",
+        "The right move is to use ES but only for read replicas — the primary copy stays in Postgres and ES is read-only."
+      ],
+      "correctIndex": 2,
+      "explanation": "Framing-is-wrong. The article: 'Not all search problems require it! If your data is small (< 100k documents) or doesn't change often, there are many other and faster solutions. See if a simple query against your primary data store is sufficient and only consider Elasticsearch if you find that to be insufficient.' 'Eventually at scale' is a non-decision. The deeper insight: every tool has a *carrying cost* (operational complexity, sync, consistency); for small or static data, the carrying cost dominates the benefit. Why (a), (b), (d) tempt: each accepts the framing that ES is the answer and just optimizes the shape; the real move is to step out and ask whether ES belongs at all. The senior signal is being able to *not* reach for the tool when it isn't earning its place.",
+      "interviewScript": "In your interview, say: 'For 80K SKUs with infrequent updates, Postgres with a GIN or trigram full-text index handles search easily. Adding ES means owning eventual consistency, sync drift, denormalization, and a separate cluster — all real costs today against a scale problem that may never arrive. \"Eventually at scale\" isn't a decision, it's a deferral. I'd start with Postgres and add ES only when the data or query pattern actually demands it.'",
+      "proTip": "Senior signal in system-design interviews often shows up as *not adding* a system. Tools have carrying costs; reaching for the simpler one is a strength, not a weakness."
+    }
+  ]
+}
