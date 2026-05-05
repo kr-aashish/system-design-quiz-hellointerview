@@ -155,6 +155,35 @@ const quizDataBySlug = Object.fromEntries(
     .filter(([, quiz]) => quiz)
 );
 const quizArticles = articleTopics.filter(article => quizDataBySlug[article.slug]);
+const INDEX_SCROLL_STATE_KEY = 'hello-interview:index-scroll-state';
+
+function getActiveIndexSlug() {
+  return document.activeElement?.closest?.('[data-keyboard-row="quiz-index"]')?.dataset.slug || null;
+}
+
+function readIndexScrollState() {
+  try {
+    const state = JSON.parse(window.sessionStorage.getItem(INDEX_SCROLL_STATE_KEY) || 'null');
+    if (!state || !Number.isFinite(state.y)) return null;
+    return state;
+  } catch {
+    return null;
+  }
+}
+
+function saveIndexScrollState(focusedSlug = getActiveIndexSlug()) {
+  try {
+    const previousState = focusedSlug ? null : readIndexScrollState();
+    window.sessionStorage.setItem(INDEX_SCROLL_STATE_KEY, JSON.stringify({
+      x: window.scrollX,
+      y: window.scrollY,
+      focusedSlug: focusedSlug || previousState?.focusedSlug || null,
+      updatedAt: Date.now(),
+    }));
+  } catch {
+    // Scroll restoration is a convenience; ignore unavailable storage.
+  }
+}
 
 function timeAgo(isoStr) {
   if (!isoStr) return '';
@@ -485,6 +514,7 @@ function Index() {
   const navigate = useNavigate();
   const [summaries, setSummaries] = useState({});
   const [confirmDialog, setConfirmDialog] = useState(null);
+  const restoredScrollRef = useRef(false);
   
   const refreshSummaries = useCallback(() => {
     setSummaries(getQuizSummaries());
@@ -493,6 +523,67 @@ function Index() {
   useEffect(() => {
     refreshSummaries();
   }, [refreshSummaries]);
+
+  useEffect(() => {
+    if (restoredScrollRef.current) return undefined;
+    restoredScrollRef.current = true;
+
+    const state = readIndexScrollState();
+    if (!state) return undefined;
+
+    let cancelled = false;
+    let frameId = 0;
+    const timeoutId = window.setTimeout(() => restoreScroll(), 120);
+
+    function restoreScroll() {
+      if (cancelled) return;
+      const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      window.scrollTo({
+        left: Number.isFinite(state.x) ? state.x : 0,
+        top: Math.min(state.y, maxY),
+        behavior: 'auto',
+      });
+
+      if (state.focusedSlug) {
+        const row = Array.from(document.querySelectorAll('[data-keyboard-row="quiz-index"]'))
+          .find((element) => element.dataset.slug === state.focusedSlug);
+        row?.focus({ preventScroll: true });
+      }
+    }
+
+    frameId = window.requestAnimationFrame(() => {
+      frameId = window.requestAnimationFrame(restoreScroll);
+    });
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+      if (frameId) window.cancelAnimationFrame(frameId);
+    };
+  }, []);
+
+  useEffect(() => {
+    let frameId = 0;
+
+    const scheduleSave = () => {
+      if (frameId) return;
+      frameId = window.requestAnimationFrame(() => {
+        frameId = 0;
+        saveIndexScrollState();
+      });
+    };
+
+    scheduleSave();
+    window.addEventListener('scroll', scheduleSave, { passive: true });
+    window.addEventListener('pagehide', scheduleSave);
+
+    return () => {
+      if (frameId) window.cancelAnimationFrame(frameId);
+      window.removeEventListener('scroll', scheduleSave);
+      window.removeEventListener('pagehide', scheduleSave);
+      saveIndexScrollState();
+    };
+  }, []);
   
   const handleClearQuiz = useCallback((slug) => {
     const topic = articleBySlug.get(slug);
@@ -811,6 +902,8 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                   tabIndex={0}
                   data-keyboard-row="quiz-index"
                   data-slug={item.slug}
+                  onClickCapture={() => saveIndexScrollState(item.slug)}
+                  onFocus={() => saveIndexScrollState(item.slug)}
                   className="flex items-center gap-3 group px-4 py-2.5 rounded-lg hover:bg-[#2d3748] focus:bg-[#2d3748] focus:outline-none focus:ring-2 focus:ring-teal-400/70 transition-colors cursor-default"
                   aria-label={`${item.name} learning item`}
                 >
