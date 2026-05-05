@@ -340,7 +340,11 @@ function QuizBottomProgress({ completed, total }) {
 function getQuestionContextItems(question, quiz) {
   const parent = question.part || quiz.name || quiz.category || getPrimaryGroup(question);
   const child = question.subtopic || question.category || getSecondaryGroup(question);
-  return orderedUnique([parent, child].filter(Boolean));
+  return orderedUnique([parent, child].filter(Boolean).map(formatQuestionContextLabel));
+}
+
+function formatQuestionContextLabel(label) {
+  return String(label).replace(/^[A-Z]\s*[-–—:]\s*/, "");
 }
 
 function QuestionContextTrail({ question, quiz }) {
@@ -351,7 +355,13 @@ function QuestionContextTrail({ question, quiz }) {
     <p className="mb-4 inline-flex max-w-full flex-wrap items-center gap-2 rounded-lg border border-indigo-800/40 bg-indigo-950/20 px-3 py-2 text-xs font-medium text-indigo-100 shadow-lg shadow-black/10">
       {items.map((item, index) => (
         <span key={`${item}-${index}`} className="inline-flex min-w-0 items-center gap-2">
-          {index > 0 && <span className="shrink-0 text-indigo-400/70">-&gt;</span>}
+          {index > 0 && (
+            <ChevronRight
+              aria-hidden="true"
+              className="h-3.5 w-3.5 shrink-0 text-indigo-400/70"
+              strokeWidth={2.4}
+            />
+          )}
           <span className={index === 0 ? "truncate text-slate-400" : "truncate text-indigo-200"}>
             {item}
           </span>
