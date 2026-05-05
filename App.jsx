@@ -908,21 +908,23 @@ export default function App() {
   return (
     <HashRouter>
       <ShortcutHelp />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        {quizArticles.flatMap((quiz) => [
-          <Route
-            key={quiz.slug}
-            path={`/${quiz.slug}`}
-            element={<QuizEngine quiz={quizDataBySlug[quiz.slug]} />}
-          />,
-          <Route
-            key={`${quiz.slug}-review`}
-            path={`/${quiz.slug}/review`}
-            element={<QuizReview quiz={quizDataBySlug[quiz.slug]} />}
-          />,
-        ])}
-      </Routes>
+      <div data-app-routes>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          {quizArticles.flatMap((quiz) => [
+            <Route
+              key={quiz.slug}
+              path={`/${quiz.slug}`}
+              element={<QuizEngine quiz={quizDataBySlug[quiz.slug]} />}
+            />,
+            <Route
+              key={`${quiz.slug}-review`}
+              path={`/${quiz.slug}/review`}
+              element={<QuizReview quiz={quizDataBySlug[quiz.slug]} />}
+            />,
+          ])}
+        </Routes>
+      </div>
     </HashRouter>
   );
 }

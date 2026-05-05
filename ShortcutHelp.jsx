@@ -88,12 +88,27 @@ export default function ShortcutHelp() {
 
   useEffect(() => {
     document.body.dataset.shortcutHelpOpen = open ? "true" : "false";
+    const appRoutes = document.querySelector("[data-app-routes]");
+    if (appRoutes) {
+      if (open) {
+        appRoutes.setAttribute("aria-hidden", "true");
+        appRoutes.inert = true;
+      } else {
+        appRoutes.removeAttribute("aria-hidden");
+        appRoutes.inert = false;
+      }
+    }
+
     if (open) {
       window.setTimeout(() => closeButtonRef.current?.focus(), 0);
     }
 
     return () => {
       document.body.dataset.shortcutHelpOpen = "false";
+      if (appRoutes) {
+        appRoutes.removeAttribute("aria-hidden");
+        appRoutes.inert = false;
+      }
     };
   }, [open]);
 

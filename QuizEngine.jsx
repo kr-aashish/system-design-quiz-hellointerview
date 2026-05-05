@@ -294,9 +294,11 @@ function ReviewList({ title, icon: Icon, questions, answers, onRetryQuestion }) 
                   type="button"
                   onClick={() => onRetryQuestion(question.id)}
                   aria-keyshortcuts="R"
+                  aria-hidden="true"
+                  tabIndex={-1}
                   className="mt-4 inline-flex items-center gap-2 rounded-lg border border-indigo-700/50 bg-indigo-900/30 px-3 py-2 text-xs font-semibold text-indigo-200 transition-colors hover:bg-indigo-900/50"
                 >
-                  <RotateCcw size={14} />
+                  <RotateCcw size={14} aria-hidden="true" />
                   Retry question
                 </button>
               )}
@@ -341,14 +343,17 @@ function getQuestionContextItems(question, quiz) {
   return orderedUnique([parent, child].filter(Boolean));
 }
 
+function getQuestionContextLabel(question, quiz) {
+  const items = getQuestionContextItems(question, quiz);
+  return items.length ? `Question context: ${items.join(" to ")}.` : "";
+}
+
 function QuestionContextTrail({ question, quiz }) {
   const items = getQuestionContextItems(question, quiz);
   if (!items.length) return null;
-  const contextLabel = `Question context: ${items.join(" to ")}.`;
 
   return (
     <section className="mb-4">
-      <p className="sr-only">{contextLabel}</p>
       <ol
         aria-hidden="true"
         className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-lg border border-indigo-800/40 bg-indigo-950/20 px-3 py-2 text-xs font-medium text-indigo-100 shadow-lg shadow-black/10"
@@ -1202,12 +1207,19 @@ export default function QuizEngine({ quiz }) {
   const isTimedOut = selectedAnswer?.timedOut;
   const isRevealed = selectedAnswer?.revealed;
   const completedQuestions = questions.filter((question) => answers[question.id]).length;
+  const questionContextLabel = getQuestionContextLabel(currentQuestion, quiz);
 
   return (
     <main className="min-h-screen bg-gray-950 px-4 pb-28 pt-4 text-gray-100">
       <div className="max-w-3xl mx-auto">
         <QuestionContextTrail question={currentQuestion} quiz={quiz} />
-        <h2 className="text-lg font-medium leading-relaxed mb-6">{currentQuestion.question}</h2>
+        <h2 className="text-lg font-medium leading-relaxed mb-6">
+          <span className="sr-only">
+            {questionContextLabel ? `${questionContextLabel} ` : ""}
+            {currentQuestion.question}
+          </span>
+          <span aria-hidden="true">{currentQuestion.question}</span>
+        </h2>
 
         <section className="mb-5 space-y-3">
           {currentQuestion.options.map((option, index) => {
@@ -1247,13 +1259,13 @@ export default function QuizEngine({ quiz }) {
                   <span className="text-sm leading-relaxed">{option}</span>
                 </div>
                 {submitted && isAnswer && (
-                  <div className="flex items-center gap-1 mt-2 ml-10 text-green-400 text-xs">
-                    <CheckCircle2 size={12} /> Correct
+                  <div aria-hidden="true" className="flex items-center gap-1 mt-2 ml-10 text-green-400 text-xs">
+                    <CheckCircle2 size={12} aria-hidden="true" /> Correct
                   </div>
                 )}
                 {submitted && isSelected && !isAnswer && (
-                  <div className="flex items-center gap-1 mt-2 ml-10 text-red-400 text-xs">
-                    <XCircle size={12} /> Incorrect
+                  <div aria-hidden="true" className="flex items-center gap-1 mt-2 ml-10 text-red-400 text-xs">
+                    <XCircle size={12} aria-hidden="true" /> Incorrect
                   </div>
                 )}
               </button>
@@ -1262,28 +1274,31 @@ export default function QuizEngine({ quiz }) {
         </section>
 
         {!submitted && (
-          <section className="space-y-4">
+          <section className="space-y-4" aria-hidden="true">
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => recordCurrentAnswer({ revealed: true })}
                 aria-keyshortcuts="V"
+                tabIndex={-1}
                 className="flex items-center gap-1 px-4 py-2 text-sm bg-indigo-900/40 hover:bg-indigo-900/60 rounded-lg border border-indigo-700/50 text-indigo-200 transition-colors"
               >
-                <BookOpen size={14} />
+                <BookOpen size={14} aria-hidden="true" />
                 Reveal answer
               </button>
               <button
                 onClick={() => recordCurrentAnswer({ skippedAnswer: true })}
                 aria-keyshortcuts="S"
+                tabIndex={-1}
                 className="flex items-center gap-1 px-4 py-2 text-sm bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
               >
-                <SkipForward size={14} />
+                <SkipForward size={14} aria-hidden="true" />
                 Skip
               </button>
               <button
                 onClick={() => recordCurrentAnswer()}
                 disabled={selectedOption === null}
                 aria-keyshortcuts="Enter"
+                tabIndex={-1}
                 className={`ml-auto flex items-center gap-2 px-6 py-2 rounded-lg font-semibold transition-colors ${
                   selectedOption !== null
                     ? "bg-indigo-600 hover:bg-indigo-500 text-white"
@@ -1299,12 +1314,12 @@ export default function QuizEngine({ quiz }) {
 
         {submitted && (
           <section className="mt-8 space-y-4">
-            <div className={`flex items-center gap-2 rounded-lg border p-3 text-sm ${
+            <div aria-hidden="true" className={`flex items-center gap-2 rounded-lg border p-3 text-sm ${
               isCorrect
                 ? "border-green-500/30 bg-green-500/10 text-green-300"
                 : "border-red-500/30 bg-red-500/10 text-red-300"
             }`}>
-              {isCorrect ? <CheckCircle2 size={17} /> : <XCircle size={17} />}
+              {isCorrect ? <CheckCircle2 size={17} aria-hidden="true" /> : <XCircle size={17} aria-hidden="true" />}
               {isRevealed ? "Answer revealed" : isTimedOut ? "Timed out" : isCorrect ? "Correct" : "Incorrect"}
             </div>
 
@@ -1312,9 +1327,11 @@ export default function QuizEngine({ quiz }) {
               type="button"
               onClick={() => retryQuestionById(currentQuestion.id)}
               aria-keyshortcuts="R"
+              aria-hidden="true"
+              tabIndex={-1}
               className="inline-flex items-center gap-2 rounded-lg border border-indigo-700/50 bg-indigo-900/30 px-4 py-2 text-sm font-semibold text-indigo-200 transition-colors hover:bg-indigo-900/50"
             >
-              <RotateCcw size={15} />
+              <RotateCcw size={15} aria-hidden="true" />
               Retry question
             </button>
 
@@ -1322,7 +1339,7 @@ export default function QuizEngine({ quiz }) {
               {currentQuestion.explanation && (
                 <div className="mb-4">
                   <h3 className="flex items-center gap-2 mb-3 text-blue-400 font-semibold text-sm">
-                    <BookOpen size={16} />
+                    <BookOpen size={16} aria-hidden="true" />
                     Explanation
                   </h3>
                   <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">{currentQuestion.explanation}</p>
@@ -1331,7 +1348,7 @@ export default function QuizEngine({ quiz }) {
               {currentQuestion.interviewScript && (
                 <div className="mb-4 bg-indigo-950/30 rounded-lg border border-indigo-800/40 p-4">
                   <h3 className="flex items-center gap-2 mb-3 text-indigo-300 font-semibold text-sm">
-                    <MessageSquare size={16} />
+                    <MessageSquare size={16} aria-hidden="true" />
                     Interview Script
                   </h3>
                   <p className="text-sm text-indigo-200/80 leading-relaxed italic">{currentQuestion.interviewScript}</p>
@@ -1340,7 +1357,7 @@ export default function QuizEngine({ quiz }) {
               {currentQuestion.proTip && (
                 <div className="bg-amber-950/20 rounded-lg border border-amber-800/30 p-4">
                   <h3 className="flex items-center gap-2 mb-3 text-amber-400 font-semibold text-sm">
-                    <Lightbulb size={16} />
+                    <Lightbulb size={16} aria-hidden="true" />
                     Pro Tip
                   </h3>
                   <p className="text-sm text-amber-200/70 leading-relaxed">{currentQuestion.proTip}</p>
@@ -1348,14 +1365,15 @@ export default function QuizEngine({ quiz }) {
               )}
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3" aria-hidden="true">
               <button
                 onClick={() => moveToNextQuestion()}
                 aria-keyshortcuts="Enter"
+                tabIndex={-1}
                 className="ml-auto flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg font-semibold transition-colors"
               >
                 {currentIndex === questions.length - 1 ? "See Results" : "Next"}
-                <ChevronRight size={16} />
+                <ChevronRight size={16} aria-hidden="true" />
               </button>
             </div>
           </section>
@@ -1365,6 +1383,8 @@ export default function QuizEngine({ quiz }) {
           to="/"
           aria-label="Back to quizzes"
           aria-keyshortcuts="Escape"
+          aria-hidden="true"
+          tabIndex={-1}
           className="fixed left-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-800 bg-gray-900/90 text-gray-400 shadow-lg backdrop-blur hover:border-gray-700 hover:bg-gray-800 hover:text-gray-200"
         >
           <ArrowLeft size={18} aria-hidden="true" />
