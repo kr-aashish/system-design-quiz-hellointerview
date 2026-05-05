@@ -84,6 +84,18 @@ export function getLatestAttempt(slug) {
   return quiz.attempts[quiz.attempts.length - 1];
 }
 
+/** Get the latest completed attempt for a quiz, or null */
+export function getLatestCompletedAttempt(slug) {
+  const quiz = getQuizProgress(slug);
+  if (!quiz || !quiz.attempts || quiz.attempts.length === 0) return null;
+
+  for (let index = quiz.attempts.length - 1; index >= 0; index -= 1) {
+    if (quiz.attempts[index].completedAt) return quiz.attempts[index];
+  }
+
+  return null;
+}
+
 /** Get in-progress attempt for a quiz (incomplete attempt), or null */
 export function getInProgressAttempt(slug) {
   const latest = getLatestAttempt(slug);

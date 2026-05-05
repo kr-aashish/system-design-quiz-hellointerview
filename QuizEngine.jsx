@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useQuizProgress } from "./useQuizProgress";
 import { isNativeInteractiveTarget, useKeyboardShortcuts } from "./keyboardShortcuts";
+import { getLatestCompletedAttempt } from "./quizProgressStore";
 
 const DEFAULT_DIFFICULTY_TIERS = ["L1", "L2", "L3", "L4", "L5"];
 const TIER_TIMERS = {
@@ -397,6 +398,7 @@ export default function QuizEngine({ quiz }) {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const isResultsRoute = location.pathname.endsWith("/results");
 
   const [screen, setScreen] = useState("landing");
   const [mode, setMode] = useState(defaultMode);
@@ -489,6 +491,11 @@ export default function QuizEngine({ quiz }) {
     startNewAttempt(initialState.questionOrder, initialState);
   }, [allQuestions, mode, quiz, startNewAttempt]);
 
+  const startOrQueueQuiz = useCallback((selectedMode, questionSubset = null) => {
+    startQuiz(selectedMode, questionSubset);
+    if (isResultsRoute) navigate(`/${quiz.slug}`, { replace: true });
+  }, [isResultsRoute, navigate, quiz.slug, startQuiz]);
+
   const restoreFromAttempt = useCallback(() => {
     const data = resumeAttempt();
     if (!data) return;
@@ -531,11 +538,67 @@ export default function QuizEngine({ quiz }) {
     setScreen("quiz");
   }, [allQuestions, defaultMode, questionsById, resumeAttempt]);
 
+  const restoreCompletedResults = useCallback(() => {
+    const attempt = getLatestCompletedAttempt(quiz.slug);
+    if (!attempt) return false;
+
+    const restoredState = attempt.state || {};
+    const questionOrder = restoredState.questionOrder?.length
+      ? restoredState.questionOrder
+      : attempt.questionOrder;
+    const orderedQuestions = questionOrder?.length
+      ? questionOrder.map((id) => questionsById.get(String(id))).filter(Boolean)
+      : allQuestions;
+    const restoredAnswers = restoredState.answers || Object.fromEntries(
+      Object.entries(attempt.questionResults || {}).map(([questionId, result]) => [
+        questionId,
+        {
+          selectedIndex: result.selectedIndex,
+          correctIndex: result.correctIndex,
+          isCorrect: result.isCorrect,
+          confidence: result.confidence,
+          timedOut: result.timedOut,
+          skipped: result.skipped,
+          revealed: result.revealed,
+          elapsedSeconds: result.elapsedSeconds,
+        },
+      ])
+    );
+    const skippedQuestionIds = restoredState.skipped || Object.entries(attempt.questionResults || {})
+      .filter(([, result]) => result.skipped)
+      .map(([questionId]) => questionId);
+    const nextIndex = Math.min(
+      restoredState.currentIndex ?? Math.max(orderedQuestions.length - 1, 0),
+      Math.max(orderedQuestions.length - 1, 0)
+    );
+    const nextQuestion = orderedQuestions[nextIndex];
+
+    setMode(restoredState.mode || defaultMode);
+    setQuestions(orderedQuestions);
+    setCurrentIndex(nextIndex);
+    setSelectedOption(restoredState.selectedOption ?? null);
+    setConfidence(restoredState.confidence ?? null);
+    setSubmitted(restoredState.submitted ?? true);
+    setAnswers(restoredAnswers);
+    setSkipped(skippedQuestionIds);
+    setFlagged(restoredState.flagged || []);
+    setTimer(restoredState.timer ?? getTimerDuration(nextQuestion));
+    setTotalElapsed(restoredState.totalElapsed ?? attempt.totalTimeSeconds ?? 0);
+    setScreen("results");
+    return true;
+  }, [allQuestions, defaultMode, questionsById, quiz.slug]);
+
   useEffect(() => {
     if (location.search.includes("resume=true") && isResuming && screen === "landing") {
       restoreFromAttempt();
     }
   }, [location.search, isResuming, screen, restoreFromAttempt]);
+
+  useEffect(() => {
+    if (isResultsRoute && screen === "landing") {
+      restoreCompletedResults();
+    }
+  }, [isResultsRoute, restoreCompletedResults, screen]);
 
   useEffect(() => {
     if (!attemptId || screen === "landing") return;
@@ -1150,9 +1213,17 @@ export default function QuizEngine({ quiz }) {
           </div>
 
           <div className="flex flex-wrap gap-3 justify-center mt-8 mb-8">
+            <button
+              onClick={() => startOrQueueQuiz(hasDifficulty ? "ladder" : "ordered")}
+              aria-keyshortcuts="T"
+              className="flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white font-semibold transition-colors"
+            >
+              <RotateCcw size={16} />
+              Retake Full Quiz
+            </button>
             {retryMissed && (
               <button
-                onClick={() => startQuiz(hasDifficulty ? "ladder" : "ordered", resultStats.missedQuestions)}
+                onClick={() => startOrQueueQuiz(hasDifficulty ? "ladder" : "ordered", resultStats.missedQuestions)}
                 aria-keyshortcuts="M"
                 className="flex items-center gap-2 px-5 py-3 bg-red-900/30 hover:bg-red-900/50 border border-red-700/50 rounded-lg text-red-300 transition-colors"
               >
@@ -1162,7 +1233,7 @@ export default function QuizEngine({ quiz }) {
             )}
             {hardQuestions.length > 0 && (
               <button
-                onClick={() => startQuiz("ladder", hardQuestions)}
+                onClick={() => startOrQueueQuiz("ladder", hardQuestions)}
                 aria-keyshortcuts="H"
                 className="flex items-center gap-2 px-5 py-3 bg-amber-900/30 hover:bg-amber-900/50 border border-amber-700/50 rounded-lg text-amber-300 transition-colors"
               >
@@ -1172,7 +1243,7 @@ export default function QuizEngine({ quiz }) {
             )}
             {retryWeak && (
               <button
-                onClick={() => startQuiz(hasDifficulty ? "ladder" : "ordered", weakQuestions)}
+                onClick={() => startOrQueueQuiz(hasDifficulty ? "ladder" : "ordered", weakQuestions)}
                 aria-keyshortcuts="W"
                 className="flex items-center gap-2 px-5 py-3 bg-indigo-900/30 hover:bg-indigo-900/50 border border-indigo-700/50 rounded-lg text-indigo-300 transition-colors"
               >
@@ -1181,7 +1252,10 @@ export default function QuizEngine({ quiz }) {
               </button>
             )}
             <button
-              onClick={() => setScreen("landing")}
+              onClick={() => {
+                if (isResultsRoute) navigate(`/${quiz.slug}`);
+                else setScreen("landing");
+              }}
               aria-keyshortcuts="B Backspace"
               className="flex items-center gap-2 px-5 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-gray-300 transition-colors"
             >
@@ -1196,7 +1270,7 @@ export default function QuizEngine({ quiz }) {
               icon={XCircle}
               questions={resultStats.incorrect}
               answers={answers}
-              onRetryQuestion={retryQuestionById}
+              onRetryQuestion={attemptId ? retryQuestionById : undefined}
             />
           </div>
         </div>

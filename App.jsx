@@ -296,6 +296,12 @@ function QuizItemActions({ slug, hasProgress, onClear }) {
   );
 }
 
+function getPrimaryQuizRoute(topic, status) {
+  if (!topic) return "/";
+  if (status === 'completed') return `/${topic.slug}/results`;
+  return `/${topic.slug}${status === 'in_progress' ? '?resume=true' : ''}`;
+}
+
 function ProgressStats({ summaries, quizTopics }) {
   const quizSlugs = quizTopics.filter(t => quizDataBySlug[t.slug]).map(t => t.slug);
   const totalQuizzes = quizSlugs.length;
@@ -668,7 +674,7 @@ function Index() {
     if (!topic || !quizDataBySlug[topic.slug]) return false;
     const status = summaries[topic.slug]?.status || 'not_started';
     saveIndexScrollState(topic.slug);
-    navigate(`/${topic.slug}${status === 'in_progress' ? '?resume=true' : ''}`);
+    navigate(getPrimaryQuizRoute(topic, status));
     return true;
   }, [navigate, summaries]);
 
@@ -950,7 +956,7 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                       <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity">
                         {hasQuiz && (
                           <Link
-                            to={`/${item.slug}${status === 'in_progress' ? '?resume=true' : ''}`}
+                            to={getPrimaryQuizRoute(item, status)}
                             className="flex items-center gap-1.5 text-xs bg-teal-500/10 text-teal-400 px-2.5 py-1.5 rounded-md hover:bg-teal-500/20 transition-colors font-semibold"
                             aria-keyshortcuts="Enter"
                           >
@@ -961,8 +967,8 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                               </>
                             ) : status === 'completed' ? (
                               <>
-                                <RotateCcw className="w-3.5 h-3.5" />
-                                Retake
+                                <ScrollText className="w-3.5 h-3.5" />
+                                Review
                               </>
                             ) : (
                               <>
@@ -979,8 +985,8 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                             title="Review all questions and answers"
                             aria-keyshortcuts="R"
                           >
-                            <ScrollText className="w-3.5 h-3.5" />
-                            Review
+                            <BookOpen className="w-3.5 h-3.5" />
+                            Answers
                           </Link>
                         )}
                         <a 
@@ -1023,6 +1029,11 @@ export default function App() {
             <Route
               key={quiz.slug}
               path={`/${quiz.slug}`}
+              element={<QuizEngine quiz={quizDataBySlug[quiz.slug]} />}
+            />,
+            <Route
+              key={`${quiz.slug}-results`}
+              path={`/${quiz.slug}/results`}
               element={<QuizEngine quiz={quizDataBySlug[quiz.slug]} />}
             />,
             <Route
