@@ -291,6 +291,13 @@ function getSyncStatusClass(tone) {
   return 'text-slate-400';
 }
 
+function describeCloudFormat(result) {
+  if (result?.cloudFormat === 'chunked') {
+    return ` (${result.chunkCount} JSONBin chunks)`;
+  }
+  return '';
+}
+
 function CloudSyncPanel({ onPulled }) {
   const [isOpen, setIsOpen] = useState(false);
   const [autoSync, setAutoSync] = useState(false);
@@ -315,7 +322,7 @@ function CloudSyncPanel({ onPulled }) {
         try {
           const result = await pushProgressToCloud();
           setTimestamps(result.timestamps);
-          showStatus('Auto-pushed progress to cloud.', 'success');
+          showStatus(`Auto-pushed progress to cloud${describeCloudFormat(result)}.`, 'success');
         } catch (error) {
           showStatus(`Auto-push failed: ${error.message}`, 'error');
         }
@@ -335,7 +342,7 @@ function CloudSyncPanel({ onPulled }) {
     try {
       const result = await pushProgressToCloud();
       setTimestamps(result.timestamps);
-      showStatus('Pushed local progress to cloud.', 'success');
+      showStatus(`Pushed local progress to cloud${describeCloudFormat(result)}.`, 'success');
     } catch (error) {
       showStatus(error.message, 'error');
     } finally {
@@ -354,7 +361,7 @@ function CloudSyncPanel({ onPulled }) {
       const result = await pullProgressFromCloud();
       setTimestamps(result.timestamps);
       onPulled();
-      showStatus('Pulled cloud progress into this browser.', 'success');
+      showStatus(`Pulled cloud progress into this browser${describeCloudFormat(result)}.`, 'success');
     } catch (error) {
       showStatus(error.message, 'error');
     } finally {
@@ -369,7 +376,7 @@ function CloudSyncPanel({ onPulled }) {
       const result = await syncProgress();
       setTimestamps(result.timestamps);
       onPulled(); // refresh the summaries since local was updated
-      showStatus('Sync complete — local and cloud are now merged.', 'success');
+      showStatus(`Sync complete — local and cloud are now merged${describeCloudFormat(result)}.`, 'success');
     } catch (error) {
       showStatus(error.message, 'error');
     } finally {
