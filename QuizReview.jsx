@@ -1,22 +1,17 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  Award,
   BookOpen,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
   Eye,
-  Layers,
   Lightbulb,
-  List,
   MessageSquare,
   PlayCircle,
-  Target,
 } from "lucide-react";
-import { useKeyboardShortcuts } from "./keyboardShortcuts";
-import { getLatestAttempt, PROGRESS_CHANGED_EVENT } from "./quizProgressStore";
+import { isNativeInteractiveTarget, useKeyboardShortcuts } from "./keyboardShortcuts";
 
 const DIFFICULTY_STYLE = {
   L1: { label: "L1 Recognition", chip: "bg-green-950/30 border-green-800/40 text-green-300" },
@@ -88,15 +83,6 @@ function getTierCounts(questions) {
     .filter((item) => item.count);
 }
 
-function StatChip({ icon: Icon, children }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 text-sm text-gray-400">
-      <Icon size={14} />
-      {children}
-    </span>
-  );
-}
-
 function Pill({ children, tone = "slate" }) {
   const tones = {
     slate: "bg-gray-800 text-gray-400 border-gray-700",
@@ -116,16 +102,60 @@ function letterFor(idx) {
   return String.fromCharCode(65 + idx);
 }
 
-function formatTime(seconds) {
-  if (!Number.isFinite(seconds) || seconds <= 0) return "0m";
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  if (mins <= 0) return `${secs}s`;
-  return secs ? `${mins}m ${secs}s` : `${mins}m`;
+function formatQuestionContextLabel(label) {
+  return String(label).replace(/^[A-Z]\s*[-–—:]\s*/, "");
 }
 
-function slugify(s) {
-  return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+function getQuestionBreadcrumb(question, sectionName) {
+  const parts = [
+    sectionName,
+    getSectionDetailLabel(question),
+  ].filter(Boolean).map(formatQuestionContextLabel);
+
+  return orderedUnique(parts);
+}
+
+function ScreenReaderReview({ groups, firstHeadingRef }) {
+  return (
+    <div className="sr-only">
+      {groups.map((group, groupIndex) => (
+        <section key={group.name}>
+          <h2
+            ref={groupIndex === 0 ? firstHeadingRef : null}
+            tabIndex={groupIndex === 0 ? -1 : undefined}
+          >
+            {formatQuestionContextLabel(group.name)}
+          </h2>
+          {group.questions.map((question) => {
+            const correctIndex = getCorrectIndex(question);
+            const options = (question.options || []).map(getOptionText);
+            const breadcrumbs = getQuestionBreadcrumb(question, group.name);
+
+            return (
+              <article key={question.id}>
+                {breadcrumbs.length > 0 && (
+                  <p>{breadcrumbs.join(" to ")}</p>
+                )}
+                <h3>{question.question}</h3>
+                <p>
+                  Correct answer: {letterFor(correctIndex)}. {options[correctIndex]}
+                </p>
+                {question.explanation && (
+                  <p>Explanation: {question.explanation}</p>
+                )}
+                {question.interviewScript && (
+                  <p>Interview script: {question.interviewScript}</p>
+                )}
+                {question.proTip && (
+                  <p>Pro tip: {question.proTip}</p>
+                )}
+              </article>
+            );
+          })}
+        </section>
+      ))}
+    </div>
+  );
 }
 
 function QuestionCard({ question, number, showAllOptions }) {
@@ -142,12 +172,13 @@ function QuestionCard({ question, number, showAllOptions }) {
   return (
     <article
       id={`q-${question.id}`}
-      tabIndex={0}
+      tabIndex={-1}
       data-review-question
       className="bg-gray-900 rounded-xl border border-gray-800 p-6 scroll-mt-6 focus:outline-none focus:ring-2 focus:ring-indigo-400/70"
     >
       <button
         type="button"
+        tabIndex={-1}
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-controls={answerId}
@@ -254,13 +285,14 @@ function QuestionCard({ question, number, showAllOptions }) {
 
 function GroupSection({ group, startNumber, defaultOpen = false, showAllOptions }) {
   const [open, setOpen] = useState(defaultOpen);
-  const anchor = `group-${slugify(group.name)}`;
+  const anchor = `group-${startNumber}`;
   const endNumber = startNumber + group.questions.length - 1;
 
   return (
     <section id={anchor} className="scroll-mt-6">
       <button
         type="button"
+        tabIndex={-1}
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls={`${anchor}-questions`}
@@ -337,14 +369,7 @@ export default function QuizReview({ quiz }) {
   const navigate = useNavigate();
   const questions = quiz.questions || [];
   const [showAllOptions, setShowAllOptions] = useState(false);
-  const [latestAttempt, setLatestAttempt] = useState(() => getLatestAttempt(quiz.slug));
-  const hasDifficulty = questions.some((question) => question.difficulty);
-
-  useEffect(() => {
-    const refreshAttempt = () => setLatestAttempt(getLatestAttempt(quiz.slug));
-    window.addEventListener(PROGRESS_CHANGED_EVENT, refreshAttempt);
-    return () => window.removeEventListener(PROGRESS_CHANGED_EVENT, refreshAttempt);
-  }, [quiz.slug]);
+  const firstReviewHeadingRef = useRef(null);
 
   const groups = useMemo(() => {
     const map = new Map();
@@ -389,27 +414,6 @@ export default function QuizReview({ quiz }) {
       }));
   }, [questions, quiz.partsOrder, quiz.categories, quiz.subtopicsOrder]);
 
-  const tierCounts = useMemo(() => {
-    return getTierCounts(questions);
-  }, [questions]);
-
-  const latestResult = useMemo(() => {
-    if (!latestAttempt?.completedAt) return null;
-    const results = Object.values(latestAttempt.questionResults || {});
-    const correct = latestAttempt.score?.correct ?? results.filter((result) => result.isCorrect).length;
-    const total = latestAttempt.score?.total || questions.length;
-    const pct = total ? Math.round((correct / total) * 100) : 0;
-
-    return {
-      correct,
-      total,
-      pct,
-      missed: results.filter((result) => !result.isCorrect).length,
-      skipped: results.filter((result) => result.skipped).length,
-      totalTimeSeconds: latestAttempt.totalTimeSeconds || 0,
-    };
-  }, [latestAttempt, questions.length]);
-
   // Pre-compute starting question number for each group so numbering is global.
   const groupStartNumbers = useMemo(() => {
     const result = [];
@@ -421,241 +425,69 @@ export default function QuizReview({ quiz }) {
     return result;
   }, [groups]);
 
-  const getReviewQuestions = useCallback(() => {
-    return Array.from(document.querySelectorAll("[data-review-question]"))
-      .filter((card) => card.offsetParent !== null);
-  }, []);
-
-  const focusReviewQuestion = useCallback((direction) => {
-    const cards = getReviewQuestions();
-    if (!cards.length) return false;
-
-    const activeCard = document.activeElement?.closest?.("[data-review-question]");
-    const activeIndex = activeCard ? cards.indexOf(activeCard) : -1;
-    let nextIndex = direction > 0 ? activeIndex + 1 : activeIndex - 1;
-
-    if (activeIndex === -1) {
-      nextIndex = direction > 0 ? 0 : cards.length - 1;
-    }
-
-    nextIndex = Math.max(0, Math.min(cards.length - 1, nextIndex));
-    cards[nextIndex].focus();
-    cards[nextIndex].scrollIntoView({ block: "start", behavior: "smooth" });
-    return true;
-  }, [getReviewQuestions]);
-
-  const focusReviewEdge = useCallback((edge) => {
-    const cards = getReviewQuestions();
-    if (!cards.length) return false;
-    const card = edge === "end" ? cards[cards.length - 1] : cards[0];
-    card.focus();
-    card.scrollIntoView({ block: "start", behavior: "smooth" });
-    return true;
-  }, [getReviewQuestions]);
-
-  const openArticle = useCallback(() => {
-    if (!quiz.path) return false;
-    window.open(`https://www.hellointerview.com${quiz.path}`, "_blank", "noopener,noreferrer");
-    return true;
-  }, [quiz.path]);
+  useEffect(() => {
+    firstReviewHeadingRef.current?.focus({ preventScroll: true });
+  }, [quiz.slug, groups.length]);
 
   useKeyboardShortcuts([
-    { keys: ["arrowdown", "j"], handler: () => focusReviewQuestion(1) },
-    { keys: ["arrowup", "k"], handler: () => focusReviewQuestion(-1) },
-    { key: "home", handler: () => focusReviewEdge("start") },
-    { key: "end", handler: () => focusReviewEdge("end") },
-    { key: "q", handler: () => { navigate(`/${quiz.slug}`); return true; } },
-    { key: "a", handler: openArticle },
+    { key: "q", handler: (event) => {
+      if (isNativeInteractiveTarget(event.target)) return false;
+      navigate(`/${quiz.slug}`);
+      return true;
+    } },
     { keys: ["backspace", "escape"], handler: () => { navigate("/"); return true; } },
   ], [
-    focusReviewEdge,
-    focusReviewQuestion,
     navigate,
-    openArticle,
     quiz.slug,
   ]);
 
   return (
     <main className="min-h-screen bg-gray-950 text-gray-100">
+      <ScreenReaderReview groups={groups} firstHeadingRef={firstReviewHeadingRef} />
+
       <Link
         to="/"
+        aria-hidden="true"
         aria-label="Back to quizzes"
         aria-keyshortcuts="Backspace Escape"
+        tabIndex={-1}
         className="fixed left-4 top-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-800 bg-gray-900/90 text-gray-400 shadow-lg backdrop-blur hover:border-gray-700 hover:bg-gray-800 hover:text-gray-200"
       >
         <ArrowLeft size={18} aria-hidden="true" />
       </Link>
 
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <header className="mb-8 text-center">
-          <div className="inline-flex items-center gap-2 bg-indigo-900/30 border border-indigo-700/50 text-indigo-300 px-3 py-1 rounded-full text-sm mb-4">
-            <Layers size={14} />
-            {quiz.category} · {quiz.name} {hasDifficulty ? "· L1 -> L5 Ladder" : ""}
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2">{quiz.title}</h1>
-          {quiz.difficultyLabel && (
-            <p className="text-gray-400 text-base sm:text-lg mb-2">{quiz.difficultyLabel}</p>
-          )}
-          {quiz.description && (
-            <p className="mx-auto max-w-3xl text-sm text-gray-500 leading-relaxed">
-              {quiz.description}
-            </p>
-          )}
-
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-            <StatChip icon={BookOpen}>{questions.length} questions</StatChip>
-            <StatChip icon={Target}>{groups.length} coverage areas</StatChip>
-            {quiz.estimatedTime && <StatChip icon={List}>{quiz.estimatedTime}</StatChip>}
-          </div>
-        </header>
-
-        <section className="mb-6 rounded-xl border border-gray-800 bg-gray-900 p-6">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-300">
-            Coverage Breakdown
-          </h2>
-          <div className="space-y-4">
-            {groups.map((group) => (
-              <div key={group.name}>
-                <div className="mb-2 text-xs font-medium uppercase tracking-wider text-gray-400">
-                  {group.name} ({group.questions.length} {group.questions.length === 1 ? "question" : "questions"})
-                </div>
-                {group.details.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {group.details.map((detail) => (
-                      <span
-                        key={`${group.name}-${detail}`}
-                        className="rounded border border-indigo-800/40 bg-indigo-950/30 px-2 py-1 text-xs text-indigo-300"
-                      >
-                        {detail}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {tierCounts.length > 0 && (
-          <section className="mb-6 rounded-xl border border-gray-800 bg-gray-900 p-6">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-300">
-              Difficulty Ladder
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {tierCounts.map(({ tier, count }) => {
-                const s = DIFFICULTY_STYLE[tier] || DIFFICULTY_STYLE.L3;
-                return (
-                  <span key={tier} className={`text-xs px-2 py-1 rounded border ${s.chip}`}>
-                    {s.label} · {count}
-                  </span>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
-        {latestResult && (
-          <section className="mb-6 rounded-xl border border-emerald-800/40 bg-emerald-950/10 p-6">
-            <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-emerald-300">
-              <Award size={16} />
-              Latest Result
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-4">
-              <div className="rounded-lg border border-gray-800 bg-gray-950/50 px-4 py-3">
-                <div className="text-xs text-gray-500">Score</div>
-                <div className="mt-1 text-2xl font-bold text-emerald-300">{latestResult.pct}%</div>
-              </div>
-              <div className="rounded-lg border border-gray-800 bg-gray-950/50 px-4 py-3">
-                <div className="text-xs text-gray-500">Correct</div>
-                <div className="mt-1 text-2xl font-bold text-gray-100">{latestResult.correct}/{latestResult.total}</div>
-              </div>
-              <div className="rounded-lg border border-gray-800 bg-gray-950/50 px-4 py-3">
-                <div className="text-xs text-gray-500">Missed</div>
-                <div className="mt-1 text-2xl font-bold text-amber-300">{latestResult.missed}</div>
-              </div>
-              <div className="rounded-lg border border-gray-800 bg-gray-950/50 px-4 py-3">
-                <div className="text-xs text-gray-500">Time</div>
-                <div className="mt-1 text-2xl font-bold text-gray-100">{formatTime(latestResult.totalTimeSeconds)}</div>
-              </div>
-            </div>
-          </section>
-        )}
-
+      <div aria-hidden="true" className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
         <section className="mb-8 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to={`/${quiz.slug}`}
-              aria-keyshortcuts="Q"
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
-            >
-              <PlayCircle size={16} />
-              Take the Quiz
-            </Link>
-            {latestResult && (
-              <Link
-                to={`/${quiz.slug}/results`}
-                className="inline-flex items-center gap-2 rounded-lg border border-emerald-800/40 bg-emerald-950/30 px-4 py-2 text-sm font-semibold text-emerald-300 transition-colors hover:bg-emerald-950/50"
-              >
-                <Award size={16} />
-                Review Result
-              </Link>
-            )}
-            {quiz.path && (
-              <a
-                href={`https://www.hellointerview.com${quiz.path}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-800 bg-gray-900 px-4 py-2 text-sm font-semibold text-gray-300 transition-colors hover:border-gray-700 hover:bg-gray-800"
-                aria-keyshortcuts="A"
-              >
-                <BookOpen size={16} />
-                Read Article
-              </a>
-            )}
-            <button
-              type="button"
-              onClick={() => setShowAllOptions((value) => !value)}
-              aria-pressed={showAllOptions}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-800 bg-gray-900 px-4 py-2 text-sm font-semibold text-gray-300 transition-colors hover:border-gray-700 hover:bg-gray-800"
-            >
-              <Eye size={16} />
-              {showAllOptions ? "Show Correct Only" : "Reveal All Options"}
-            </button>
+          <Link
+            to={`/${quiz.slug}`}
+            aria-keyshortcuts="Q"
+            tabIndex={-1}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
+          >
+            <PlayCircle size={16} />
+            Retake the Quiz
+          </Link>
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => setShowAllOptions((value) => !value)}
+            aria-pressed={showAllOptions}
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-800 bg-gray-900 px-4 py-2 text-sm font-semibold text-gray-300 transition-colors hover:border-gray-700 hover:bg-gray-800"
+          >
+            <Eye size={16} />
+            {showAllOptions ? "Show Correct Only" : "Reveal All Options"}
+          </button>
         </section>
 
-        <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
-          <aside className="hidden lg:block">
-            <div className="sticky top-6 rounded-xl border border-gray-800 bg-gray-900/60 p-5">
-              <h2 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                <List size={14} />
-                Sections
-              </h2>
-              <nav className="space-y-1">
-                {groups.map((g) => (
-                  <a
-                    key={g.name}
-                    href={`#group-${slugify(g.name)}`}
-                    className="flex items-center justify-between rounded-md px-3 py-2 text-sm text-gray-400 transition-colors hover:bg-gray-800 hover:text-gray-100"
-                  >
-                    <span className="truncate">{g.name}</span>
-                    <span className="ml-3 shrink-0 text-xs text-gray-600">
-                      {g.questions.length}
-                    </span>
-                  </a>
-                ))}
-              </nav>
-            </div>
-          </aside>
-
-          <div className="space-y-10">
-            {groups.map((g, idx) => (
-              <GroupSection
-                key={g.name}
-                group={g}
-                startNumber={groupStartNumbers[idx]}
-                showAllOptions={showAllOptions}
-              />
-            ))}
-          </div>
+        <div className="space-y-10">
+          {groups.map((g, idx) => (
+            <GroupSection
+              key={g.name}
+              group={g}
+              startNumber={groupStartNumbers[idx]}
+              showAllOptions={showAllOptions}
+            />
+          ))}
         </div>
       </div>
     </main>

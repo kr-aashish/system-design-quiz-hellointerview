@@ -968,7 +968,7 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                             ) : status === 'completed' ? (
                               <>
                                 <ScrollText className="w-3.5 h-3.5" />
-                                Review
+                                Results
                               </>
                             ) : (
                               <>
@@ -986,7 +986,7 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                             aria-keyshortcuts="R"
                           >
                             <BookOpen className="w-3.5 h-3.5" />
-                            Answers
+                            Review
                           </Link>
                         )}
                         <a 
