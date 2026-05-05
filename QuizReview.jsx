@@ -101,6 +101,10 @@ function getQuestionBreadcrumb(question, sectionName) {
   return orderedUnique(parts);
 }
 
+function normalizeContextLabel(label) {
+  return formatQuestionContextLabel(label).trim().toLowerCase();
+}
+
 function ScreenReaderReview({ groups, firstHeadingRef }) {
   return (
     <div className="sr-only">
@@ -144,7 +148,7 @@ function ScreenReaderReview({ groups, firstHeadingRef }) {
   );
 }
 
-function QuestionCard({ question, number, showAllOptions, defaultOpen = true }) {
+function QuestionCard({ question, sectionName, showAllOptions, defaultOpen = true }) {
   const [open, setOpen] = useState(defaultOpen);
   const correctIndex = getCorrectIndex(question);
   const options = (question.options || []).map(getOptionText);
@@ -154,6 +158,8 @@ function QuestionCard({ question, number, showAllOptions, defaultOpen = true }) 
   const difficulty = question.difficulty || "L3";
   const diffStyle = DIFFICULTY_STYLE[difficulty] || DIFFICULTY_STYLE.L3;
   const answerId = `q-${question.id}-answer`;
+  const topicLabel = getQuestionTopicLabel(question);
+  const showTopicTag = normalizeContextLabel(topicLabel) !== normalizeContextLabel(sectionName);
 
   return (
     <article
@@ -177,13 +183,10 @@ function QuestionCard({ question, number, showAllOptions, defaultOpen = true }) 
         )}
         <div className="min-w-0 flex-1">
           <header className="mb-3 flex flex-wrap items-center gap-2">
-            <span className="inline-flex h-7 min-w-[28px] items-center justify-center rounded-md bg-gray-800 px-2 text-xs font-bold text-gray-400">
-              #{number}
-            </span>
             <span className={`text-xs px-2 py-1 rounded border ${diffStyle.chip}`}>
               {diffStyle.label}
             </span>
-            <Pill tone="blue">{getQuestionTopicLabel(question)}</Pill>
+            {showTopicTag && <Pill tone="blue">{topicLabel}</Pill>}
             {question.style && <Pill>{question.style}</Pill>}
             {question.l5Pattern && <Pill tone="purple">{question.l5Pattern}</Pill>}
             <span className="ml-auto text-[11px] uppercase tracking-wider text-gray-600">
@@ -300,7 +303,7 @@ function GroupSection({ group, startNumber, defaultOpen = true, showAllOptions }
             <QuestionCard
               key={q.id}
               question={q}
-              number={startNumber + i}
+              sectionName={group.name}
               showAllOptions={showAllOptions}
             />
           ))}
