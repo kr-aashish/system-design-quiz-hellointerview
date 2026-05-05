@@ -293,6 +293,12 @@ function getSyncStatusClass(tone) {
 
 function describeCloudFormat(result) {
   if (result?.cloudFormat === 'chunked') {
+    if (Number.isFinite(result.createdChunkBins)) {
+      const action = result.createdChunkBins > 0
+        ? `${result.createdChunkBins} new, ${result.reusedChunkBins || 0} reused`
+        : 'reused existing bins';
+      return ` (${result.chunkCount} JSONBin chunks: ${action})`;
+    }
     return ` (${result.chunkCount} JSONBin chunks)`;
   }
   return '';

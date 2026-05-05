@@ -179,7 +179,14 @@ function buildChunkRecord({ chunkSetId, syncedAt, index, total, data }) {
   };
 }
 
-function buildChunkedCloudPayload({ syncedAt, chunkSetId, chunkBinIds, encodedLength, decodedByteLength }) {
+function buildChunkedCloudPayload({
+  syncedAt,
+  chunkSetId,
+  chunkBinIds,
+  encodedLength,
+  decodedByteLength,
+  usedChunks,
+}) {
   return {
     app: APP_ID,
     schemaVersion: CLOUD_SCHEMA_VERSION,
@@ -191,17 +198,19 @@ function buildChunkedCloudPayload({ syncedAt, chunkSetId, chunkBinIds, encodedLe
       chunkSetId,
       chunkBinIds,
       totalChunks: chunkBinIds.length,
+      usedChunks,
       encodedLength,
       decodedByteLength,
     },
   };
 }
 
-function makeChunkRecords(progress, syncedAt) {
+function makeChunkRecords(progress, syncedAt, allocatedChunkCount = 0) {
   const progressJson = JSON.stringify(validateProgress(progress));
   const encoded = encodeUtf8Base64(progressJson);
   const chunkSetId = generateCloudId();
-  const total = Math.max(1, Math.ceil(encoded.length / CHUNK_DATA_CHARS));
+  const usedChunks = Math.max(1, Math.ceil(encoded.length / CHUNK_DATA_CHARS));
+  const total = Math.max(usedChunks, allocatedChunkCount);
   const chunks = [];
 
   for (let index = 0; index < total; index += 1) {
@@ -221,6 +230,7 @@ function makeChunkRecords(progress, syncedAt) {
     chunks,
     encodedLength: encoded.length,
     decodedByteLength: getByteLength(progressJson),
+    usedChunks,
   };
 }
 
@@ -243,17 +253,6 @@ async function updateJsonBinRecord(apiKey, binId, record) {
       'X-Master-Key': apiKey,
     },
     body: JSON.stringify(record),
-  });
-  return readResponseJson(response);
-}
-
-async function deleteJsonBinRecord(apiKey, binId) {
-  const urls = getJsonBinUrls(binId);
-  const response = await fetch(urls.update, {
-    method: 'DELETE',
-    headers: {
-      'X-Master-Key': apiKey,
-    },
   });
   return readResponseJson(response);
 }
@@ -298,20 +297,6 @@ async function readCurrentChunkBinIds(apiKey, binId) {
   } catch {
     return [];
   }
-}
-
-async function deleteChunkBins(apiKey, chunkBinIds) {
-  const uniqueIds = [...new Set(chunkBinIds)];
-  if (uniqueIds.length === 0) return { deleted: 0, failed: 0 };
-
-  const results = await Promise.allSettled(
-    uniqueIds.map(chunkBinId => deleteJsonBinRecord(apiKey, chunkBinId))
-  );
-
-  return {
-    deleted: results.filter(result => result.status === 'fulfilled').length,
-    failed: results.filter(result => result.status === 'rejected').length,
-  };
 }
 
 async function readChunkedProgress(manifest, apiKey) {
@@ -425,27 +410,37 @@ async function writeProgressToCloud(apiKey, binId, progress, syncedAt) {
   const previousChunkBinIds = await readCurrentChunkBinIds(apiKey, binId);
   const singlePayload = buildCloudPayload(progress, syncedAt);
 
-  if (getJsonByteLength(singlePayload) <= MAX_JSONBIN_RECORD_BYTES) {
+  if (previousChunkBinIds.length === 0 && getJsonByteLength(singlePayload) <= MAX_JSONBIN_RECORD_BYTES) {
     const data = await updateJsonBinRecord(apiKey, binId, singlePayload);
-    const cleanup = await deleteChunkBins(apiKey, previousChunkBinIds);
     return {
       cloudFormat: 'single',
       chunkCount: 0,
       metadata: data?.metadata || null,
-      cleanup,
+      createdChunkBins: 0,
+      reusedChunkBins: 0,
     };
   }
 
-  const { chunkSetId, chunks, encodedLength, decodedByteLength } = makeChunkRecords(progress, syncedAt);
-  const chunkBinIds = [];
+  const {
+    chunkSetId,
+    chunks,
+    encodedLength,
+    decodedByteLength,
+    usedChunks,
+  } = makeChunkRecords(progress, syncedAt, previousChunkBinIds.length);
+
+  const chunkBinIds = [...previousChunkBinIds];
+  let createdChunkBins = 0;
 
   for (let index = 0; index < chunks.length; index += 1) {
-    const result = await createJsonBinRecord(
-      apiKey,
-      chunks[index],
-      `${APP_ID}-progress-${chunkSetId}-${index + 1}`
-    );
-    chunkBinIds.push(result.id);
+    if (chunkBinIds[index]) {
+      await updateJsonBinRecord(apiKey, chunkBinIds[index], chunks[index]);
+      continue;
+    }
+
+    const result = await createJsonBinRecord(apiKey, chunks[index], `${APP_ID}-progress-chunk-${index + 1}`);
+    chunkBinIds[index] = result.id;
+    createdChunkBins += 1;
   }
 
   const manifest = buildChunkedCloudPayload({
@@ -454,6 +449,7 @@ async function writeProgressToCloud(apiKey, binId, progress, syncedAt) {
     chunkBinIds,
     encodedLength,
     decodedByteLength,
+    usedChunks,
   });
 
   if (getJsonByteLength(manifest) > MAX_JSONBIN_RECORD_BYTES) {
@@ -461,12 +457,12 @@ async function writeProgressToCloud(apiKey, binId, progress, syncedAt) {
   }
 
   const data = await updateJsonBinRecord(apiKey, binId, manifest);
-  const cleanup = await deleteChunkBins(apiKey, previousChunkBinIds);
   return {
     cloudFormat: 'chunked',
     chunkCount: chunks.length,
     metadata: data?.metadata || null,
-    cleanup,
+    createdChunkBins,
+    reusedChunkBins: chunks.length - createdChunkBins,
   };
 }
 
@@ -486,7 +482,8 @@ export async function pushProgressToCloud({ progress = getProgress() } = {}) {
     metadata: writeResult.metadata,
     cloudFormat: writeResult.cloudFormat,
     chunkCount: writeResult.chunkCount,
-    cleanup: writeResult.cleanup,
+    createdChunkBins: writeResult.createdChunkBins,
+    reusedChunkBins: writeResult.reusedChunkBins,
   };
 }
 
@@ -597,7 +594,8 @@ export async function syncProgress({ emit = true } = {}) {
     timestamps: ts,
     cloudFormat: writeResult.cloudFormat,
     chunkCount: writeResult.chunkCount,
-    cleanup: writeResult.cleanup,
+    createdChunkBins: writeResult.createdChunkBins,
+    reusedChunkBins: writeResult.reusedChunkBins,
     previousCloudFormat: cloudRead.cloudFormat,
   };
 }
