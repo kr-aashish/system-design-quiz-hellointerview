@@ -401,7 +401,7 @@ export default function QuizReview({ quiz }) {
     { key: "end", handler: () => focusReviewEdge("end") },
     { key: "q", handler: () => { navigate(`/${quiz.slug}`); return true; } },
     { key: "a", handler: openArticle },
-    { key: "escape", handler: () => { navigate("/"); return true; } },
+    { keys: ["backspace", "escape"], handler: () => { navigate("/"); return true; } },
   ], [
     focusReviewEdge,
     focusReviewQuestion,
@@ -415,7 +415,7 @@ export default function QuizReview({ quiz }) {
       <Link
         to="/"
         aria-label="Back to quizzes"
-        aria-keyshortcuts="Escape"
+        aria-keyshortcuts="Backspace Escape"
         className="fixed left-4 top-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-800 bg-gray-900/90 text-gray-400 shadow-lg backdrop-blur hover:border-gray-700 hover:bg-gray-800 hover:text-gray-200"
       >
         <ArrowLeft size={18} aria-hidden="true" />

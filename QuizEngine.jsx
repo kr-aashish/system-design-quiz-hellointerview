@@ -685,6 +685,17 @@ export default function QuizEngine({ quiz }) {
       },
     },
     {
+      key: "backspace",
+      handler: () => {
+        if (screen === "landing") {
+          navigate("/");
+        } else {
+          setScreen("landing");
+        }
+        return true;
+      },
+    },
+    {
       key: "l",
       handler: () => {
         if (screen !== "landing" || !hasDifficulty) return false;
@@ -824,7 +835,7 @@ export default function QuizEngine({ quiz }) {
     return (
       <main className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center p-4">
         <div className="max-w-2xl w-full">
-          <Link to="/" aria-keyshortcuts="Escape" className="mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300">
+          <Link to="/" aria-keyshortcuts="Backspace Escape" className="mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300">
             <ArrowLeft size={16} />
             All quizzes
           </Link>
@@ -1021,7 +1032,7 @@ export default function QuizEngine({ quiz }) {
             )}
             <button
               onClick={() => setScreen("landing")}
-              aria-keyshortcuts="B"
+              aria-keyshortcuts="B Backspace"
               className="flex items-center gap-2 px-5 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-gray-300 transition-colors"
             >
               <ArrowLeft size={16} />

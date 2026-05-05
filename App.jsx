@@ -6,6 +6,7 @@ import { getQuizSummaries, clearQuizProgress, clearAllProgress, PROGRESS_CHANGED
 import { getCloudSyncConfig, hasCloudSyncConfig, pushProgressToCloud, pullProgressFromCloud, syncProgress } from './quizCloudSync';
 import QuizEngine from './QuizEngine';
 import QuizReview from './QuizReview';
+import ShortcutHelp from './ShortcutHelp';
 import { useKeyboardShortcuts } from './keyboardShortcuts';
 
 const quizModules = import.meta.glob('./data/quizzes/**/*.json', { eager: true, import: 'default' });
@@ -597,7 +598,7 @@ function Index() {
     { key: 'r', handler: () => confirmDialog ? false : navigateToTopicReview(getFocusedTopic()) },
     { key: 'a', handler: () => confirmDialog ? false : openTopicArticle(getFocusedTopic()) },
     {
-      keys: ['delete', 'backspace'],
+      key: 'delete',
       shiftKey: false,
       handler: () => {
         if (confirmDialog) return false;
@@ -906,6 +907,7 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
 export default function App() {
   return (
     <HashRouter>
+      <ShortcutHelp />
       <Routes>
         <Route path="/" element={<Index />} />
         {quizArticles.flatMap((quiz) => [

@@ -35,9 +35,11 @@ export function useKeyboardShortcuts(bindings, deps = []) {
       if (event.defaultPrevented || isEditableTarget(event.target)) return;
 
       const eventKey = normalizeKey(event.key);
+      const helpOpen = document.body.dataset.shortcutHelpOpen === "true";
       const binding = bindings.find((candidate) => {
         const keys = Array.isArray(candidate.keys) ? candidate.keys : [candidate.key];
         return (
+          (!helpOpen || candidate.allowWhenShortcutHelpOpen) &&
           keys.map(normalizeKey).includes(eventKey) &&
           matchesModifier(event, "shiftKey", candidate.shiftKey) &&
           matchesModifier(event, "altKey", candidate.altKey) &&
@@ -54,6 +56,7 @@ export function useKeyboardShortcuts(bindings, deps = []) {
       event.preventDefault();
       if (binding.stopPropagation !== false) {
         event.stopPropagation();
+        event.stopImmediatePropagation?.();
       }
     };
 
