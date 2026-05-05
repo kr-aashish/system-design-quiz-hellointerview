@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -410,6 +410,7 @@ export default function QuizEngine({ quiz }) {
   const [flagged, setFlagged] = useState([]);
   const [timer, setTimer] = useState(LEGACY_TIMER_SECONDS);
   const [totalElapsed, setTotalElapsed] = useState(0);
+  const questionHeadingRef = useRef(null);
 
   const currentQuestion = questions[currentIndex];
   const currentTimerDuration = getTimerDuration(currentQuestion);
@@ -556,6 +557,18 @@ export default function QuizEngine({ quiz }) {
     }, 1000);
     return () => window.clearInterval(interval);
   }, [currentQuestion, screen, submitted]);
+
+  useEffect(() => {
+    if (screen !== "quiz" || submitted || !currentQuestion) return undefined;
+
+    document.title = `${quiz.name || "Quiz"} - Question ${currentIndex + 1} of ${questions.length}`;
+
+    const frame = window.requestAnimationFrame(() => {
+      questionHeadingRef.current?.focus();
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [currentIndex, currentQuestion, questions.length, quiz.name, screen, submitted]);
 
   const finishQuiz = useCallback((finalAnswers = answers, finalSkipped = skipped) => {
     const correct = questions.filter((question) => finalAnswers[question.id]?.isCorrect).length;
@@ -1211,62 +1224,70 @@ export default function QuizEngine({ quiz }) {
   return (
     <main className="min-h-screen bg-gray-950 px-4 pb-28 pt-4 text-gray-100">
       <div className="max-w-3xl mx-auto">
-        <QuestionContextTrail question={currentQuestion} quiz={quiz} />
-        <h2 className="text-lg font-medium leading-relaxed mb-6">{currentQuestion.question}</h2>
+        <div key={currentQuestion.id}>
+          <QuestionContextTrail question={currentQuestion} quiz={quiz} />
+          <h2
+            ref={questionHeadingRef}
+            tabIndex={-1}
+            className="text-lg font-medium leading-relaxed mb-6 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60 focus-visible:ring-offset-4 focus-visible:ring-offset-gray-950"
+          >
+            {currentQuestion.question}
+          </h2>
 
-        <section className="mb-5 space-y-3">
-          {currentQuestion.options.map((option, index) => {
-            const optionLetter = String.fromCharCode(65 + index);
-            const isSelected = selectedOption === index;
-            const isAnswer = currentQuestion.correctIndex === index;
-            let classes = "border-gray-700 bg-gray-900 hover:border-gray-500";
-            if (submitted) {
-              if (isAnswer) classes = "border-green-500 bg-green-500/10";
-              else if (isSelected) classes = "border-red-500 bg-red-500/10";
-              else classes = "border-gray-800 bg-gray-900/60 opacity-70";
-            } else if (isSelected) {
-              classes = "border-indigo-500 bg-indigo-500/10";
-            }
+          <section className="mb-5 space-y-3">
+            {currentQuestion.options.map((option, index) => {
+              const optionLetter = String.fromCharCode(65 + index);
+              const isSelected = selectedOption === index;
+              const isAnswer = currentQuestion.correctIndex === index;
+              let classes = "border-gray-700 bg-gray-900 hover:border-gray-500";
+              if (submitted) {
+                if (isAnswer) classes = "border-green-500 bg-green-500/10";
+                else if (isSelected) classes = "border-red-500 bg-red-500/10";
+                else classes = "border-gray-800 bg-gray-900/60 opacity-70";
+              } else if (isSelected) {
+                classes = "border-indigo-500 bg-indigo-500/10";
+              }
 
-            return (
-              <button
-                key={`${currentQuestion.id}-${index}`}
-                data-quiz-option
-                onClick={() => !submitted && setSelectedOption(index)}
-                disabled={submitted}
-                aria-label={`${optionLetter}. ${option}`}
-                aria-keyshortcuts={`${index + 1} ${optionLetter}`}
-                aria-pressed={isSelected}
-                className={`w-full text-left p-4 rounded-lg border ${classes} transition-all duration-200`}
-              >
-                <div className="flex gap-3">
-                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                    submitted && isAnswer
-                      ? "bg-green-500 text-white"
-                      : submitted && isSelected
-                        ? "bg-red-500 text-white"
-                        : isSelected
-                          ? "bg-indigo-500 text-white"
-                          : "bg-gray-800 text-gray-400"
-                  }`}>
-                    {optionLetter}
-                  </span>
-                  <span className="text-sm leading-relaxed">{option}</span>
-                </div>
-                {submitted && isAnswer && (
-                  <div aria-hidden="true" className="flex items-center gap-1 mt-2 ml-10 text-green-400 text-xs">
-                    <CheckCircle2 size={12} aria-hidden="true" /> Correct
+              return (
+                <button
+                  key={`${currentQuestion.id}-${index}`}
+                  data-quiz-option
+                  onClick={() => !submitted && setSelectedOption(index)}
+                  disabled={submitted}
+                  aria-label={`${optionLetter}. ${option}`}
+                  aria-keyshortcuts={`${index + 1} ${optionLetter}`}
+                  aria-pressed={isSelected}
+                  className={`w-full text-left p-4 rounded-lg border ${classes} transition-all duration-200`}
+                >
+                  <div className="flex gap-3">
+                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                      submitted && isAnswer
+                        ? "bg-green-500 text-white"
+                        : submitted && isSelected
+                          ? "bg-red-500 text-white"
+                          : isSelected
+                            ? "bg-indigo-500 text-white"
+                            : "bg-gray-800 text-gray-400"
+                    }`}>
+                      {optionLetter}
+                    </span>
+                    <span className="text-sm leading-relaxed">{option}</span>
                   </div>
-                )}
-                {submitted && isSelected && !isAnswer && (
-                  <div aria-hidden="true" className="flex items-center gap-1 mt-2 ml-10 text-red-400 text-xs">
-                    <XCircle size={12} aria-hidden="true" /> Incorrect
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </section>
+                  {submitted && isAnswer && (
+                    <div aria-hidden="true" className="flex items-center gap-1 mt-2 ml-10 text-green-400 text-xs">
+                      <CheckCircle2 size={12} aria-hidden="true" /> Correct
+                    </div>
+                  )}
+                  {submitted && isSelected && !isAnswer && (
+                    <div aria-hidden="true" className="flex items-center gap-1 mt-2 ml-10 text-red-400 text-xs">
+                      <XCircle size={12} aria-hidden="true" /> Incorrect
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </section>
+        </div>
 
         {!submitted && (
           <section className="space-y-4" aria-hidden="true">
