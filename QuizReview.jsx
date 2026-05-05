@@ -144,8 +144,8 @@ function ScreenReaderReview({ groups, firstHeadingRef }) {
   );
 }
 
-function QuestionCard({ question, number, showAllOptions }) {
-  const [open, setOpen] = useState(false);
+function QuestionCard({ question, number, showAllOptions, defaultOpen = true }) {
+  const [open, setOpen] = useState(defaultOpen);
   const correctIndex = getCorrectIndex(question);
   const options = (question.options || []).map(getOptionText);
   const visibleOptions = showAllOptions
@@ -269,7 +269,7 @@ function QuestionCard({ question, number, showAllOptions }) {
   );
 }
 
-function GroupSection({ group, startNumber, defaultOpen = false, showAllOptions }) {
+function GroupSection({ group, startNumber, defaultOpen = true, showAllOptions }) {
   const [open, setOpen] = useState(defaultOpen);
   const anchor = `group-${startNumber}`;
 
