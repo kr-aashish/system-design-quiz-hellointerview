@@ -21,8 +21,6 @@ const DIFFICULTY_STYLE = {
   L5: { label: "L5 Staff", chip: "bg-red-950/30 border-red-800/40 text-red-300" },
 };
 
-const TIER_ORDER = ["L1", "L2", "L3", "L4", "L5"];
-
 function getCorrectIndex(q) {
   if (Number.isInteger(q.correctIndex)) return q.correctIndex;
   if (Number.isInteger(q.correct)) return q.correct;
@@ -69,18 +67,6 @@ function orderedUnique(values, preferredOrder = []) {
     if (aIndex !== bIndex) return aIndex - bIndex;
     return 0;
   });
-}
-
-function getTierCounts(questions) {
-  const counts = {};
-  for (const question of questions) {
-    const tier = question.difficulty || "L3";
-    counts[tier] = (counts[tier] || 0) + 1;
-  }
-
-  return TIER_ORDER
-    .map((tier) => ({ tier, count: counts[tier] || 0 }))
-    .filter((item) => item.count);
 }
 
 function Pill({ children, tone = "slate" }) {
@@ -286,7 +272,6 @@ function QuestionCard({ question, number, showAllOptions }) {
 function GroupSection({ group, startNumber, defaultOpen = false, showAllOptions }) {
   const [open, setOpen] = useState(defaultOpen);
   const anchor = `group-${startNumber}`;
-  const endNumber = startNumber + group.questions.length - 1;
 
   return (
     <section id={anchor} className="scroll-mt-6">
@@ -311,46 +296,6 @@ function GroupSection({ group, startNumber, defaultOpen = false, showAllOptions 
 
       {open && (
         <div id={`${anchor}-questions`} className="mt-4 space-y-4">
-          <div className="rounded-lg border border-gray-800 bg-gray-950/50 p-4">
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Section Details
-              </span>
-              <span className="rounded border border-gray-800 bg-gray-900 px-2 py-1 text-xs text-gray-400">
-                Questions #{startNumber}-{endNumber}
-              </span>
-              {group.details.length > 0 && (
-                <span className="rounded border border-gray-800 bg-gray-900 px-2 py-1 text-xs text-gray-400">
-                  {group.details.length} {group.details.length === 1 ? "topic" : "topics"}
-                </span>
-              )}
-              {group.tierCounts.map(({ tier, count }) => {
-                const style = DIFFICULTY_STYLE[tier] || DIFFICULTY_STYLE.L3;
-                return (
-                  <span key={tier} className={`rounded border px-2 py-1 text-xs ${style.chip}`}>
-                    {tier} · {count}
-                  </span>
-                );
-              })}
-            </div>
-
-            {group.details.length > 0 && (
-              <ol className="grid gap-2 sm:grid-cols-2">
-                {group.details.map((detail, index) => (
-                  <li
-                    key={detail}
-                    className="flex items-start gap-2 rounded-md border border-gray-800 bg-gray-900/50 px-3 py-2 text-sm text-gray-300"
-                  >
-                    <span className="mt-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded bg-gray-800 px-1 text-[11px] font-bold text-gray-500">
-                      {index + 1}
-                    </span>
-                    <span className="leading-relaxed">{detail}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </div>
-
           {group.questions.map((q, i) => (
             <QuestionCard
               key={q.id}
@@ -387,16 +332,12 @@ export default function QuizReview({ quiz }) {
         map.set(name, {
           name,
           questions: [],
-          details: [],
           sourceIndex: map.size,
         });
       }
 
       const group = map.get(name);
       group.questions.push(q);
-
-      const detail = getSectionDetailLabel(q);
-      if (detail) group.details.push(detail);
     }
 
     const order = new Map((groupOrder || []).map((name, index) => [name, index]));
@@ -406,12 +347,7 @@ export default function QuizReview({ quiz }) {
         const bIndex = order.has(b.name) ? order.get(b.name) : Number.MAX_SAFE_INTEGER;
         if (aIndex !== bIndex) return aIndex - bIndex;
         return a.sourceIndex - b.sourceIndex;
-      })
-      .map((group) => ({
-        ...group,
-        details: orderedUnique(group.details, quiz.subtopicsOrder),
-        tierCounts: getTierCounts(group.questions),
-      }));
+      });
   }, [questions, quiz.partsOrder, quiz.categories, quiz.subtopicsOrder]);
 
   // Pre-compute starting question number for each group so numbering is global.
