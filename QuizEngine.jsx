@@ -335,6 +335,37 @@ function QuizBottomProgress({ completed, total }) {
   );
 }
 
+function getQuestionContextItems(question, quiz) {
+  const parent = question.part || quiz.name || quiz.category || getPrimaryGroup(question);
+  const child = question.subtopic || question.category || getSecondaryGroup(question);
+  return orderedUnique([parent, child].filter(Boolean));
+}
+
+function QuestionContextTrail({ question, quiz }) {
+  const items = getQuestionContextItems(question, quiz);
+  if (!items.length) return null;
+  const contextLabel = `Question context: ${items.join(" to ")}.`;
+
+  return (
+    <section className="mb-4">
+      <p className="sr-only">{contextLabel}</p>
+      <ol
+        aria-hidden="true"
+        className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-lg border border-indigo-800/40 bg-indigo-950/20 px-3 py-2 text-xs font-medium text-indigo-100 shadow-lg shadow-black/10"
+      >
+        {items.map((item, index) => (
+          <li key={`${item}-${index}`} className="inline-flex min-w-0 items-center gap-2">
+            {index > 0 && <ChevronRight size={13} className="shrink-0 text-indigo-400/70" />}
+            <span className={index === 0 ? "truncate text-slate-400" : "truncate text-indigo-200"}>
+              {item}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 export default function QuizEngine({ quiz }) {
   const allQuestions = useMemo(
     () => (quiz.questions || []).map(normalizeQuestion),
@@ -1175,6 +1206,7 @@ export default function QuizEngine({ quiz }) {
   return (
     <main className="min-h-screen bg-gray-950 px-4 pb-28 pt-4 text-gray-100">
       <div className="max-w-3xl mx-auto">
+        <QuestionContextTrail question={currentQuestion} quiz={quiz} />
         <h2 className="text-lg font-medium leading-relaxed mb-6">{currentQuestion.question}</h2>
 
         <section className="mb-5 space-y-3">
@@ -1264,15 +1296,6 @@ export default function QuizEngine({ quiz }) {
             </div>
           </section>
         )}
-
-        <section className="mt-5 flex flex-wrap gap-2" aria-label="Question tags">
-          <span className={`text-xs px-2 py-1 rounded border ${DIFFICULTY_STYLE[currentQuestion.difficulty || "L3"]?.chip || DIFFICULTY_STYLE.L3.chip}`}>
-            {DIFFICULTY_STYLE[currentQuestion.difficulty || "L3"]?.label || currentQuestion.difficulty}
-          </span>
-          <Pill tone="blue">{getPrimaryGroup(currentQuestion)}</Pill>
-          {currentQuestion.style && <Pill>{currentQuestion.style}</Pill>}
-          {currentQuestion.l5Pattern && <Pill tone="purple">{currentQuestion.l5Pattern}</Pill>}
-        </section>
 
         {submitted && (
           <section className="mt-8 space-y-4">
