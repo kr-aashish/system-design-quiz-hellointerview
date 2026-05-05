@@ -161,6 +161,12 @@ function getActiveIndexSlug() {
   return document.activeElement?.closest?.('[data-keyboard-row="quiz-index"]')?.dataset.slug || null;
 }
 
+function getIndexRowBySlug(slug) {
+  if (!slug) return null;
+  return Array.from(document.querySelectorAll('[data-keyboard-row="quiz-index"]'))
+    .find((element) => element.dataset.slug === slug) || null;
+}
+
 function readIndexScrollState() {
   try {
     const state = JSON.parse(window.sessionStorage.getItem(INDEX_SCROLL_STATE_KEY) || 'null');
@@ -173,11 +179,18 @@ function readIndexScrollState() {
 
 function saveIndexScrollState(focusedSlug = getActiveIndexSlug()) {
   try {
-    const previousState = focusedSlug ? null : readIndexScrollState();
+    const previousState = readIndexScrollState();
+    const row = focusedSlug ? getIndexRowBySlug(focusedSlug) : null;
+    const rowTop = row?.getBoundingClientRect().top;
+    const keepRecentAnchoredPosition = !focusedSlug
+      && previousState?.focusedSlug
+      && Date.now() - previousState.updatedAt < 1500;
+
     window.sessionStorage.setItem(INDEX_SCROLL_STATE_KEY, JSON.stringify({
-      x: window.scrollX,
-      y: window.scrollY,
+      x: keepRecentAnchoredPosition ? previousState.x : window.scrollX,
+      y: keepRecentAnchoredPosition ? previousState.y : window.scrollY,
       focusedSlug: focusedSlug || previousState?.focusedSlug || null,
+      rowTop: Number.isFinite(rowTop) ? rowTop : previousState?.rowTop ?? null,
       updatedAt: Date.now(),
     }));
   } catch {
@@ -533,22 +546,22 @@ function Index() {
 
     let cancelled = false;
     let frameId = 0;
-    const timeoutId = window.setTimeout(() => restoreScroll(), 120);
+    const timeoutIds = [80, 180, 360, 700].map((delay) => window.setTimeout(() => restoreScroll(), delay));
 
     function restoreScroll() {
       if (cancelled) return;
+      const row = getIndexRowBySlug(state.focusedSlug);
+      const targetY = row
+        ? window.scrollY + row.getBoundingClientRect().top - (Number.isFinite(state.rowTop) ? state.rowTop : Math.min(360, window.innerHeight * 0.45))
+        : state.y;
       const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
       window.scrollTo({
         left: Number.isFinite(state.x) ? state.x : 0,
-        top: Math.min(state.y, maxY),
+        top: Math.max(0, Math.min(targetY, maxY)),
         behavior: 'auto',
       });
 
-      if (state.focusedSlug) {
-        const row = Array.from(document.querySelectorAll('[data-keyboard-row="quiz-index"]'))
-          .find((element) => element.dataset.slug === state.focusedSlug);
-        row?.focus({ preventScroll: true });
-      }
+      row?.focus({ preventScroll: true });
     }
 
     frameId = window.requestAnimationFrame(() => {
@@ -557,7 +570,7 @@ function Index() {
 
     return () => {
       cancelled = true;
-      window.clearTimeout(timeoutId);
+      timeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId));
       if (frameId) window.cancelAnimationFrame(frameId);
     };
   }, []);
@@ -573,7 +586,6 @@ function Index() {
       });
     };
 
-    scheduleSave();
     window.addEventListener('scroll', scheduleSave, { passive: true });
     window.addEventListener('pagehide', scheduleSave);
 
@@ -655,18 +667,21 @@ function Index() {
   const navigateToTopicQuiz = useCallback((topic) => {
     if (!topic || !quizDataBySlug[topic.slug]) return false;
     const status = summaries[topic.slug]?.status || 'not_started';
+    saveIndexScrollState(topic.slug);
     navigate(`/${topic.slug}${status === 'in_progress' ? '?resume=true' : ''}`);
     return true;
   }, [navigate, summaries]);
 
   const navigateToTopicReview = useCallback((topic) => {
     if (!topic || !quizDataBySlug[topic.slug]) return false;
+    saveIndexScrollState(topic.slug);
     navigate(`/${topic.slug}/review`);
     return true;
   }, [navigate]);
 
   const openTopicArticle = useCallback((topic) => {
     if (!topic?.path) return false;
+    saveIndexScrollState(topic.slug);
     window.open(`https://www.hellointerview.com${topic.path}`, '_blank', 'noopener,noreferrer');
     return true;
   }, []);
