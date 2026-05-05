@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Award,
@@ -20,6 +20,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useQuizProgress } from "./useQuizProgress";
+import { isNativeInteractiveTarget, useKeyboardShortcuts } from "./keyboardShortcuts";
 
 const DEFAULT_DIFFICULTY_TIERS = ["L1", "L2", "L3", "L4", "L5"];
 const TIER_TIMERS = {
@@ -167,6 +168,21 @@ function formatTime(seconds) {
   return `${mins}:${String(secs).padStart(2, "0")}`;
 }
 
+function getOptionIndexForKey(key, optionCount) {
+  const normalized = key.length === 1 ? key.toLowerCase() : key;
+  if (/^[1-9]$/.test(normalized)) {
+    const index = Number(normalized) - 1;
+    return index < optionCount ? index : null;
+  }
+
+  if (/^[a-z]$/.test(normalized)) {
+    const index = normalized.charCodeAt(0) - 97;
+    return index < optionCount ? index : null;
+  }
+
+  return null;
+}
+
 function getReviewSummary(resumeData, totalQuestions) {
   if (!resumeData) return null;
   const answered = resumeData.answeredCount || 0;
@@ -300,6 +316,7 @@ export default function QuizEngine({ quiz }) {
   } = useQuizProgress(quiz.slug, allQuestions.length);
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [screen, setScreen] = useState("landing");
   const [mode, setMode] = useState(defaultMode);
@@ -538,26 +555,52 @@ export default function QuizEngine({ quiz }) {
     timer,
   ]);
 
+  const selectOptionByIndex = useCallback((index) => {
+    if (
+      screen !== "quiz" ||
+      submitted ||
+      !currentQuestion?.options ||
+      index < 0 ||
+      index >= currentQuestion.options.length
+    ) {
+      return false;
+    }
+    setSelectedOption(index);
+    return true;
+  }, [currentQuestion, screen, submitted]);
 
-  useEffect(() => {
-    if (screen !== "quiz") return undefined;
-    const handler = (event) => {
-      const key = event.key.toLowerCase();
-      if (!submitted) {
-        if (["1", "a"].includes(key)) setSelectedOption(0);
-        if (["2", "b"].includes(key)) setSelectedOption(1);
-        if (["3", "c"].includes(key)) setSelectedOption(2);
-        if (["4", "d"].includes(key)) setSelectedOption(3);
-        if (key === "enter" && selectedOption !== null) {
-          recordCurrentAnswer();
-        }
-      } else if (key === "enter") {
-        moveToNextQuestion();
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+  const moveSelectedOption = useCallback((direction) => {
+    if (screen !== "quiz" || submitted || !currentQuestion?.options?.length) return false;
+    const optionCount = currentQuestion.options.length;
+    const currentSelection = Number.isInteger(selectedOption)
+      ? selectedOption
+      : direction > 0
+        ? -1
+        : optionCount;
+    const nextSelection = Math.max(0, Math.min(optionCount - 1, currentSelection + direction));
+    setSelectedOption(nextSelection);
+    return true;
+  }, [currentQuestion, screen, selectedOption, submitted]);
+
+  const submitOrAdvance = useCallback((event) => {
+    if (screen !== "quiz") return false;
+    const isOptionButton = Boolean(event.target?.closest?.("[data-quiz-option]"));
+    if (isNativeInteractiveTarget(event.target) && !isOptionButton) return false;
+    if (isOptionButton && event.key !== "Enter") return false;
+    if (submitted) {
+      moveToNextQuestion();
+      return true;
+    }
+    if (selectedOption === null) return false;
+    recordCurrentAnswer();
+    return true;
   }, [moveToNextQuestion, recordCurrentAnswer, screen, selectedOption, submitted]);
+
+  const openArticle = useCallback(() => {
+    if (!quiz.path) return false;
+    window.open(`https://www.hellointerview.com${quiz.path}`, "_blank", "noopener,noreferrer");
+    return true;
+  }, [quiz.path]);
 
   const coverageRows = useMemo(() => {
     const counts = new Map();
@@ -625,6 +668,154 @@ export default function QuizEngine({ quiz }) {
     };
   }, [answers, flagged, questions]);
 
+  const weakQuestionsForRetry = useMemo(() => {
+    return allQuestions.filter((question) => resultStats.weakGroups.includes(getPrimaryGroup(question)));
+  }, [allQuestions, resultStats.weakGroups]);
+
+  const hardQuestionsForRetry = useMemo(() => {
+    return allQuestions.filter((question) => ["L4", "L5"].includes(question.difficulty));
+  }, [allQuestions]);
+
+  useKeyboardShortcuts([
+    {
+      key: "escape",
+      handler: () => {
+        navigate("/");
+        return true;
+      },
+    },
+    {
+      key: "l",
+      handler: () => {
+        if (screen !== "landing" || !hasDifficulty) return false;
+        startQuiz("ladder");
+        return true;
+      },
+    },
+    {
+      key: "o",
+      handler: () => {
+        if (screen !== "landing") return false;
+        startQuiz("ordered");
+        return true;
+      },
+    },
+    {
+      key: "s",
+      handler: () => {
+        if (screen === "landing") {
+          startQuiz("shuffled");
+          return true;
+        }
+        if (screen === "quiz" && !submitted) {
+          recordCurrentAnswer({ skippedAnswer: true });
+          return true;
+        }
+        return false;
+      },
+    },
+    {
+      key: "c",
+      handler: () => {
+        if (screen !== "landing" || !isResuming) return false;
+        restoreFromAttempt();
+        return true;
+      },
+    },
+    {
+      key: "a",
+      handler: () => {
+        if (screen === "quiz" && !submitted) return selectOptionByIndex(0);
+        if (screen === "landing" || screen === "results") return openArticle();
+        return false;
+      },
+    },
+    {
+      key: "b",
+      handler: () => {
+        if (screen === "quiz" && !submitted) return selectOptionByIndex(1);
+        if (screen === "results") {
+          setScreen("landing");
+          return true;
+        }
+        if (screen === "landing") {
+          navigate("/");
+          return true;
+        }
+        return false;
+      },
+    },
+    {
+      key: "m",
+      handler: () => {
+        if (screen !== "results" || !resultStats.missedQuestions.length) return false;
+        startQuiz(hasDifficulty ? "ladder" : "ordered", resultStats.missedQuestions);
+        return true;
+      },
+    },
+    {
+      key: "h",
+      handler: () => {
+        if (screen !== "results" || !hardQuestionsForRetry.length) return false;
+        startQuiz("ladder", hardQuestionsForRetry);
+        return true;
+      },
+    },
+    {
+      key: "w",
+      handler: () => {
+        if (screen !== "results" || !weakQuestionsForRetry.length) return false;
+        startQuiz(hasDifficulty ? "ladder" : "ordered", weakQuestionsForRetry);
+        return true;
+      },
+    },
+    {
+      key: "v",
+      handler: () => {
+        if (screen !== "quiz" || submitted) return false;
+        recordCurrentAnswer({ revealed: true });
+        return true;
+      },
+    },
+    {
+      keys: ["arrowdown", "j"],
+      handler: () => moveSelectedOption(1),
+    },
+    {
+      keys: ["arrowup", "k"],
+      handler: () => moveSelectedOption(-1),
+    },
+    {
+      keys: ["enter", " ", "spacebar"],
+      handler: submitOrAdvance,
+    },
+    {
+      keys: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "c", "d", "e", "f", "g", "h", "i"],
+      handler: (event) => {
+        if (screen !== "quiz" || submitted || !currentQuestion) return false;
+        const optionIndex = getOptionIndexForKey(event.key, currentQuestion.options.length);
+        return optionIndex === null ? false : selectOptionByIndex(optionIndex);
+      },
+    },
+  ], [
+    currentQuestion,
+    hardQuestionsForRetry,
+    hasDifficulty,
+    isResuming,
+    navigate,
+    openArticle,
+    moveSelectedOption,
+    recordCurrentAnswer,
+    restoreFromAttempt,
+    resultStats.missedQuestions,
+    screen,
+    selectOptionByIndex,
+    startQuiz,
+    submitOrAdvance,
+    submitted,
+    weakQuestionsForRetry,
+  ]);
+
   if (screen === "landing") {
     const totalSeconds = allQuestions.reduce((sum, question) => sum + getTimerDuration(question), 0);
     const estimatedMinutes = quiz.estimatedTime || `~${Math.round(totalSeconds / 60)} min`;
@@ -633,7 +824,7 @@ export default function QuizEngine({ quiz }) {
     return (
       <main className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center p-4">
         <div className="max-w-2xl w-full">
-          <Link to="/" className="mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300">
+          <Link to="/" aria-keyshortcuts="Escape" className="mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300">
             <ArrowLeft size={16} />
             All quizzes
           </Link>
@@ -663,6 +854,7 @@ export default function QuizEngine({ quiz }) {
                 </div>
                 <button
                   onClick={restoreFromAttempt}
+                  aria-keyshortcuts="C"
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-500"
                 >
                   <RotateCcw size={16} />
@@ -715,6 +907,7 @@ export default function QuizEngine({ quiz }) {
             {hasDifficulty && (
               <button
                 onClick={() => startQuiz("ladder")}
+                aria-keyshortcuts="L"
                 className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors font-semibold"
               >
                 <Layers size={18} />
@@ -723,6 +916,7 @@ export default function QuizEngine({ quiz }) {
             )}
             <button
               onClick={() => startQuiz("ordered")}
+              aria-keyshortcuts="O"
               className="flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors border border-gray-700"
             >
               <List size={18} />
@@ -730,6 +924,7 @@ export default function QuizEngine({ quiz }) {
             </button>
             <button
               onClick={() => startQuiz("shuffled")}
+              aria-keyshortcuts="S"
               className="flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors border border-gray-700"
             >
               <Shuffle size={18} />
@@ -745,13 +940,13 @@ export default function QuizEngine({ quiz }) {
     const { grade } = resultStats;
     const retryMissed = resultStats.missedQuestions.length > 0;
     const retryWeak = resultStats.weakGroups.length > 0;
-    const weakQuestions = allQuestions.filter((question) => resultStats.weakGroups.includes(getPrimaryGroup(question)));
-    const hardQuestions = allQuestions.filter((question) => ["L4", "L5"].includes(question.difficulty));
+    const weakQuestions = weakQuestionsForRetry;
+    const hardQuestions = hardQuestionsForRetry;
 
     return (
       <main className="min-h-screen bg-gray-950 text-gray-100 p-4">
         <div className="max-w-3xl mx-auto">
-          <Link to="/" className="mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300">
+          <Link to="/" aria-keyshortcuts="Escape" className="mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300">
             <ArrowLeft size={16} />
             All quizzes
           </Link>
@@ -797,6 +992,7 @@ export default function QuizEngine({ quiz }) {
             {retryMissed && (
               <button
                 onClick={() => startQuiz(hasDifficulty ? "ladder" : "ordered", resultStats.missedQuestions)}
+                aria-keyshortcuts="M"
                 className="flex items-center gap-2 px-5 py-3 bg-red-900/30 hover:bg-red-900/50 border border-red-700/50 rounded-lg text-red-300 transition-colors"
               >
                 <RotateCcw size={16} />
@@ -806,6 +1002,7 @@ export default function QuizEngine({ quiz }) {
             {hardQuestions.length > 0 && (
               <button
                 onClick={() => startQuiz("ladder", hardQuestions)}
+                aria-keyshortcuts="H"
                 className="flex items-center gap-2 px-5 py-3 bg-amber-900/30 hover:bg-amber-900/50 border border-amber-700/50 rounded-lg text-amber-300 transition-colors"
               >
                 <Layers size={16} />
@@ -815,6 +1012,7 @@ export default function QuizEngine({ quiz }) {
             {retryWeak && (
               <button
                 onClick={() => startQuiz(hasDifficulty ? "ladder" : "ordered", weakQuestions)}
+                aria-keyshortcuts="W"
                 className="flex items-center gap-2 px-5 py-3 bg-indigo-900/30 hover:bg-indigo-900/50 border border-indigo-700/50 rounded-lg text-indigo-300 transition-colors"
               >
                 <TrendingUp size={16} />
@@ -823,6 +1021,7 @@ export default function QuizEngine({ quiz }) {
             )}
             <button
               onClick={() => setScreen("landing")}
+              aria-keyshortcuts="B"
               className="flex items-center gap-2 px-5 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-gray-300 transition-colors"
             >
               <ArrowLeft size={16} />
@@ -875,8 +1074,11 @@ export default function QuizEngine({ quiz }) {
             return (
               <button
                 key={`${currentQuestion.id}-${index}`}
+                data-quiz-option
                 onClick={() => !submitted && setSelectedOption(index)}
                 disabled={submitted}
+                aria-keyshortcuts={`${index + 1} ${String.fromCharCode(65 + index)}`}
+                aria-pressed={isSelected}
                 className={`w-full text-left p-4 rounded-lg border ${classes} transition-all duration-200`}
               >
                 <div className="flex gap-3">
@@ -913,6 +1115,7 @@ export default function QuizEngine({ quiz }) {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => recordCurrentAnswer({ revealed: true })}
+                aria-keyshortcuts="V"
                 className="flex items-center gap-1 px-4 py-2 text-sm bg-indigo-900/40 hover:bg-indigo-900/60 rounded-lg border border-indigo-700/50 text-indigo-200 transition-colors"
               >
                 <BookOpen size={14} />
@@ -920,6 +1123,7 @@ export default function QuizEngine({ quiz }) {
               </button>
               <button
                 onClick={() => recordCurrentAnswer({ skippedAnswer: true })}
+                aria-keyshortcuts="S"
                 className="flex items-center gap-1 px-4 py-2 text-sm bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
               >
                 <SkipForward size={14} />
@@ -928,6 +1132,7 @@ export default function QuizEngine({ quiz }) {
               <button
                 onClick={() => recordCurrentAnswer()}
                 disabled={selectedOption === null}
+                aria-keyshortcuts="Enter"
                 className={`ml-auto flex items-center gap-2 px-6 py-2 rounded-lg font-semibold transition-colors ${
                   selectedOption !== null
                     ? "bg-indigo-600 hover:bg-indigo-500 text-white"
@@ -994,6 +1199,7 @@ export default function QuizEngine({ quiz }) {
             <div className="flex gap-3">
               <button
                 onClick={() => moveToNextQuestion()}
+                aria-keyshortcuts="Enter"
                 className="ml-auto flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg font-semibold transition-colors"
               >
                 {currentIndex === questions.length - 1 ? "See Results" : "Next"}
@@ -1006,6 +1212,7 @@ export default function QuizEngine({ quiz }) {
         <Link
           to="/"
           aria-label="Back to quizzes"
+          aria-keyshortcuts="Escape"
           className="fixed left-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-800 bg-gray-900/90 text-gray-400 shadow-lg backdrop-blur hover:border-gray-700 hover:bg-gray-800 hover:text-gray-200"
         >
           <ArrowLeft size={18} aria-hidden="true" />

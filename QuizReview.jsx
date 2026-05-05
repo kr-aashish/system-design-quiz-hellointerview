@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   BookOpen,
@@ -13,6 +13,7 @@ import {
   PlayCircle,
   Target,
 } from "lucide-react";
+import { useKeyboardShortcuts } from "./keyboardShortcuts";
 
 const DIFFICULTY_STYLE = {
   L1: { label: "L1 Recognition", chip: "bg-green-950/30 border-green-800/40 text-green-300" },
@@ -125,7 +126,9 @@ function QuestionCard({ question, number }) {
   return (
     <article
       id={`q-${question.id}`}
-      className="bg-gray-900 rounded-xl border border-gray-800 p-6 scroll-mt-6"
+      tabIndex={0}
+      data-review-question
+      className="bg-gray-900 rounded-xl border border-gray-800 p-6 scroll-mt-6 focus:outline-none focus:ring-2 focus:ring-indigo-400/70"
     >
       <header className="flex flex-wrap items-center gap-2 mb-4">
         <span className="inline-flex h-7 min-w-[28px] items-center justify-center rounded-md bg-gray-800 px-2 text-xs font-bold text-gray-400">
@@ -225,6 +228,8 @@ function GroupSection({ group, startNumber, defaultOpen = true }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls={`${anchor}-questions`}
         className="group flex w-full items-center gap-3 rounded-lg border border-gray-800 bg-gray-900/60 px-4 py-3 text-left transition-colors hover:bg-gray-900"
       >
         {open ? (
@@ -239,7 +244,7 @@ function GroupSection({ group, startNumber, defaultOpen = true }) {
       </button>
 
       {open && (
-        <div className="mt-4 space-y-4">
+        <div id={`${anchor}-questions`} className="mt-4 space-y-4">
           <div className="rounded-lg border border-gray-800 bg-gray-950/50 p-4">
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
@@ -290,6 +295,7 @@ function GroupSection({ group, startNumber, defaultOpen = true }) {
 }
 
 export default function QuizReview({ quiz }) {
+  const navigate = useNavigate();
   const questions = quiz.questions || [];
 
   const groups = useMemo(() => {
@@ -350,11 +356,66 @@ export default function QuizReview({ quiz }) {
     return result;
   }, [groups]);
 
+  const getReviewQuestions = useCallback(() => {
+    return Array.from(document.querySelectorAll("[data-review-question]"))
+      .filter((card) => card.offsetParent !== null);
+  }, []);
+
+  const focusReviewQuestion = useCallback((direction) => {
+    const cards = getReviewQuestions();
+    if (!cards.length) return false;
+
+    const activeCard = document.activeElement?.closest?.("[data-review-question]");
+    const activeIndex = activeCard ? cards.indexOf(activeCard) : -1;
+    let nextIndex = direction > 0 ? activeIndex + 1 : activeIndex - 1;
+
+    if (activeIndex === -1) {
+      nextIndex = direction > 0 ? 0 : cards.length - 1;
+    }
+
+    nextIndex = Math.max(0, Math.min(cards.length - 1, nextIndex));
+    cards[nextIndex].focus();
+    cards[nextIndex].scrollIntoView({ block: "start", behavior: "smooth" });
+    return true;
+  }, [getReviewQuestions]);
+
+  const focusReviewEdge = useCallback((edge) => {
+    const cards = getReviewQuestions();
+    if (!cards.length) return false;
+    const card = edge === "end" ? cards[cards.length - 1] : cards[0];
+    card.focus();
+    card.scrollIntoView({ block: "start", behavior: "smooth" });
+    return true;
+  }, [getReviewQuestions]);
+
+  const openArticle = useCallback(() => {
+    if (!quiz.path) return false;
+    window.open(`https://www.hellointerview.com${quiz.path}`, "_blank", "noopener,noreferrer");
+    return true;
+  }, [quiz.path]);
+
+  useKeyboardShortcuts([
+    { keys: ["arrowdown", "j"], handler: () => focusReviewQuestion(1) },
+    { keys: ["arrowup", "k"], handler: () => focusReviewQuestion(-1) },
+    { key: "home", handler: () => focusReviewEdge("start") },
+    { key: "end", handler: () => focusReviewEdge("end") },
+    { key: "q", handler: () => { navigate(`/${quiz.slug}`); return true; } },
+    { key: "a", handler: openArticle },
+    { key: "escape", handler: () => { navigate("/"); return true; } },
+  ], [
+    focusReviewEdge,
+    focusReviewQuestion,
+    navigate,
+    openArticle,
+    quiz.slug,
+  ]);
+
   return (
     <main className="min-h-screen bg-gray-950 text-gray-100">
       <Link
         to="/"
         aria-label="Back to quizzes"
+        aria-keyshortcuts="Escape"
         className="fixed left-4 top-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-800 bg-gray-900/90 text-gray-400 shadow-lg backdrop-blur hover:border-gray-700 hover:bg-gray-800 hover:text-gray-200"
       >
         <ArrowLeft size={18} aria-hidden="true" />
@@ -401,6 +462,7 @@ export default function QuizReview({ quiz }) {
           <div className="mt-6 flex items-center justify-center gap-3">
             <Link
               to={`/${quiz.slug}`}
+              aria-keyshortcuts="Q"
               className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
             >
               <PlayCircle size={16} />
@@ -412,6 +474,7 @@ export default function QuizReview({ quiz }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-lg border border-gray-800 bg-gray-900 px-4 py-2 text-sm font-semibold text-gray-300 transition-colors hover:border-gray-700 hover:bg-gray-800"
+                aria-keyshortcuts="A"
               >
                 <BookOpen size={16} />
                 Read Article

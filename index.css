@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  :focus-visible {
+    outline: 2px solid rgb(45 212 191 / 0.8);
+    outline-offset: 2px;
+  }
+
   /* Hide legacy per-question countdown UI while keeping normal quiz progress visible. */
   div:has(> svg.lucide-timer),
   span:has(> svg.lucide-timer),

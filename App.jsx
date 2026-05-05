@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { HashRouter, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { ChevronDown, ChevronRight, CheckCircle2, LayoutGrid, BookOpen, ExternalLink, PlayCircle, Trash2, XCircle, RotateCcw, Clock, AlertTriangle, Cloud, UploadCloud, DownloadCloud, RefreshCw, Layers, Boxes, ScrollText } from 'lucide-react';
 import quizState from './quiz-state.json';
 import { getQuizSummaries, clearQuizProgress, clearAllProgress, PROGRESS_CHANGED_EVENT } from './quizProgressStore';
 import { getCloudSyncConfig, hasCloudSyncConfig, pushProgressToCloud, pullProgressFromCloud, syncProgress } from './quizCloudSync';
 import QuizEngine from './QuizEngine';
 import QuizReview from './QuizReview';
+import { useKeyboardShortcuts } from './keyboardShortcuts';
 
 const quizModules = import.meta.glob('./data/quizzes/**/*.json', { eager: true, import: 'default' });
 
@@ -168,9 +169,23 @@ function timeAgo(isoStr) {
 }
 
 function ConfirmDialog({ message, onConfirm, onCancel }) {
+  const cancelRef = useRef(null);
+
+  useEffect(() => {
+    cancelRef.current?.focus();
+  }, []);
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onCancel}>
-      <div className="bg-[#1e2536] border border-[#2d3748] rounded-2xl p-6 max-w-sm w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="bg-[#1e2536] border border-[#2d3748] rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+        onClick={e => e.stopPropagation()}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') onCancel();
+        }}
+      >
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl bg-red-500/15 flex items-center justify-center">
             <AlertTriangle className="w-5 h-5 text-red-400" />
@@ -180,6 +195,7 @@ function ConfirmDialog({ message, onConfirm, onCancel }) {
         <p className="text-slate-400 text-sm mb-6 leading-relaxed">{message}</p>
         <div className="flex gap-3">
           <button
+            ref={cancelRef}
             onClick={onCancel}
             className="flex-1 px-4 py-2.5 rounded-xl bg-slate-700/50 text-slate-300 font-medium text-sm hover:bg-slate-700 transition-colors"
           >
@@ -225,9 +241,12 @@ function QuizItemActions({ slug, hasProgress, onClear }) {
   
   return (
     <button
+      type="button"
       onClick={(e) => { e.stopPropagation(); e.preventDefault(); onClear(slug); }}
       className="p-1 rounded-md text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
       title="Clear quiz progress"
+      aria-label="Clear quiz progress"
+      aria-keyshortcuts="Delete"
     >
       <XCircle className="w-3.5 h-3.5" />
     </button>
@@ -462,6 +481,7 @@ function CloudSyncPanel({ onPulled }) {
 }
 
 function Index() {
+  const navigate = useNavigate();
   const [summaries, setSummaries] = useState({});
   const [confirmDialog, setConfirmDialog] = useState(null);
   
@@ -473,7 +493,7 @@ function Index() {
     refreshSummaries();
   }, [refreshSummaries]);
   
-  const handleClearQuiz = (slug) => {
+  const handleClearQuiz = useCallback((slug) => {
     const topic = articleBySlug.get(slug);
     setConfirmDialog({
       message: `Clear all progress for "${topic?.name || slug}"? This will remove your saved answers, scores, and attempt history for this quiz.`,
@@ -483,9 +503,9 @@ function Index() {
         setConfirmDialog(null);
       },
     });
-  };
+  }, [refreshSummaries]);
   
-  const handleClearAll = () => {
+  const handleClearAll = useCallback(() => {
     setConfirmDialog({
       message: 'Clear ALL quiz progress? This will permanently remove all saved answers, scores, and attempt history across every quiz.',
       onConfirm: () => {
@@ -494,9 +514,123 @@ function Index() {
         setConfirmDialog(null);
       },
     });
-  };
+  }, [refreshSummaries]);
 
   const hasAnyProgress = Object.keys(summaries).length > 0;
+
+  const getIndexRows = useCallback(() => {
+    return Array.from(document.querySelectorAll('[data-keyboard-row="quiz-index"]'))
+      .filter((row) => row.offsetParent !== null);
+  }, []);
+
+  const getFocusedRow = useCallback(() => {
+    return document.activeElement?.closest?.('[data-keyboard-row="quiz-index"]') || null;
+  }, []);
+
+  const focusIndexRow = useCallback((direction) => {
+    const rows = getIndexRows();
+    if (!rows.length) return false;
+
+    const activeRow = getFocusedRow();
+    const activeIndex = activeRow ? rows.indexOf(activeRow) : -1;
+    let nextIndex = direction > 0 ? activeIndex + 1 : activeIndex - 1;
+
+    if (activeIndex === -1) {
+      nextIndex = direction > 0 ? 0 : rows.length - 1;
+    }
+
+    nextIndex = Math.max(0, Math.min(rows.length - 1, nextIndex));
+    rows[nextIndex].focus();
+    rows[nextIndex].scrollIntoView({ block: 'nearest' });
+    return true;
+  }, [getFocusedRow, getIndexRows]);
+
+  const focusIndexEdge = useCallback((edge) => {
+    const rows = getIndexRows();
+    if (!rows.length) return false;
+    const row = edge === 'end' ? rows[rows.length - 1] : rows[0];
+    row.focus();
+    row.scrollIntoView({ block: 'nearest' });
+    return true;
+  }, [getIndexRows]);
+
+  const getFocusedTopic = useCallback(() => {
+    const row = getFocusedRow();
+    if (!row) return null;
+    return articleBySlug.get(row.dataset.slug) || null;
+  }, [getFocusedRow]);
+
+  const navigateToTopicQuiz = useCallback((topic) => {
+    if (!topic || !quizDataBySlug[topic.slug]) return false;
+    const status = summaries[topic.slug]?.status || 'not_started';
+    navigate(`/${topic.slug}${status === 'in_progress' ? '?resume=true' : ''}`);
+    return true;
+  }, [navigate, summaries]);
+
+  const navigateToTopicReview = useCallback((topic) => {
+    if (!topic || !quizDataBySlug[topic.slug]) return false;
+    navigate(`/${topic.slug}/review`);
+    return true;
+  }, [navigate]);
+
+  const openTopicArticle = useCallback((topic) => {
+    if (!topic?.path) return false;
+    window.open(`https://www.hellointerview.com${topic.path}`, '_blank', 'noopener,noreferrer');
+    return true;
+  }, []);
+
+  useKeyboardShortcuts([
+    { keys: ['arrowdown', 'j'], handler: () => confirmDialog ? false : focusIndexRow(1) },
+    { keys: ['arrowup', 'k'], handler: () => confirmDialog ? false : focusIndexRow(-1) },
+    { key: 'home', handler: () => confirmDialog ? false : focusIndexEdge('start') },
+    { key: 'end', handler: () => confirmDialog ? false : focusIndexEdge('end') },
+    {
+      key: 'enter',
+      handler: () => {
+        if (confirmDialog) return false;
+        const row = getFocusedRow();
+        if (!row || document.activeElement !== row) return false;
+        const topic = getFocusedTopic();
+        return navigateToTopicQuiz(topic) || openTopicArticle(topic);
+      },
+    },
+    { key: 'r', handler: () => confirmDialog ? false : navigateToTopicReview(getFocusedTopic()) },
+    { key: 'a', handler: () => confirmDialog ? false : openTopicArticle(getFocusedTopic()) },
+    {
+      keys: ['delete', 'backspace'],
+      shiftKey: false,
+      handler: () => {
+        if (confirmDialog) return false;
+        const topic = getFocusedTopic();
+        if (!topic || !summaries[topic.slug]) return false;
+        handleClearQuiz(topic.slug);
+        return true;
+      },
+    },
+    {
+      key: 'delete',
+      shiftKey: true,
+      handler: () => {
+        if (confirmDialog) return false;
+        if (!hasAnyProgress) return false;
+        handleClearAll();
+        return true;
+      },
+    },
+  ], [
+    focusIndexEdge,
+    focusIndexRow,
+    confirmDialog,
+    getFocusedRow,
+    getFocusedTopic,
+    hasAnyProgress,
+    handleClearAll,
+    handleClearQuiz,
+    navigateToTopicQuiz,
+    navigateToTopicReview,
+    openTopicArticle,
+    summaries,
+  ]);
 
   return (
     <div className="min-h-screen bg-[#1c2331] text-slate-300 p-8 font-sans">
@@ -634,8 +768,10 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
   return (
     <div className="mb-2">
       <button 
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-3 w-full text-left font-semibold text-slate-200 hover:text-white transition-colors py-3 px-2 rounded-lg hover:bg-white/5"
+        aria-expanded={isOpen}
       >
         <LayoutGrid className="w-5 h-5 text-slate-400" />
         <span className="text-lg">{category}</span>
@@ -670,7 +806,13 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
             
             return (
               <li key={item.slug}>
-                <div className="flex items-center gap-3 group px-4 py-2.5 rounded-lg hover:bg-[#2d3748] transition-colors cursor-default">
+                <div
+                  tabIndex={0}
+                  data-keyboard-row="quiz-index"
+                  data-slug={item.slug}
+                  className="flex items-center gap-3 group px-4 py-2.5 rounded-lg hover:bg-[#2d3748] focus:bg-[#2d3748] focus:outline-none focus:ring-2 focus:ring-teal-400/70 transition-colors cursor-default"
+                  aria-label={`${item.name} learning item`}
+                >
                   <StatusIcon 
                     className={`w-5 h-5 shrink-0 ${iconColor} transition-colors`} 
                   />
@@ -696,11 +838,12 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                       )}
                       
                       {/* Action buttons — always visible on hover */}
-                      <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity">
                         {hasQuiz && (
                           <Link
                             to={`/${item.slug}${status === 'in_progress' ? '?resume=true' : ''}`}
                             className="flex items-center gap-1.5 text-xs bg-teal-500/10 text-teal-400 px-2.5 py-1.5 rounded-md hover:bg-teal-500/20 transition-colors font-semibold"
+                            aria-keyshortcuts="Enter"
                           >
                             {status === 'in_progress' ? (
                               <>
@@ -725,6 +868,7 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                             to={`/${item.slug}/review`}
                             className="flex items-center gap-1.5 text-xs bg-violet-500/10 text-violet-300 px-2.5 py-1.5 rounded-md hover:bg-violet-500/20 transition-colors font-semibold"
                             title="Review all questions and answers"
+                            aria-keyshortcuts="R"
                           >
                             <ScrollText className="w-3.5 h-3.5" />
                             Review
@@ -736,6 +880,7 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                           rel="noopener noreferrer"
                           className="flex items-center gap-1.5 text-xs bg-blue-500/10 text-blue-400 px-2.5 py-1.5 rounded-md hover:bg-blue-500/20 transition-colors font-semibold"
                           title="Read Article"
+                          aria-keyshortcuts="A"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                           Article
