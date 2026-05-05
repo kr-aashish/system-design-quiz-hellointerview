@@ -10,6 +10,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   startAttempt,
   recordAnswer,
+  clearAnswer,
   completeAttempt,
   getInProgressAttempt,
   saveQuestionOrder,
@@ -101,6 +102,16 @@ export function useQuizProgress(quizSlug, totalQuestions) {
   }, [quizSlug, attemptId]);
 
   /**
+   * Clear one saved answer so the learner can retry a single question.
+   */
+  const retryQuestion = useCallback((questionId, nextState = null) => {
+    const id = attemptId;
+    if (!id) return;
+
+    clearAnswer(quizSlug, id, questionId, nextState);
+  }, [quizSlug, attemptId]);
+
+  /**
    * Persist the current question order for resume support after skip/reorder flows.
    */
   const persistQuestionOrder = useCallback((questionIds) => {
@@ -136,6 +147,7 @@ export function useQuizProgress(quizSlug, totalQuestions) {
   return {
     attemptId,
     saveAnswer,
+    retryQuestion,
     completeQuiz,
     resumeData,
     startNewAttempt,

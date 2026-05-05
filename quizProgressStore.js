@@ -201,6 +201,45 @@ export function recordAnswer(slug, attemptId, questionId, result) {
 }
 
 /**
+ * Clear one saved answer from an attempt without touching the rest of the quiz.
+ * Used by per-question retry flows.
+ */
+export function clearAnswer(slug, attemptId, questionId, nextState = null) {
+  const store = getStore();
+  const quiz = store.quizzes[slug];
+  if (!quiz) return;
+
+  const attempt = quiz.attempts.find(a => a.attemptId === attemptId);
+  if (!attempt) return;
+
+  delete attempt.questionResults[questionId];
+
+  const results = Object.values(attempt.questionResults);
+  attempt.score = {
+    correct: results.filter(r => r.isCorrect).length,
+    total: results.filter(r => !r.skipped).length,
+  };
+
+  const updatedAt = new Date().toISOString();
+  attempt.lastSavedAt = updatedAt;
+  attempt.completedAt = null;
+  quiz.status = 'in_progress';
+  quiz.lastAttemptAt = updatedAt;
+
+  if (nextState) {
+    attempt.state = nextState;
+    if (nextState.questionOrder?.length) {
+      attempt.questionOrder = nextState.questionOrder;
+    }
+    if (Number.isFinite(nextState.totalElapsed)) {
+      attempt.totalTimeSeconds = nextState.totalElapsed;
+    }
+  }
+
+  saveStore(store);
+}
+
+/**
  * Complete an attempt — mark it as finished.
  */
 export function completeAttempt(slug, attemptId, finalScore, totalTimeSeconds, finalState) {

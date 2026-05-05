@@ -54,6 +54,7 @@ const SHORTCUT_GROUPS = [
       ["J / Down", "Move selection down"],
       ["K / Up", "Move selection up"],
       ["Enter / Space", "Submit, then continue"],
+      ["R", "Retry the submitted question"],
       ["S", "Skip question"],
       ["V", "Reveal answer"],
       ["Backspace", "Back to quiz start"],
@@ -64,6 +65,7 @@ const SHORTCUT_GROUPS = [
     title: "Results",
     rows: [
       ["M", "Retry missed questions"],
+      ["R", "Retry focused missed question"],
       ["H", "Retake L4-L5 questions"],
       ["W", "Retry weak areas"],
       ["B / Backspace", "Back to quiz start"],

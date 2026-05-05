@@ -245,7 +245,7 @@ function BreakdownBars({ title, icon: Icon, rows }) {
   );
 }
 
-function ReviewList({ title, icon: Icon, questions, answers }) {
+function ReviewList({ title, icon: Icon, questions, answers, onRetryQuestion }) {
   if (!questions.length) return null;
   return (
     <section className="bg-gray-900 rounded-xl border border-gray-800 p-6">
@@ -260,7 +260,12 @@ function ReviewList({ title, icon: Icon, questions, answers }) {
             ? question.options[answer.selectedIndex]
             : null;
           return (
-            <article key={question.id} className="rounded-lg border border-gray-800 p-4">
+            <article
+              key={question.id}
+              tabIndex={onRetryQuestion ? 0 : undefined}
+              data-result-question={onRetryQuestion ? question.id : undefined}
+              className="rounded-lg border border-gray-800 p-4 focus:outline-none focus:ring-2 focus:ring-indigo-400/70"
+            >
               <div className="mb-2 flex flex-wrap gap-2">
                 {question.difficulty && (
                   <span className={`text-xs px-2 py-0.5 rounded border ${DIFFICULTY_STYLE[question.difficulty]?.chip || DIFFICULTY_STYLE.L3.chip}`}>
@@ -283,6 +288,17 @@ function ReviewList({ title, icon: Icon, questions, answers }) {
               </p>
               {question.explanation && (
                 <p className="text-xs leading-relaxed text-gray-500">{question.explanation}</p>
+              )}
+              {onRetryQuestion && (
+                <button
+                  type="button"
+                  onClick={() => onRetryQuestion(question.id)}
+                  aria-keyshortcuts="R"
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg border border-indigo-700/50 bg-indigo-900/30 px-3 py-2 text-xs font-semibold text-indigo-200 transition-colors hover:bg-indigo-900/50"
+                >
+                  <RotateCcw size={14} />
+                  Retry question
+                </button>
               )}
             </article>
           );
@@ -307,6 +323,7 @@ export default function QuizEngine({ quiz }) {
   const {
     attemptId,
     saveAnswer: persistAnswer,
+    retryQuestion: clearPersistedQuestionAnswer,
     completeQuiz,
     resumeData,
     startNewAttempt,
@@ -490,7 +507,11 @@ export default function QuizEngine({ quiz }) {
   }, [answers, completeQuiz, makePersistedState, questions, skipped, totalElapsed]);
 
   const moveToNextQuestion = useCallback((nextAnswers = answers, nextSkipped = skipped) => {
-    const nextIndex = currentIndex + 1;
+    let nextIndex = currentIndex + 1;
+    while (nextIndex < questions.length && nextAnswers[questions[nextIndex].id]) {
+      nextIndex += 1;
+    }
+
     if (nextIndex >= questions.length) {
       finishQuiz(nextAnswers, nextSkipped);
       return;
@@ -503,6 +524,44 @@ export default function QuizEngine({ quiz }) {
     setSubmitted(false);
     setTimer(getTimerDuration(nextQuestion));
   }, [answers, currentIndex, finishQuiz, questions, skipped]);
+
+  const retryQuestionById = useCallback((questionId) => {
+    const targetIndex = questions.findIndex((question) => question.id === questionId);
+    if (targetIndex < 0) return false;
+
+    const targetQuestion = questions[targetIndex];
+    const nextAnswers = { ...answers };
+    delete nextAnswers[questionId];
+    const nextSkipped = skipped.filter((id) => id !== questionId);
+    const nextTimer = getTimerDuration(targetQuestion);
+    const nextState = makePersistedState({
+      screen: "quiz",
+      answers: nextAnswers,
+      skipped: nextSkipped,
+      currentIndex: targetIndex,
+      selectedOption: null,
+      confidence: null,
+      submitted: false,
+      timer: nextTimer,
+    });
+
+    clearPersistedQuestionAnswer(questionId, nextState);
+    setAnswers(nextAnswers);
+    setSkipped(nextSkipped);
+    setCurrentIndex(targetIndex);
+    setSelectedOption(null);
+    setConfidence(null);
+    setSubmitted(false);
+    setTimer(nextTimer);
+    setScreen("quiz");
+    return true;
+  }, [
+    answers,
+    clearPersistedQuestionAnswer,
+    makePersistedState,
+    questions,
+    skipped,
+  ]);
 
   const recordCurrentAnswer = useCallback(({ timedOut = false, skippedAnswer = false, revealed = false } = {}) => {
     if (!currentQuestion || submitted) return;
@@ -789,6 +848,20 @@ export default function QuizEngine({ quiz }) {
       },
     },
     {
+      key: "r",
+      handler: () => {
+        if (screen === "quiz" && submitted && currentQuestion) {
+          return retryQuestionById(currentQuestion.id);
+        }
+        if (screen === "results") {
+          const questionId = document.activeElement?.closest?.("[data-result-question]")?.dataset.resultQuestion;
+          if (!questionId) return false;
+          return retryQuestionById(questionId);
+        }
+        return false;
+      },
+    },
+    {
       keys: ["arrowdown", "j"],
       handler: () => moveSelectedOption(1),
     },
@@ -818,6 +891,7 @@ export default function QuizEngine({ quiz }) {
     moveSelectedOption,
     recordCurrentAnswer,
     restoreFromAttempt,
+    retryQuestionById,
     resultStats.missedQuestions,
     screen,
     selectOptionByIndex,
@@ -1041,7 +1115,13 @@ export default function QuizEngine({ quiz }) {
           </div>
 
           <div className="space-y-6">
-            <ReviewList title="Incorrect Questions" icon={XCircle} questions={resultStats.incorrect} answers={answers} />
+            <ReviewList
+              title="Incorrect Questions"
+              icon={XCircle}
+              questions={resultStats.incorrect}
+              answers={answers}
+              onRetryQuestion={retryQuestionById}
+            />
           </div>
         </div>
       </main>
@@ -1176,6 +1256,16 @@ export default function QuizEngine({ quiz }) {
               {isCorrect ? <CheckCircle2 size={17} /> : <XCircle size={17} />}
               {isRevealed ? "Answer revealed" : isTimedOut ? "Timed out" : isCorrect ? "Correct" : "Incorrect"}
             </div>
+
+            <button
+              type="button"
+              onClick={() => retryQuestionById(currentQuestion.id)}
+              aria-keyshortcuts="R"
+              className="inline-flex items-center gap-2 rounded-lg border border-indigo-700/50 bg-indigo-900/30 px-4 py-2 text-sm font-semibold text-indigo-200 transition-colors hover:bg-indigo-900/50"
+            >
+              <RotateCcw size={15} />
+              Retry question
+            </button>
 
             <div className="bg-gray-900 rounded-lg border border-gray-800 p-5">
               {currentQuestion.explanation && (
