@@ -308,6 +308,33 @@ function ReviewList({ title, icon: Icon, questions, answers, onRetryQuestion }) 
   );
 }
 
+function QuizBottomProgress({ completed, total }) {
+  const safeTotal = Math.max(total, 0);
+  const safeCompleted = Math.min(Math.max(completed, 0), safeTotal);
+  const progressPct = safeTotal ? Math.round((safeCompleted / safeTotal) * 100) : 0;
+
+  return (
+    <div
+      aria-hidden="true"
+      role="presentation"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-4 pb-4"
+    >
+      <div className="mx-auto max-w-3xl rounded-lg border border-gray-800/90 bg-gray-950/90 p-3 shadow-2xl shadow-black/40 backdrop-blur-xl">
+        <div className="mb-2 flex items-center justify-between gap-4">
+          <span className="quiz-progress-caption" data-label="Completed" />
+          <span className="quiz-progress-count" data-label={`${safeCompleted} / ${safeTotal}`} />
+        </div>
+        <div className="h-2.5 overflow-hidden rounded-full bg-gray-800 ring-1 ring-white/5">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-teal-400 via-indigo-400 to-emerald-300 shadow-[0_0_18px_rgba(45,212,191,0.35)] transition-[width] duration-500 ease-out"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function QuizEngine({ quiz }) {
   const allQuestions = useMemo(
     () => (quiz.questions || []).map(normalizeQuestion),
@@ -1143,9 +1170,10 @@ export default function QuizEngine({ quiz }) {
   const selectedAnswer = answers[currentQuestion.id];
   const isTimedOut = selectedAnswer?.timedOut;
   const isRevealed = selectedAnswer?.revealed;
+  const completedQuestions = questions.filter((question) => answers[question.id]).length;
 
   return (
-    <main className="min-h-screen bg-gray-950 text-gray-100 p-4">
+    <main className="min-h-screen bg-gray-950 px-4 pb-28 pt-4 text-gray-100">
       <div className="max-w-3xl mx-auto">
         <h2 className="text-lg font-medium leading-relaxed mb-6">{currentQuestion.question}</h2>
 
@@ -1318,6 +1346,8 @@ export default function QuizEngine({ quiz }) {
         >
           <ArrowLeft size={18} aria-hidden="true" />
         </Link>
+
+        <QuizBottomProgress completed={completedQuestions} total={questions.length} />
       </div>
     </main>
   );

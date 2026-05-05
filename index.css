@@ -21,3 +21,22 @@
     display: none !important;
   }
 }
+
+@layer components {
+  .quiz-progress-caption::after {
+    content: attr(data-label);
+    color: rgb(148 163 184);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1rem;
+    text-transform: uppercase;
+  }
+
+  .quiz-progress-count::after {
+    content: attr(data-label);
+    color: rgb(226 232 240);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1rem;
+  }
+}
