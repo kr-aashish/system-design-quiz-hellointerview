@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   BookOpen,
   CheckCircle2,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   Eye,
   Lightbulb,
@@ -105,45 +106,42 @@ function normalizeContextLabel(label) {
   return formatQuestionContextLabel(label).trim().toLowerCase();
 }
 
-function ScreenReaderReview({ groups, firstHeadingRef }) {
+function ScreenReaderReview({ group, firstHeadingRef }) {
+  if (!group) return null;
+
   return (
     <div className="sr-only">
-      {groups.map((group, groupIndex) => (
-        <section key={group.name}>
-          <h2
-            ref={groupIndex === 0 ? firstHeadingRef : null}
-            tabIndex={groupIndex === 0 ? -1 : undefined}
-          >
-            {formatQuestionContextLabel(group.name)}
-          </h2>
-          {group.questions.map((question) => {
-            const correctIndex = getCorrectIndex(question);
-            const options = (question.options || []).map(getOptionText);
-            const breadcrumbs = getQuestionBreadcrumb(question, group.name);
+      <section key={group.name}>
+        <h2 ref={firstHeadingRef} tabIndex={-1}>
+          {formatQuestionContextLabel(group.name)}
+        </h2>
+        {group.questions.map((question) => {
+          const correctIndex = getCorrectIndex(question);
+          const options = (question.options || []).map(getOptionText);
+          const breadcrumbs = getQuestionBreadcrumb(question, group.name);
 
-            return (
-              <article key={question.id}>
-                {breadcrumbs.length > 0 && (
-                  <p>{breadcrumbs.join(" to ")}</p>
-                )}
-                <h3>{question.question}</h3>
-                <p>
-                  Correct answer: {letterFor(correctIndex)}. {options[correctIndex]}
-                </p>
-                {question.explanation && (
-                  <p>Explanation: {question.explanation}</p>
-                )}
-                {question.interviewScript && (
-                  <p>Interview script: {question.interviewScript}</p>
-                )}
-                {question.proTip && (
-                  <p>Pro tip: {question.proTip}</p>
-                )}
-              </article>
-            );
-          })}
-        </section>
-      ))}
+          return (
+            <article key={question.id}>
+              {breadcrumbs.length > 0 && (
+                <p>{breadcrumbs.join(" to ")}</p>
+              )}
+              <h3>{question.question}</h3>
+              <p>
+                Correct answer: {letterFor(correctIndex)}. {options[correctIndex]}
+              </p>
+              {question.explanation && (
+                <p>Explanation: {question.explanation}</p>
+              )}
+              {question.interviewScript && (
+                <p>Interview script: {question.interviewScript}</p>
+              )}
+              {question.proTip && (
+                <p>Pro tip: {question.proTip}</p>
+              )}
+            </article>
+          );
+        })}
+      </section>
     </div>
   );
 }
@@ -313,10 +311,92 @@ function GroupSection({ group, startNumber, defaultOpen = true, showAllOptions }
   );
 }
 
+function SectionPager({ groups, sectionIndex, onSelectSection, onPrevious, onNext }) {
+  const currentGroup = groups[sectionIndex];
+  const isFirst = sectionIndex <= 0;
+  const isLast = sectionIndex >= groups.length - 1;
+  const progressPercent = groups.length ? ((sectionIndex + 1) / groups.length) * 100 : 0;
+
+  if (!currentGroup) return null;
+
+  const navButtonClass = "inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition-colors";
+  const enabledClass = "border-gray-700 bg-gray-900 text-gray-200 hover:border-gray-600 hover:bg-gray-800";
+  const disabledClass = "border-gray-900 bg-gray-900/50 text-gray-700";
+
+  return (
+    <section className="mb-8 rounded-xl border border-gray-800 bg-gray-900/80 p-5 shadow-xl shadow-black/10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <button
+          type="button"
+          tabIndex={-1}
+          disabled={isFirst}
+          onClick={onPrevious}
+          className={`${navButtonClass} ${isFirst ? disabledClass : enabledClass}`}
+        >
+          <ChevronLeft size={16} />
+          Previous Section
+        </button>
+
+        <div className="min-w-0 text-center">
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+            Section {sectionIndex + 1} of {groups.length}
+          </p>
+          <h2 className="mt-1 text-xl font-semibold text-gray-100">
+            {currentGroup.name}
+          </h2>
+          <p className="mt-1 text-sm text-gray-500">
+            {currentGroup.questions.length} {currentGroup.questions.length === 1 ? "question" : "questions"}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          tabIndex={-1}
+          disabled={isLast}
+          onClick={onNext}
+          className={`${navButtonClass} ${isLast ? disabledClass : enabledClass}`}
+        >
+          Next Section
+          <ChevronRight size={16} />
+        </button>
+      </div>
+
+      <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-gray-800">
+        <div
+          className="h-full rounded-full bg-indigo-500 transition-all duration-300"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+
+      <div className="mt-4 flex flex-wrap justify-center gap-2">
+        {groups.map((group, index) => {
+          const isActive = index === sectionIndex;
+          return (
+            <button
+              key={group.name}
+              type="button"
+              tabIndex={-1}
+              onClick={() => onSelectSection(index)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                isActive
+                  ? "border-indigo-500 bg-indigo-500/15 text-indigo-200"
+                  : "border-gray-800 bg-gray-950/50 text-gray-500 hover:border-gray-700 hover:text-gray-300"
+              }`}
+            >
+              {group.name}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default function QuizReview({ quiz }) {
   const navigate = useNavigate();
   const questions = quiz.questions || [];
   const [showAllOptions, setShowAllOptions] = useState(false);
+  const [sectionIndex, setSectionIndex] = useState(0);
   const firstReviewHeadingRef = useRef(null);
 
   const groups = useMemo(() => {
@@ -364,9 +444,35 @@ export default function QuizReview({ quiz }) {
     return result;
   }, [groups]);
 
+  const currentGroup = groups[sectionIndex] || null;
+  const currentStartNumber = groupStartNumbers[sectionIndex] || 1;
+
+  const goToSection = useCallback((nextIndex) => {
+    if (!groups.length) return false;
+
+    const clampedIndex = Math.max(0, Math.min(nextIndex, groups.length - 1));
+    if (clampedIndex === sectionIndex) return false;
+
+    setSectionIndex(clampedIndex);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return true;
+  }, [groups.length, sectionIndex]);
+
+  const goToPreviousSection = useCallback(() => {
+    return goToSection(sectionIndex - 1);
+  }, [goToSection, sectionIndex]);
+
+  const goToNextSection = useCallback(() => {
+    return goToSection(sectionIndex + 1);
+  }, [goToSection, sectionIndex]);
+
+  useEffect(() => {
+    setSectionIndex((currentIndex) => Math.min(currentIndex, Math.max(groups.length - 1, 0)));
+  }, [groups.length]);
+
   useEffect(() => {
     firstReviewHeadingRef.current?.focus({ preventScroll: true });
-  }, [quiz.slug, groups.length]);
+  }, [quiz.slug, currentGroup?.name]);
 
   useKeyboardShortcuts([
     { key: "q", handler: (event) => {
@@ -374,15 +480,25 @@ export default function QuizReview({ quiz }) {
       navigate(`/${quiz.slug}`);
       return true;
     } },
+    { key: "]", handler: (event) => {
+      if (isNativeInteractiveTarget(event.target)) return false;
+      return goToNextSection();
+    } },
+    { key: "[", handler: (event) => {
+      if (isNativeInteractiveTarget(event.target)) return false;
+      return goToPreviousSection();
+    } },
     { keys: ["backspace", "escape"], handler: () => { navigate("/"); return true; } },
   ], [
+    goToNextSection,
+    goToPreviousSection,
     navigate,
     quiz.slug,
   ]);
 
   return (
     <main className="min-h-screen bg-gray-950 text-gray-100">
-      <ScreenReaderReview groups={groups} firstHeadingRef={firstReviewHeadingRef} />
+      <ScreenReaderReview group={currentGroup} firstHeadingRef={firstReviewHeadingRef} />
 
       <Link
         to="/"
@@ -418,15 +534,23 @@ export default function QuizReview({ quiz }) {
           </button>
         </section>
 
+        <SectionPager
+          groups={groups}
+          sectionIndex={sectionIndex}
+          onSelectSection={goToSection}
+          onPrevious={goToPreviousSection}
+          onNext={goToNextSection}
+        />
+
         <div className="space-y-10">
-          {groups.map((g, idx) => (
+          {currentGroup && (
             <GroupSection
-              key={g.name}
-              group={g}
-              startNumber={groupStartNumbers[idx]}
+              key={currentGroup.name}
+              group={currentGroup}
+              startNumber={currentStartNumber}
               showAllOptions={showAllOptions}
             />
-          ))}
+          )}
         </div>
       </div>
     </main>
