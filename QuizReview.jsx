@@ -45,31 +45,6 @@ function getSectionLabel(q) {
   return q.part || q.category || q.subtopic || "General";
 }
 
-function getSectionDetailLabel(q) {
-  if (q.part) return q.subtopic || q.category || null;
-  if (q.category) return q.subtopic || null;
-  return null;
-}
-
-function orderedUnique(values, preferredOrder = []) {
-  const seen = new Set();
-  const unique = [];
-  for (const value of values) {
-    if (value && !seen.has(value)) {
-      seen.add(value);
-      unique.push(value);
-    }
-  }
-
-  const order = new Map((preferredOrder || []).map((value, index) => [value, index]));
-  return unique.sort((a, b) => {
-    const aIndex = order.has(a) ? order.get(a) : Number.MAX_SAFE_INTEGER;
-    const bIndex = order.has(b) ? order.get(b) : Number.MAX_SAFE_INTEGER;
-    if (aIndex !== bIndex) return aIndex - bIndex;
-    return 0;
-  });
-}
-
 function Pill({ children, tone = "slate" }) {
   const tones = {
     slate: "bg-gray-800 text-gray-400 border-gray-700",
@@ -93,42 +68,35 @@ function formatQuestionContextLabel(label) {
   return String(label).replace(/^[A-Z]\s*[-–—:]\s*/, "");
 }
 
-function getQuestionBreadcrumb(question, sectionName) {
-  const parts = [
-    sectionName,
-    getSectionDetailLabel(question),
-  ].filter(Boolean).map(formatQuestionContextLabel);
-
-  return orderedUnique(parts);
-}
-
 function normalizeContextLabel(label) {
   return formatQuestionContextLabel(label).trim().toLowerCase();
 }
 
-function ScreenReaderReview({ group, firstHeadingRef }) {
+function ScreenReaderReview({ group, firstQuestionRef }) {
   if (!group) return null;
 
   return (
     <div className="sr-only">
       <section key={group.name}>
-        <h2 ref={firstHeadingRef} tabIndex={-1}>
-          {formatQuestionContextLabel(group.name)}
-        </h2>
-        {group.questions.map((question) => {
+        {group.questions.map((question, questionIndex) => {
           const correctIndex = getCorrectIndex(question);
           const options = (question.options || []).map(getOptionText);
-          const breadcrumbs = getQuestionBreadcrumb(question, group.name);
 
           return (
             <article key={question.id}>
-              {breadcrumbs.length > 0 && (
-                <p>{breadcrumbs.join(" to ")}</p>
+              <h2 ref={questionIndex === 0 ? firstQuestionRef : null} tabIndex={-1}>
+                {question.question}
+              </h2>
+              {options.length > 0 && (
+                <ol>
+                  {options.map((option, optionIndex) => (
+                    <li key={optionIndex}>
+                      Option {letterFor(optionIndex)}. {option}
+                      {optionIndex === correctIndex ? " Correct answer." : ""}
+                    </li>
+                  ))}
+                </ol>
               )}
-              <h3>{question.question}</h3>
-              <p>
-                Correct answer: {letterFor(correctIndex)}. {options[correctIndex]}
-              </p>
               {question.explanation && (
                 <p>Explanation: {question.explanation}</p>
               )}
@@ -356,7 +324,7 @@ export default function QuizReview({ quiz }) {
   const questions = quiz.questions || [];
   const [showAllOptions, setShowAllOptions] = useState(false);
   const [sectionIndex, setSectionIndex] = useState(0);
-  const firstReviewHeadingRef = useRef(null);
+  const firstReviewQuestionRef = useRef(null);
 
   const groups = useMemo(() => {
     const map = new Map();
@@ -418,7 +386,7 @@ export default function QuizReview({ quiz }) {
   }, [groups.length]);
 
   useEffect(() => {
-    firstReviewHeadingRef.current?.focus({ preventScroll: true });
+    firstReviewQuestionRef.current?.focus({ preventScroll: true });
   }, [quiz.slug, currentGroup?.name]);
 
   useKeyboardShortcuts([
@@ -445,7 +413,7 @@ export default function QuizReview({ quiz }) {
 
   return (
     <main className="min-h-screen bg-gray-950 text-gray-100">
-      <ScreenReaderReview group={currentGroup} firstHeadingRef={firstReviewHeadingRef} />
+      <ScreenReaderReview group={currentGroup} firstQuestionRef={firstReviewQuestionRef} />
 
       <Link
         to="/"
