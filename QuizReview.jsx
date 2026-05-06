@@ -270,47 +270,6 @@ function QuestionCard({ question, sectionName, showAllOptions, defaultOpen = tru
   );
 }
 
-function GroupSection({ group, startNumber, defaultOpen = true, showAllOptions }) {
-  const [open, setOpen] = useState(defaultOpen);
-  const anchor = `group-${startNumber}`;
-
-  return (
-    <section id={anchor} className="scroll-mt-6">
-      <button
-        type="button"
-        tabIndex={-1}
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
-        aria-controls={`${anchor}-questions`}
-        className="group flex w-full items-center gap-3 rounded-lg border border-gray-800 bg-gray-900/60 px-4 py-3 text-left transition-colors hover:bg-gray-900"
-      >
-        {open ? (
-          <ChevronDown size={16} className="text-gray-500 group-hover:text-gray-300" />
-        ) : (
-          <ChevronRight size={16} className="text-gray-500 group-hover:text-gray-300" />
-        )}
-        <h2 className="flex-1 text-base font-semibold text-gray-100">{group.name}</h2>
-        <span className="text-xs text-gray-500">
-          {group.questions.length} {group.questions.length === 1 ? "question" : "questions"}
-        </span>
-      </button>
-
-      {open && (
-        <div id={`${anchor}-questions`} className="mt-4 space-y-4">
-          {group.questions.map((q, i) => (
-            <QuestionCard
-              key={q.id}
-              question={q}
-              sectionName={group.name}
-              showAllOptions={showAllOptions}
-            />
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
 function SectionPager({ groups, sectionIndex, onSelectSection, onPrevious, onNext }) {
   const currentGroup = groups[sectionIndex];
   const isFirst = sectionIndex <= 0;
@@ -433,19 +392,7 @@ export default function QuizReview({ quiz }) {
       });
   }, [questions, quiz.partsOrder, quiz.categories, quiz.subtopicsOrder]);
 
-  // Pre-compute starting question number for each group so numbering is global.
-  const groupStartNumbers = useMemo(() => {
-    const result = [];
-    let running = 1;
-    for (const g of groups) {
-      result.push(running);
-      running += g.questions.length;
-    }
-    return result;
-  }, [groups]);
-
   const currentGroup = groups[sectionIndex] || null;
-  const currentStartNumber = groupStartNumbers[sectionIndex] || 1;
 
   const goToSection = useCallback((nextIndex) => {
     if (!groups.length) return false;
@@ -542,16 +489,18 @@ export default function QuizReview({ quiz }) {
           onNext={goToNextSection}
         />
 
-        <div className="space-y-10">
-          {currentGroup && (
-            <GroupSection
-              key={currentGroup.name}
-              group={currentGroup}
-              startNumber={currentStartNumber}
-              showAllOptions={showAllOptions}
-            />
-          )}
-        </div>
+        {currentGroup && (
+          <section className="space-y-4">
+            {currentGroup.questions.map((question) => (
+              <QuestionCard
+                key={question.id}
+                question={question}
+                sectionName={currentGroup.name}
+                showAllOptions={showAllOptions}
+              />
+            ))}
+          </section>
+        )}
       </div>
     </main>
   );
