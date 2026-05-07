@@ -1,0 +1,386 @@
+{
+  "coverageManifest": {
+    "source": "https://www.hellointerview.com/learn/low-level-design/in-a-hurry/patterns",
+    "totalQuestions": 42,
+    "parts": [
+      {
+        "id": "A",
+        "name": "Meta — what patterns are and aren't",
+        "concepts": [
+          { "id": "A1", "description": "Patterns are reusable building blocks for common design problems", "questions": ["q1"] },
+          { "id": "A2", "description": "Patterns are names for structures emerging from solid principles", "questions": ["q1", "q2"] },
+          { "id": "A3", "description": "GoF context — 1994, 23 patterns, mostly historical", "questions": ["q1"] },
+          { "id": "A4", "description": "Most GoF patterns don't matter today; languages/composition replaced many", "questions": ["q1"] },
+          { "id": "A5", "description": "Interview reality — ~5 patterns asked", "questions": ["q1"] },
+          { "id": "A6", "description": "Goal isn't to force patterns — only when problem calls for it", "questions": ["q2"] },
+          { "id": "A7", "description": "Forcing a pattern = over-engineering", "questions": ["q2"] },
+          { "id": "A8", "description": "Patterns arise from good design decisions; they don't drive them", "questions": ["q2"] },
+          { "id": "A9", "description": "Most frequent error — fitting a pattern where it doesn't belong", "questions": ["q2"] },
+          { "id": "A10", "description": "Three categories — creational, structural, behavioral", "questions": ["q1"] },
+          { "id": "A11", "description": "US LLD interviews — design quality graded, not pattern names", "questions": ["q3"] },
+          { "id": "A12", "description": "India tradition — interviewers ask patterns by name more often", "questions": ["q3"] },
+          { "id": "A13", "description": "Both approaches have merit; candidates ready for either", "questions": ["q3"] }
+        ],
+        "ladder": { "L1": [], "L2": [], "L3": ["q1"], "L4": ["q2"], "L5": ["q3"] }
+      },
+      {
+        "id": "B",
+        "name": "Factory Method",
+        "concepts": [
+          { "id": "B1", "description": "Factory creates the right kind of object; hides creation logic", "questions": ["q4"] },
+          { "id": "B2", "description": "Use when type can change", "questions": ["q4"] },
+          { "id": "B3", "description": "Polarizing — Java idiomatic vs over-engineered", "questions": ["q5", "q7"] },
+          { "id": "B4", "description": "Triggers — 'support different X types', 'multiple payment methods'", "questions": ["q4", "q6"] },
+          { "id": "B5", "description": "Replace scattered new EmailNotification() with factory.create(type)", "questions": ["q6"] },
+          { "id": "B6", "description": "Adding new types = update factory only, callers unchanged", "questions": ["q6"] },
+          { "id": "B7", "description": "Centralizes creation logic", "questions": ["q4"] },
+          { "id": "B8", "description": "What the article shows is 'Simple Factory', not GoF Factory Method", "questions": ["q8"] },
+          { "id": "B9", "description": "Real code/interviews use Simple Factory, not GoF version", "questions": ["q8"] }
+        ],
+        "ladder": { "L1": ["q4"], "L2": ["q5"], "L3": ["q6"], "L4": ["q7"], "L5": ["q8"] }
+      },
+      {
+        "id": "C",
+        "name": "Builder",
+        "concepts": [
+          { "id": "C1", "description": "Step-by-step construction of complex object without ordering issues", "questions": ["q9"] },
+          { "id": "C2", "description": "Use when many optional parts or configuration choices", "questions": ["q9", "q10"] },
+          { "id": "C3", "description": "Triggers — HTTP requests, DB queries, configuration objects", "questions": ["q9"] },
+          { "id": "C4", "description": "Replaces 10-param constructors with chained calls", "questions": ["q9", "q10"] },
+          { "id": "C5", "description": "Build incrementally with .url().method().header().body().build()", "questions": ["q9"] },
+          { "id": "C6", "description": "Builder makes construction readable, handles optional fields cleanly", "questions": ["q10"] },
+          { "id": "C7", "description": "Common LLD triggers — API clients, complex configurations", "questions": ["q11"] },
+          { "id": "C8", "description": "Rarely used in other contexts", "questions": ["q11"] },
+          { "id": "C9", "description": "If no complex object with optional details, Builder probably isn't needed", "questions": ["q11"] },
+          { "id": "C10", "description": "Most interview problems = simple objects with 2-4 required fields", "questions": ["q11", "q12"] }
+        ],
+        "ladder": { "L1": [], "L2": ["q9"], "L3": ["q10"], "L4": ["q11"], "L5": ["q12"] }
+      },
+      {
+        "id": "D",
+        "name": "Singleton",
+        "concepts": [
+          { "id": "D1", "description": "Ensures only one instance of a class exists", "questions": ["q13"] },
+          { "id": "D2", "description": "Triggers — config manager, connection pool, logger", "questions": ["q13"] },
+          { "id": "D3", "description": "Most of the time you don't actually need it", "questions": ["q13", "q14"] },
+          { "id": "D4", "description": "DI through constructors is clearer + more testable", "questions": ["q14"] },
+          { "id": "D5", "description": "Singletons hide dependencies, make testing harder", "questions": ["q14"] },
+          { "id": "D6", "description": "C++ Meyers Singleton — static local in getInstance, thread-safe since C++11", "questions": ["q15"] },
+          { "id": "D7", "description": "Modern idiomatic approach in C++", "questions": ["q15"] },
+          { "id": "D8", "description": "Interview signal — know what it is and when NOT to use", "questions": ["q14", "q16"] },
+          { "id": "D9", "description": "Default answer to 'should this be a Singleton?' is no", "questions": ["q16"] },
+          { "id": "D10", "description": "Thread-safe versions exist; not expected in LLD", "questions": ["q15"] }
+        ],
+        "ladder": { "L1": [], "L2": ["q13"], "L3": ["q14"], "L4": ["q15"], "L5": ["q16"] }
+      },
+      {
+        "id": "E",
+        "name": "Decorator (Structural)",
+        "concepts": [
+          { "id": "E1", "description": "Adds behavior to object without changing its class", "questions": ["q17"] },
+          { "id": "E2", "description": "Layer functionality at runtime", "questions": ["q17"] },
+          { "id": "E3", "description": "Less common than Strategy or Observer", "questions": ["q18"] },
+          { "id": "E4", "description": "Triggers — 'add logging to specific operations', 'encrypt some messages'", "questions": ["q17", "q19"] },
+          { "id": "E5", "description": "Avoids subclass explosion (LoggedEncryptedEmail combinations)", "questions": ["q17", "q18"] },
+          { "id": "E6", "description": "Wrap base object with decorators sharing the interface", "questions": ["q19"] },
+          { "id": "E7", "description": "Signals — 'optional features', 'stack behaviors', 'combine enhancements'", "questions": ["q19"] },
+          { "id": "E8", "description": "Each decorator adds one piece of functionality", "questions": ["q19"] },
+          { "id": "E9", "description": "Stack in any order; add/remove without touching base or other decorators", "questions": ["q20"] },
+          { "id": "E10", "description": "In real systems order often affects behavior", "questions": ["q21"] },
+          { "id": "E11", "description": "Choose Decorator when behavior added at runtime based on conditions", "questions": ["q20"] },
+          { "id": "E12", "description": "Choose Subclass when fixed at design time, stable variation", "questions": ["q20"] },
+          { "id": "E13", "description": "Runtime-conditional → Decorator; predefined-type → Subclass", "questions": ["q20", "q21"] }
+        ],
+        "ladder": { "L1": ["q17"], "L2": ["q18"], "L3": ["q19"], "L4": ["q20"], "L5": ["q21"] }
+      },
+      {
+        "id": "F",
+        "name": "Facade (Structural)",
+        "concepts": [
+          { "id": "F1", "description": "Coordinator class that hides complexity", "questions": ["q22"] },
+          { "id": "F2", "description": "You're already building facades in every LLD interview", "questions": ["q22", "q23"] },
+          { "id": "F3", "description": "Game class in Tic Tac Toe is a facade", "questions": ["q22"] },
+          { "id": "F4", "description": "Any orchestrator coordinating multiple components = facade", "questions": ["q22"] },
+          { "id": "F5", "description": "Almost nobody names this pattern", "questions": ["q23", "q24"] },
+          { "id": "F6", "description": "Pattern name useful when wrapping existing messy code", "questions": ["q23"] },
+          { "id": "F7", "description": "LLD = designing clean orchestrators from scratch — same structure", "questions": ["q23"] },
+          { "id": "F8", "description": "Doing it instinctively without naming", "questions": ["q24"] },
+          { "id": "F9", "description": "Pattern name describes good orchestrator design", "questions": ["q24"] },
+          { "id": "F10", "description": "Build naturally; name only if it helps communicate", "questions": ["q24"] }
+        ],
+        "ladder": { "L1": [], "L2": [], "L3": ["q22"], "L4": ["q23"], "L5": ["q24"] }
+      },
+      {
+        "id": "G",
+        "name": "Strategy (Behavioral)",
+        "concepts": [
+          { "id": "G1", "description": "Replaces conditional logic with polymorphism", "questions": ["q25"] },
+          { "id": "G2", "description": "Different ways of doing same thing, swap at runtime", "questions": ["q25"] },
+          { "id": "G3", "description": "'Runtime' = while program runs — choose by conditions/inputs/config", "questions": ["q26"] },
+          { "id": "G4", "description": "'Compile time' = decisions baked in at class definition", "questions": ["q26"] },
+          { "id": "G5", "description": "Most common pattern in LLD interviews", "questions": ["q27"] },
+          { "id": "G6", "description": "Tests polymorphism + composition over inheritance directly", "questions": ["q27"] },
+          { "id": "G7", "description": "if/else or switch on type → Strategy waiting to happen", "questions": ["q25", "q27"] },
+          { "id": "G8", "description": "Already shown in OOP page (parking lot vehicle)", "questions": ["q26"] },
+          { "id": "G9", "description": "Each implementation handles itself — no central conditional", "questions": ["q25"] },
+          { "id": "G10", "description": "Strategy swaps BEHAVIOR at runtime through composition", "questions": ["q28"] },
+          { "id": "G11", "description": "Cart holds reference to strategy and delegates", "questions": ["q27"] },
+          { "id": "G12", "description": "Factory chooses TYPE; Strategy chooses BEHAVIOR after object exists", "questions": ["q28", "q29"] },
+          { "id": "G13", "description": "Most important pattern to learn from this page", "questions": ["q27"] }
+        ],
+        "ladder": { "L1": ["q25"], "L2": ["q26"], "L3": ["q27"], "L4": ["q28"], "L5": ["q29"] }
+      },
+      {
+        "id": "H",
+        "name": "Observer (Behavioral)",
+        "concepts": [
+          { "id": "H1", "description": "Objects subscribe to events and get notified when something happens", "questions": ["q30"] },
+          { "id": "H2", "description": "Use when changes in one object trigger updates in others", "questions": ["q30"] },
+          { "id": "H3", "description": "Top-tier interview pattern", "questions": ["q31"] },
+          { "id": "H4", "description": "Triggers — state change, multiple components care", "questions": ["q30", "q31"] },
+          { "id": "H5", "description": "Examples — stock price, order placement → multiple side effects", "questions": ["q31"] },
+          { "id": "H6", "description": "Signals — 'notify' / 'update multiple components'", "questions": ["q31"] },
+          { "id": "H7", "description": "Subject manages observer list — attach/detach/notifyObservers", "questions": ["q32"] },
+          { "id": "H8", "description": "Stock.setPrice triggers notifyObservers → update on each", "questions": ["q32"] },
+          { "id": "H9", "description": "Different observers do different things with same notification", "questions": ["q32"] },
+          { "id": "H10", "description": "Subject doesn't know what observers do with the info", "questions": ["q33", "q34"] }
+        ],
+        "ladder": { "L1": ["q30"], "L2": ["q31"], "L3": ["q32"], "L4": ["q33"], "L5": ["q34"] }
+      },
+      {
+        "id": "I",
+        "name": "State Machine (Behavioral)",
+        "concepts": [
+          { "id": "I1", "description": "Handles state transitions cleanly", "questions": ["q35"] },
+          { "id": "I2", "description": "Use when behavior changes by internal state with complex transition rules", "questions": ["q35"] },
+          { "id": "I3", "description": "Also called 'State pattern'; 'state machine' more common", "questions": ["q35"] },
+          { "id": "I4", "description": "Less common than Strategy or Observer", "questions": ["q36"] },
+          { "id": "I5", "description": "When needed, usually centerpiece of design", "questions": ["q36"] },
+          { "id": "I6", "description": "If state machine in solution, interview probably organized around it", "questions": ["q36"] },
+          { "id": "I7", "description": "Triggers — vending machines, document workflows, game states", "questions": ["q35"] },
+          { "id": "I8", "description": "'State' appearing multiple times in requirements → likely state machine", "questions": ["q37"] },
+          { "id": "I9", "description": "Encapsulate each state's behavior in own class — instead of scattered conditionals", "questions": ["q37"] },
+          { "id": "I10", "description": "Drawing a state diagram is one of best ways to communicate", "questions": ["q38"] },
+          { "id": "I11", "description": "States as circles, transitions as arrows labeled with actions", "questions": ["q38"] },
+          { "id": "I12", "description": "Visual immediately clear how system works", "questions": ["q38"] },
+          { "id": "I13", "description": "Interviewers appreciate the visual — shows clear thinking", "questions": ["q38"] },
+          { "id": "I14", "description": "Each state handles same operations with different effects", "questions": ["q37"] },
+          { "id": "I15", "description": "Each state knows next state + valid actions", "questions": ["q37"] },
+          { "id": "I16", "description": "setState transitions to new state instance", "questions": ["q37"] },
+          { "id": "I17", "description": "No giant switch on current state in every method", "questions": ["q39"] }
+        ],
+        "ladder": { "L1": ["q35"], "L2": ["q36"], "L3": ["q37"], "L4": ["q38"], "L5": ["q39"] }
+      },
+      {
+        "id": "J",
+        "name": "Synthesis — forcing patterns is the failure mode",
+        "concepts": [
+          { "id": "J1", "description": "Patterns help only when matching the problem", "questions": ["q40"] },
+          { "id": "J2", "description": "Most interview-ready designs use 0-1 patterns", "questions": ["q40", "q41"] },
+          { "id": "J3", "description": "3+ patterns = forcing it = over-engineering", "questions": ["q41", "q42"] },
+          { "id": "J4", "description": "Cheat sheet by category — Factory/Builder/Singleton; Decorator/Facade; Strategy/Observer/StateMachine", "questions": ["q40"] },
+          { "id": "J5", "description": "Solve the problem cleanly; name the pattern afterward if it fits", "questions": ["q42"] }
+        ],
+        "ladder": { "L1": [], "L2": [], "L3": ["q40"], "L4": ["q41"], "L5": ["q42"] }
+      }
+    ],
+    "crossPart": ["q3", "q24", "q28", "q29", "q33", "q34", "q41", "q42"],
+    "l5PatternCoverage": {
+      "framing-is-wrong": ["q3", "q24"],
+      "two-levels-of-indirection": ["q21", "q34"],
+      "adversarial-pushback": ["q16"],
+      "trade-off-inversion": ["q12"],
+      "implementation-specific-gotcha": ["q29"],
+      "estimation-backed-scenario": ["q39"],
+      "future-proofing": ["q8", "q42"]
+    }
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "part": "A — Meta",
+      "subtopic": "What patterns are and aren't",
+      "difficulty": "L3",
+      "style": "Scenario-Based",
+      "conceptIds": ["A1", "A2", "A3", "A4", "A5", "A10"],
+      "l5Pattern": null,
+      "question": "A junior engineer says: 'I bought the Gang of Four book and I'm working through all 23 patterns — once I know them all, my LLD interviews will be set.' What's the most accurate critique of this study plan, and how should the engineer recalibrate without dismissing patterns altogether?",
+      "options": [
+        "The plan is correct — the GoF catalog is the canonical reference and mastering all 23 patterns is what separates senior engineers from juniors; LLD interviews specifically test pattern fluency at depth, and the engineer should continue but supplement with implementation in their target language.",
+        "The plan over-invests in a 1994 catalog whose contents have aged unevenly: language features replaced some patterns (iterators are primitives now, not patterns), the shift away from inheritance-heavy OOP made others obsolete, and interviews ask about ~5 patterns total, not 23. The recalibration is to focus on the small set that still earns its complexity in modern LLD — Strategy, Observer, State Machine, Factory, Decorator, plus a few structural orchestrators — and to study each by *what problem it solves* and *when it's the wrong choice*, not by memorizing the catalog.",
+        "The plan is wrong because GoF patterns are exclusively for C++ and Smalltalk, and modern languages need different patterns; the engineer should switch to a Python-specific or JavaScript-specific patterns book that reflects current practice, and abandon the GoF entirely as a historical artifact with no current relevance.",
+        "The plan is fine but inefficient — the engineer should learn all 23 GoF patterns plus the supplementary patterns from POSA and Domain-Driven Design, since interviews increasingly draw from the broader literature; mastering 23 is a starting point but not a stopping point, and the recalibration is upward, not downward."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article's exact framing: 'Most online resources still dutifully list all 23 GoF patterns like they're equally important. They're not. We're cutting the historical baggage and focusing on the patterns that actually show up in modern LLD interviews. The ones below are what interviewers ask about and what you'll use in real designs.' The article specifically mentions iterators as an example of a pattern that became a language primitive, and points to the composition-over-inheritance shift as making others obsolete. The recalibration is to study the small set that still pays its weight — Strategy, Observer, State Machine, Factory, Decorator, plus orchestrators — and to study each by problem-fit, not by memorization. Option A doubles down on the catalog. Option C overcorrects by abandoning GoF entirely (some patterns are still relevant). Option D moves in the wrong direction by adding more catalogs.",
+      "interviewScript": "In your interview, when patterns come up, talk about the small set that's relevant to the problem in front of you. Don't recite the catalog; describe what the pattern buys you and when it's the wrong choice — that demonstrates judgment, not memorization.",
+      "proTip": "GoF was 1994; languages and design culture have moved. Learn the 5-7 patterns that still earn their complexity, study each by problem-fit and anti-fit, and skip the rest until a real situation introduces you to them."
+    },
+    {
+      "id": "q2",
+      "part": "A — Meta",
+      "subtopic": "What patterns are and aren't",
+      "difficulty": "L4",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["A2", "A6", "A7", "A8", "A9"],
+      "l5Pattern": null,
+      "question": "A candidate's parking-lot design includes Factory (for vehicles), Builder (for ParkingTickets with 12 optional fields), Strategy (for pricing — but there's only one flat rate), Observer (for spot-availability updates — but only one consumer subscribes), and Decorator (for adding logging — but no logging requirement was given). The design compiles and works. What is the most accurate critique?",
+      "options": [
+        "The design is fine — it demonstrates pattern fluency across all three GoF categories (creational, structural, behavioral), and interviewers reward this kind of comprehensive application; the implementation is correct, so the worst critique is that some patterns are 'precautionary' but they don't break anything.",
+        "The design is wrong because some patterns are misapplied — Builder is over-engineering for a 12-field ticket since most fields have defaults, Strategy is pointless with one rate, and Observer with one consumer is just a method call. The fix is to remove the misapplied ones and keep Factory and Decorator, which are the two that match real complexity in this problem.",
+        "The design forces patterns onto a problem that doesn't call for them, which is the article's named anti-pattern. Patterns 'arise from good design decisions' rather than driving them; using a pattern when the problem doesn't naturally call for it is over-engineering and signals the candidate hasn't internalized when each pattern earns its complexity. The correct base design is plain classes for vehicle types, a constructor for ParkingTicket, a single price() method on the spot or vehicle, a direct method call where the Observer was, and no Decorator at all. Patterns get added back if and only if specific complexity arrives that they actually solve.",
+        "The design is wrong on a specific axis — too many patterns from one category. The candidate has three behavioral patterns (Strategy, Observer, Decorator-as-runtime-wrap) and only one creational; the fix is to rebalance toward more creational patterns by adding a Singleton for the parking-lot manager and an Abstract Factory for spots, restoring symmetry across the GoF categories."
+      ],
+      "correctIndex": 2,
+      "explanation": "The article's exact framing: 'You should only use a pattern when the problem naturally calls for it. Forcing one is a common mistake that signals over-engineering. Patterns arise from good design decisions rather than driving them, and the most frequent error is trying to fit a pattern where it doesn't belong.' The candidate's design is the canonical instance — five patterns layered onto a problem that needed almost none. The fix is to strip back to the simple shape and add patterns only when specific complexity arrives that the pattern actually addresses. Option A normalizes the over-engineering. Option B partially corrects but keeps Decorator without a logging requirement, which is the same anti-pattern at smaller scale. Option D invents a category-balance rubric that isn't real and prescribes adding more patterns, which is exactly the wrong direction.",
+      "interviewScript": "In your interview, when you reach for a pattern, name the *specific complexity* the pattern is solving. If you can't name one in a sentence, don't add the pattern. The senior signal is recognizing when complexity warrants structure, not deploying structure preemptively.",
+      "proTip": "Patterns are responses to complexity, not investments against future complexity. Add a pattern when a concrete piece of complexity is in front of you that the pattern addresses; otherwise the pattern is its own complexity with no payoff."
+    },
+    {
+      "id": "q3",
+      "part": "A — Meta",
+      "subtopic": "What patterns are and aren't",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["A11", "A12", "A13"],
+      "l5Pattern": "framing-is-wrong",
+      "question": "You're interviewing across two markets in the same week. US-tradition interviewer #1 grades you primarily on design quality and barely mentions patterns by name. India-tradition interviewer #2 explicitly asks: 'Which design patterns did you use? Name them and where they apply.' Two candidates handle this differently. Candidate X uses a single style across both rounds — describing each design move by what it buys, never naming patterns — and lets the chips fall. Candidate Y uses a single style across both rounds — naming patterns proactively and describing each design move with the pattern label leading. What is the strongest senior framing of how to navigate this consistently?",
+      "options": [
+        "Candidate X has the better strategy — design quality is the universal currency, and interviewers who grade on naming are applying the wrong rubric; consistent design-first framing across both rounds protects against the worst case (interviewer disagreeing with the rubric) and demonstrates principled judgment over interviewer-pleasing.",
+        "Candidate Y has the better strategy — naming patterns proactively is the lowest common denominator that satisfies both rubrics; interviewers who don't grade on naming won't penalize the names being present, and interviewers who do grade on naming will reward them. Always-name dominates always-design-first as a strategy.",
+        "Both candidates miss the framing. The article's explicit position is that 'both approaches have merit, and we want you prepared for either reality you may encounter.' The senior move is to lead every design move with what it *buys* (design-first framing — universal across rubrics) and to add the pattern *name* either when the interviewer asks or as a courtesy summary at end of section. That hybrid approach hits both rubrics simultaneously: design-quality interviewers get the substance; pattern-naming interviewers get the labels. Crucially, the candidate doesn't have to read the interviewer in advance — the format works for everyone, and the candidate can stay consistent across the loop without sacrificing signal.",
+        "The choice depends entirely on geography — Candidate X is right in the US and Candidate Y is right in India, and senior calibration means switching strategies based on the interviewer's apparent regional tradition. The article's framing implies that adaptability between rounds is itself the senior signal."
+      ],
+      "correctIndex": 2,
+      "explanation": "The framing-is-wrong move: the question presents a binary (always-name vs never-name) and asks the candidate to pick. The article's explicit framing — 'both approaches have merit, and we want you prepared for either reality' — supports a hybrid: lead with what the design move buys (works for everyone), add the pattern label when asked or as a closing summary (works for naming-oriented interviewers without distorting the substance). Why other options tempt: Option A's design-first absolutism scores well with US interviewers but forfeits real signal with naming-oriented ones. Option B's always-name reverses the cost — design-first interviewers may read it as recitation rather than reasoning. Option D's geography-based switching is operationally fragile (interviewer tradition isn't always known, and judging by accent or company is inappropriate) and creates an inconsistency across the loop that interviewers often compare notes on. The deeper insight: the question forces a false choice; the senior move is to do both halves of the spectrum simultaneously with the substance leading and the label following — and to do it consistently regardless of who's interviewing.",
+      "interviewScript": "In your interview, lead with what each design move buys ('Vehicle is an interface so the lot doesn't branch on type'), and add the pattern name either when asked ('that's the Strategy pattern') or as a brief closing summary ('to label what I just did: that's Strategy and that's Observer'). The substance is universal currency; the label is a courtesy that costs almost nothing and pays off with naming-oriented interviewers.",
+      "proTip": "When interview cultures vary on pattern naming, refuse to choose. Lead with what each move buys (design-first), add the pattern label as a courtesy when asked or in summary. The hybrid satisfies both rubrics; picking a side forfeits signal in one of them."
+    },
+    {
+      "id": "q4",
+      "part": "B — Factory Method",
+      "subtopic": "Factory Method",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["B1", "B2", "B4", "B7"],
+      "l5Pattern": null,
+      "question": "Your code currently has `new EmailNotification(...)` in 14 places across the codebase. A new requirement adds SMS and push notifications, and the choice of which to use depends on user preferences fetched at runtime. A teammate proposes: 'Add `if (pref == \"sms\") new SMSNotification(); else if (pref == \"push\") new PushNotification(); else new EmailNotification();' wherever notifications are created — that's 14 places to update.' What does Factory Method propose instead, and what is the structural payoff?",
+      "options": [
+        "Replace each `new EmailNotification(...)` site with `notificationFactory.create(pref)` where the factory contains the type-selection logic in one place. The structural payoff is centralization — when push notifications are added, the factory updates once; the 14 call sites never change. Factory hides which concrete class is being constructed behind a method that returns the right type for a given input, so callers depend on the abstraction (the factory's contract) rather than on concrete class names scattered across the codebase.",
+        "Replace each direct construction with a Singleton notification manager — the manager holds a static reference to one EmailNotification, one SMSNotification, and one PushNotification, and call sites do `manager.email().send(...)` to pick the type. The structural payoff is single-instance sharing across call sites, eliminating both the construction redundancy and the type-selection logic.",
+        "Replace each direct construction with a Decorator stack — wrap an SMSDecorator around the EmailNotification at call sites that need SMS, and a PushDecorator at sites that need push. The structural payoff is that each call site retains explicit awareness of what kind of notification is being sent, while the type difference is layered through wrapping rather than through alternative constructors.",
+        "Replace each direct construction with a Strategy injection at the call site — every call site takes a NotificationStrategy parameter, and the wiring layer chooses which strategy to inject. The structural payoff is that call sites are entirely decoupled from notification types and the wiring layer makes the type decision once per code path."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's exact framing: 'Instead of writing new EmailNotification() throughout your code, you call notificationFactory.create(type). Now when you add SMS notifications, you update the factory. The rest of your code never changes.' Factory centralizes creation logic — call sites depend on the factory's method contract, the factory chooses the concrete class, and adding a new type is a factory update rather than a 14-call-site refactor. Option B's Singleton mismatches the problem — single-instance sharing isn't the goal; the goal is type selection at construction time. Option C's Decorator is for layering behavior on existing objects, not for choosing between alternatives at construction. Option D's Strategy is for swapping behavior post-construction, not for choosing which concrete class to instantiate; the article specifically distinguishes Factory (chooses type) from Strategy (chooses behavior).",
+      "interviewScript": "In your interview, say: 'I'd add a NotificationFactory.create(prefType) and replace the 14 direct constructions with calls to it. The factory has the type-selection logic in one place; adding push notifications is a factory update, not a 14-site refactor. Call sites depend on the factory's method, not on which concrete class runs.'",
+      "proTip": "Factory's payoff is structural: the choice of which concrete class to construct lives in one place. If your codebase has 'new ConcreteX' scattered across many call sites, a factory is what stops the next type-add from being a 14-site change."
+    },
+    {
+      "id": "q5",
+      "part": "B — Factory Method",
+      "subtopic": "Factory Method",
+      "difficulty": "L2",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["B3"],
+      "l5Pattern": null,
+      "question": "An interviewer says: 'I notice you reach for Factory pattern for almost every multi-type situation. Some of my coworkers see Factory as a Java idiom that's been over-applied since the 2000s; in modern code with first-class functions, even simple type-selection can be a one-line lambda or a dict lookup, no Factory class needed.' What's the most defensible response that respects both views?",
+      "options": [
+        "Push back firmly — Factory is the canonical OO solution and the coworkers are applying a functional-programming bias that doesn't translate well to enterprise codebases; senior engineers should defend established patterns against trendy alternatives, and a one-line lambda lacks the structural clarity of a named factory class.",
+        "Concede entirely — modern languages have made Factory mostly obsolete, and a dict lookup or first-class function is the right answer in any language with closures. The Factory class is a Java-era artifact and naming it in modern designs signals out-of-date thinking; the right move is to use the language-level primitive whenever possible.",
+        "Engage the trade-off explicitly — Factory's value is centralization (one place for type-selection logic) and named structure (the factory's contract is explicit and discoverable). In small designs with stable types, a dict lookup or factory function captures the same centralization benefit at lower ceremony; the named class earns its weight when the type-selection grows beyond a single line, when validation is needed at construction, or when the factory itself needs to be injected and tested. The choice between Factory class and lighter alternatives is a question of where the design's complexity threshold sits, not a stylistic preference between OO and functional camps.",
+        "Suggest both approaches in the same design — use a Factory class for the type-selection logic itself but expose a static helper function as the primary call-site API, so the lambda-style is what most callers see and the Factory class is internal. This gives the appearance of modern minimalism while preserving the canonical pattern internally for cases that need it."
+      ],
+      "correctIndex": 2,
+      "explanation": "The article's exact framing: 'Factories are polarizing. While very popular and idiomatic in languages like Java, some engineers see them as examples of overengineering. If you choose to implement one, take a look at your interviewer and check them for a grimace.' The senior response engages the polarization explicitly rather than defending one side. Option A defends the OO position absolutely. Option B concedes the OO position absolutely. Option D's dual-implementation hides one inside the other, which is more complex than either alone. Option C names the actual decision criteria — centralization, validation, testability — and frames the choice as a complexity threshold rather than a style war.",
+      "interviewScript": "In your interview, say: 'Factory's value is centralization — one place for type-selection logic and a named contract you can inject and test. In small designs with stable types, a dict lookup or function is enough; the named class earns its weight when type-selection grows past one line, when validation is needed at construction, or when the factory itself needs to be substituted in tests. I treat the choice as a complexity threshold question rather than an OO-vs-functional preference.'",
+      "proTip": "Factory's anti-pattern shape is when it's a class wrapping a one-line lookup with no validation and no testability need — that's ceremony without payoff. Reach for the lighter alternative when the surface is small; reach for the named class when the type-selection has substance to it."
+    },
+    {
+      "id": "q6",
+      "part": "B — Factory Method",
+      "subtopic": "Factory Method",
+      "difficulty": "L3",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["B4", "B5", "B6"],
+      "l5Pattern": null,
+      "question": "A teammate writes a Factory that takes 8 parameters: `factory.create(type, retries, timeout, encrypted, logged, batched, async, priority)`. Inside, it constructs the right concrete class and configures it with all 8 parameters. What's the precise critique, and what does this reveal about Factory's right scope?",
+      "options": [
+        "The Factory has absorbed configuration responsibility that doesn't belong in creation — its job is to select the concrete class for a given type, not to thread 8 configuration parameters through it. The fix is to separate type-selection (Factory) from configuration (Builder, configuration object, or method-chaining), so the factory takes only the type and returns a configured-or-default object that callers can refine if needed. The deeper signal is that Factory's right scope is the *type-selection decision* and the *minimum required parameters* for the chosen type to be valid.",
+        "The Factory is fine as designed — eight parameters is tolerable for a configuration-heavy domain, and centralizing all of them in one factory is the article's exact recommendation for cross-cutting concerns. The fix is to add a configuration-defaults file that the factory reads at construction, so the 8 parameters can be optional with reasonable defaults rather than always required.",
+        "The Factory is wrong because it should return a builder, not the constructed object — the right shape is `factory.create(type).withRetries(3).withTimeout(5s).build()` so the call site composes rather than passing 8 positional parameters. The fix is to convert the Factory to a Factory-of-Builders pattern, which is a named GoF combination for this specific case.",
+        "The Factory's parameter count is symptomatic of missing inheritance — if the 8 parameters were broken across base and subclass, the factory would only need to thread the base ones (which most call sites use) and the subclass-specific ones would be set after construction. The fix is to redesign the type hierarchy so configuration concerns are split by abstraction level."
+      ],
+      "correctIndex": 0,
+      "explanation": "Factory's job is type-selection — given an input, return the right concrete class. When the factory absorbs configuration responsibility, its parameter count grows with every new optional and the factory becomes a god-method that conflates two distinct decisions (which type to construct, how to configure the chosen type). The fix is to keep the factory narrow (return the type with sensible defaults) and let callers refine via Builder, configuration object, or chained setters. Option B normalizes the parameter explosion. Option C's 'Factory of Builders' is real but heavier than needed; in practice, separating Factory and Builder usually serves the same goal with less ceremony. Option D pushes responsibility into inheritance, which doesn't address the structural issue that the factory itself is doing two jobs.",
+      "interviewScript": "In your interview, when reviewing a Factory with many parameters, say: 'The factory's job is type-selection — given an input, return the right concrete class. The 8 parameters are configuration responsibilities that don't belong in creation; they're conflating two decisions. I'd narrow the factory to type and minimum-required parameters, return a constructed-with-defaults object, and let callers refine through a Builder or chained setters if they need to override defaults.'",
+      "proTip": "Factory's right scope is the type-selection decision plus the minimum required parameters for the chosen type to be valid. Configuration with many optionals belongs in a Builder or configuration object — not in the factory's signature."
+    },
+    {
+      "id": "q7",
+      "part": "B — Factory Method",
+      "subtopic": "Factory Method",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["B3"],
+      "l5Pattern": null,
+      "question": "Your interviewer reviews a small two-type design (Email and SMS notifications, no growth expected) and says: 'You added a NotificationFactory class. With only two types and no growth, can't you just have the call site do `if (pref == \"sms\") new SMSNotification(); else new EmailNotification();`? The factory is one indirection that buys nothing.' Two candidates respond. Candidate X immediately removes the factory. Candidate Y disagrees: 'You're right that the factory is light here, but it preserves the seam — when push notifications land or when type-selection logic grows past one line (validation, defaults, A/B testing), the factory is where it goes; without it, the next change is a hunt across every call site that has the inline conditional.' Why does Y's response carry senior signal even though X's removal would simplify the current code?",
+      "options": [
+        "Y carries senior signal by recognizing that Factory's value is the *seam*, not the current centralization payoff. Eliminating the factory makes today's code smaller but recreates the original problem — type-selection scattered across call sites — the moment the next type-add or validation requirement lands. The cost of the factory is one class with two cases; the cost of removing it is the next refactor's call-site hunt. Y is arguing for the same KISS-vs-future-proofing balance the article calls 'managed deferral': add structure to solve the named near-term problem, leave it in place against the named near-term growth, remove it only when both have proven inapplicable.",
+        "X carries senior signal — YAGNI applies to factory classes too, and adding one for two types is speculative complexity. Y's 'preserve the seam' argument is exactly the kind of speculative defense the article warns against in design-principles; the senior move is to start with the inline conditional and add the factory when the third type lands or when validation is actually needed.",
+        "Both responses are defensible but Y's is the better choice for senior interviews specifically because pattern-naming interviewers reward visible patterns; X's removal optimizes for current code minimalism but signals that the candidate doesn't recognize when seams matter, which is read as junior even when the current code is cleaner.",
+        "The disagreement is mostly about taste — both candidates have valid reasoning, and most interview rubrics would grade them similarly because the codebase is small enough that either choice is defensible. The article's framing on Factory ('check the interviewer for a grimace') treats this as a calibration decision, not a right-answer decision."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article frames Factory as polarizing and recommends reading the interviewer, but it doesn't recommend removing it whenever it's lightly used today. Y's argument captures the seam value: the factory is one class that absorbs near-term growth (third type, validation, A/B test) without forcing a call-site hunt. The cost of the factory is small (one class, two cases); the cost of removing and re-adding it is the call-site refactor when the next change lands. Option B applies YAGNI in the wrong direction — YAGNI is for features, not for seams that prevent future global refactors (mirrors the design-principles encapsulation L5 question). Option C reduces the difference to interviewer-flattery; the real signal is structural reasoning. Option D treats the disagreement as taste, which misses Y's actual argument.",
+      "interviewScript": "In your interview, when defending a lightly-used Factory: 'You're right that the centralization payoff is small today — two types, no growth requirement on the table. The factory's value is the seam: when the third type lands, when validation gets added, when A/B testing of routing starts, the change goes inside the factory rather than across every call site. The cost of the factory is one small class; the cost of removing it is the next refactor's call-site hunt. I'd keep it.'",
+      "proTip": "Factory's value isn't always centralization — sometimes it's the seam. When deciding whether to add or keep one, ask: 'where will the next change to type-selection land?' If the answer is 'across every call site,' the factory is paying for itself even when it looks light today."
+    },
+    {
+      "id": "q8",
+      "part": "B — Factory Method",
+      "subtopic": "Factory Method",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["B8", "B9"],
+      "l5Pattern": "future-proofing",
+      "question": "An interviewer says: 'You've been using Factory as a static method — `NotificationFactory.create(type)`. The Gang of Four's Factory Method pattern is different: an abstract factory class with a virtual create() method, and subclasses override it. Which pattern is yours, and what's the difference, and which one would you reach for in a real codebase that's growing complexity over five years?' What's the most defensible answer?",
+      "options": [
+        "My pattern is the Simple Factory — a static method that selects the concrete class based on input. The GoF Factory Method has each subclass override a virtual create() so the factory itself is polymorphic. They solve overlapping problems but at different complexity tiers: Simple Factory handles 'pick a type from input', and the GoF version is for when the factory itself needs to vary by context (different factories for different test environments, different regional implementations, etc.). The article specifically says: 'What we're showing here is what people actually build and what interviewers expect when they say use a factory.' Five-year growth: I'd start with Simple Factory and migrate to GoF Factory Method only if the factory itself starts varying by context — running tests against a stub factory, having region-specific factories, or splitting factories by team ownership. The migration cost is bounded because the call sites already depend on a method, not a constructor; switching from static to virtual is a localized change.",
+        "My pattern is the GoF Factory Method — a static method on a class is structurally equivalent to a virtual method on an abstract class once you account for language-level polymorphism. The article's distinction is largely pedagogical; in practice, modern Java/Kotlin/C# treat static methods on factory classes as the canonical Factory Method, and the GoF abstract-factory-with-overrides version was specific to early-1990s C++ idioms.",
+        "My pattern is neither — it's the Service Locator anti-pattern, since a static method that returns concrete classes hides dependencies in the same way a global state does. The GoF Factory Method doesn't have this problem because it's instance-based and the factory itself is injected. Five-year growth: I'd refactor to instance-based factory injection regardless of the GoF distinction, since hidden dependencies compound over time.",
+        "My pattern is the Simple Factory and GoF Factory Method is essentially the same pattern with extra ceremony — the abstract-factory-class-with-overrides version is what 1990s C++ books recommended, but in practice it adds a virtual method indirection without buying a real benefit, so the Simple Factory is what every modern codebase uses. Five-year growth: stay with Simple Factory; the GoF version is a historical curiosity."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's exact framing: 'This is technically called Simple Factory, not the Gang of Four Factory Method pattern. The GoF version uses abstract factory classes with subclasses that override a factory method. It's more complex and rarely shows up in real code or interviews. What we're showing here is what people actually build and what interviewers expect when they say use a factory.' The future-proofing pattern at L5: Simple Factory works today and for the foreseeable future of most codebases; GoF Factory Method becomes the right answer only when the factory itself needs to vary by context (test stubs, regional variations, team-owned factory subclasses). Why other options tempt: Option B flattens a real distinction the article explicitly draws — static methods and virtual-method-overrides are not equivalent; the latter is a different abstraction with different costs and benefits. Option C invents a Service-Locator-anti-pattern critique that's a real concern in some discussions but isn't the article's point and isn't the right framing here (Simple Factory's static method is a well-defined contract, not hidden global state). Option D dismisses GoF entirely, which goes too far — there are real codebases where the factory needs to vary by context and GoF Factory Method is the right shape; saying it has no use is the inverse error of Option B. Deeper insight: Simple Factory and GoF Factory Method address overlapping but distinct problems, and the right choice is determined by whether the factory itself is going to need to vary — not by historical or stylistic preference.",
+      "interviewScript": "In your interview, say: 'Mine is the Simple Factory — static method picks the concrete class. GoF Factory Method has the factory itself be polymorphic, with subclasses overriding create. Simple Factory is what you build when type-selection varies; GoF Factory Method is what you build when the factory itself varies — different factories for different environments, regions, or test stubs. I'd start with Simple Factory and migrate only when the factory needs to vary by context, because the migration is bounded — call sites already depend on a method, so switching from static to instance is localized.'",
+      "proTip": "Simple Factory and GoF Factory Method aren't synonyms or alternatives — they solve different problems. Simple Factory: type varies. GoF Factory Method: the factory varies. Default to Simple Factory; reach for GoF only when the factory itself needs to be substituted across contexts."
+    }
+  ],
+  "partsOrder": [
+    "A — Meta",
+    "B — Factory Method",
+    "C — Builder",
+    "D — Singleton",
+    "E — Decorator (Structural)",
+    "F — Facade (Structural)",
+    "G — Strategy (Behavioral)",
+    "H — Observer (Behavioral)",
+    "I — State Machine (Behavioral)",
+    "J — Synthesis"
+  ],
+  "subtopicsOrder": [
+    "What patterns are and aren't",
+    "Factory Method",
+    "Builder",
+    "Singleton",
+    "Decorator",
+    "Facade",
+    "Strategy",
+    "Observer",
+    "State Machine",
+    "Forcing patterns is the failure mode"
+  ],
+  "difficultyTiers": ["L1", "L2", "L3", "L4", "L5"],
+  "active": true
+}

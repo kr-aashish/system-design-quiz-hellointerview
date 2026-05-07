@@ -1,0 +1,655 @@
+{
+  "coverageManifest": {
+    "source": "https://www.hellointerview.com/learn/low-level-design/in-a-hurry/oop-concepts",
+    "totalQuestions": 26,
+    "parts": [
+      {
+        "id": "A",
+        "name": "Framing — OOP concepts as implementation mechanisms",
+        "concepts": [
+          { "id": "A1", "description": "OOP concepts implement design principles, they don't replace them", "questions": ["q1", "q2", "q3"] },
+          { "id": "A2", "description": "Four-concept canon: encapsulation, abstraction, polymorphism, inheritance", "questions": ["q1"] },
+          { "id": "A3", "description": "Recognition in design > vocabulary recital", "questions": ["q1", "q2", "q3", "q26"] }
+        ],
+        "ladder": { "L1": [], "L2": [], "L3": ["q1"], "L4": ["q2"], "L5": ["q3"] }
+      },
+      {
+        "id": "B",
+        "name": "Encapsulation",
+        "concepts": [
+          { "id": "B1", "description": "Private data + method-controlled access", "questions": ["q4", "q5"] },
+          { "id": "B2", "description": "Predictability benefit — enforce invariants in methods", "questions": ["q5", "q8"] },
+          { "id": "B3", "description": "Public field = no guarantee rules are followed", "questions": ["q4", "q8"] },
+          { "id": "B4", "description": "Bad ParkingLot — public spots vector", "questions": ["q4"] },
+          { "id": "B5", "description": "Good ParkingLot — private spots, parkVehicle method", "questions": ["q4"] },
+          { "id": "B6", "description": "Returning mutable internal collections breaks encapsulation; copies/unmodifiable", "questions": ["q6"] },
+          { "id": "B7", "description": "Default = write the getter", "questions": ["q5"] },
+          { "id": "B8", "description": "Encapsulation as basic interview hygiene check", "questions": ["q7"] }
+        ],
+        "ladder": { "L1": ["q4"], "L2": ["q5"], "L3": ["q6"], "L4": ["q7"], "L5": ["q8"] }
+      },
+      {
+        "id": "C",
+        "name": "Abstraction",
+        "concepts": [
+          { "id": "C1", "description": "Define what, hide how", "questions": ["q9"] },
+          { "id": "C2", "description": "Simplification benefit — abstraction hides complexity", "questions": ["q9", "q10"] },
+          { "id": "C3", "description": "Swap implementations without touching callers", "questions": ["q11"] },
+          { "id": "C4", "description": "Bad OrderService coupled to StripeAPI", "questions": ["q11"] },
+          { "id": "C5", "description": "Good PaymentMethod interface + OrderService delegation", "questions": ["q10", "q11"] },
+          { "id": "C6", "description": "Belongs where complexity is — variations, rules, messy details", "questions": ["q12"] },
+          { "id": "C7", "description": "Interview signal: tangled logic / multiple-approach hints", "questions": ["q12"] },
+          { "id": "C8", "description": "Right-level trap — too abstract = doWork(); too specific = no abstraction", "questions": ["q12", "q13"] },
+          { "id": "C9", "description": "Choose by what callers need to perform", "questions": ["q13"] }
+        ],
+        "ladder": { "L1": ["q9"], "L2": ["q10"], "L3": ["q11"], "L4": ["q12"], "L5": ["q13"] }
+      },
+      {
+        "id": "D",
+        "name": "Polymorphism",
+        "concepts": [
+          { "id": "D1", "description": "Same call, different behavior; replaces switch/typecheck", "questions": ["q14"] },
+          { "id": "D2", "description": "Dispatch by concrete type, no typechecking", "questions": ["q14", "q16"] },
+          { "id": "D3", "description": "Follows from abstraction", "questions": ["q15"] },
+          { "id": "D4", "description": "Bad ParkingLot if/elif chain", "questions": ["q14"] },
+          { "id": "D5", "description": "Good Vehicle.getRequiredSpotSize polymorphism", "questions": ["q14"] },
+          { "id": "D6", "description": "Adding a new vehicle = new class, ParkingLot unchanged", "questions": ["q15", "q18"] },
+          { "id": "D7", "description": "Trigger: type-checks/switch-on-enum → polymorphism", "questions": ["q14", "q15"] },
+          { "id": "D8", "description": "Trade-off: extensibility vs. trace/debug difficulty", "questions": ["q16", "q17"] },
+          { "id": "D9", "description": "Company tolerance varies; articulate the trade-off", "questions": ["q17"] }
+        ],
+        "ladder": { "L1": ["q14"], "L2": ["q15"], "L3": ["q16"], "L4": ["q17"], "L5": ["q18"] }
+      },
+      {
+        "id": "E",
+        "name": "Inheritance",
+        "concepts": [
+          { "id": "E1", "description": "Subclass = more specific version inheriting data + behavior", "questions": ["q19"] },
+          { "id": "E2", "description": "Tight-coupling cost", "questions": ["q19", "q20"] },
+          { "id": "E3", "description": "Fragile base class problem", "questions": ["q20", "q23"] },
+          { "id": "E4", "description": "Inheritance often more rigid than it solves", "questions": ["q19"] },
+          { "id": "E5", "description": "Composition + interfaces alternative", "questions": ["q21", "q22"] },
+          { "id": "E6", "description": "Composition gives abstraction + polymorphism without parent-child or shared state", "questions": ["q21"] },
+          { "id": "E7", "description": "Works when stable shared impl is genuinely needed", "questions": ["q20"] },
+          { "id": "E8", "description": "BankAccount/Savings/Checking good case", "questions": ["q20"] },
+          { "id": "E9", "description": "Breaks when used to model behavior differences", "questions": ["q19", "q22"] },
+          { "id": "E10", "description": "Bad Car/ElectricCar engine override", "questions": ["q19"] },
+          { "id": "E11", "description": "Hybrid problem — extend Car or ElectricCar?", "questions": ["q22"] },
+          { "id": "E12", "description": "Fix: isolate varying behavior, compose", "questions": ["q21"] },
+          { "id": "E13", "description": "Drivetrain + GasEngine/ElectricMotor + CarWithDrivetrain", "questions": ["q21"] },
+          { "id": "E14", "description": "Hybrid = two drivetrains; hydrogen = new Drivetrain", "questions": ["q22"] },
+          { "id": "E15", "description": "Default to interfaces + composition", "questions": ["q22", "q23"] },
+          { "id": "E16", "description": "Most LLD interviews don't need inheritance at all", "questions": ["q23"] }
+        ],
+        "ladder": { "L1": ["q19"], "L2": ["q20"], "L3": ["q21"], "L4": ["q22"], "L5": ["q23"] }
+      },
+      {
+        "id": "F",
+        "name": "Synthesis — concepts show through how you design",
+        "concepts": [
+          { "id": "F1", "description": "Vocabulary not the point; recognition is", "questions": ["q24", "q26"] },
+          { "id": "F2", "description": "Multiple-implementations cue → interface", "questions": ["q24"] },
+          { "id": "F3", "description": "Designing a class → private fields + methods", "questions": ["q24"] },
+          { "id": "F4", "description": "Type checks → interface", "questions": ["q24"] },
+          { "id": "F5", "description": "Concepts show through how you design, not what you name", "questions": ["q25", "q26"] },
+          { "id": "F6", "description": "Encapsulation summary line — hide state, expose behavior", "questions": ["q25"] },
+          { "id": "F7", "description": "Abstraction summary line — interfaces for variations", "questions": ["q25"] },
+          { "id": "F8", "description": "Polymorphism summary line — let objects handle themselves", "questions": ["q25"] },
+          { "id": "F9", "description": "Inheritance summary line — compose, don't inherit (default to interfaces)", "questions": ["q25"] }
+        ],
+        "ladder": { "L1": [], "L2": [], "L3": ["q24"], "L4": ["q25"], "L5": ["q26"] }
+      }
+    ],
+    "crossPart": ["q3", "q8", "q18", "q23", "q26"],
+    "l5PatternCoverage": {
+      "framing-is-wrong": ["q3", "q26"],
+      "two-levels-of-indirection": ["q13"],
+      "adversarial-pushback": ["q8"],
+      "trade-off-inversion": ["q23"],
+      "implementation-specific-gotcha": [],
+      "estimation-backed-scenario": ["q18"],
+      "future-proofing": ["q8"]
+    }
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "part": "A — Framing",
+      "subtopic": "OOP concepts as implementation mechanisms",
+      "difficulty": "L3",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["A1", "A2", "A3"],
+      "l5Pattern": null,
+      "question": "A candidate is asked to design a small library reservation system. They open with: 'I'll use encapsulation, abstraction, polymorphism, and inheritance — those are the four pillars of OOP.' They then make every field on Reservation public, give User a 14-method interface that every consumer pulls from in full, and use inheritance to model a PremiumReservation that just adds a discount field. What does this design tell the interviewer about the candidate's relationship to the four concepts they named?",
+      "options": [
+        "The candidate has solid theoretical knowledge but is weak on implementation idioms — they understand each concept but lack the C++/Java practice to express them; the fix is more practice writing classes in their target language so the patterns become muscle memory and the design tightens up.",
+        "The candidate is fine on three of the four concepts but failed only on inheritance — PremiumReservation should be a Strategy or a Decorator instead. Once that single substitution is made the design is conceptually sound and the other three concepts are implemented adequately for an LLD round.",
+        "The candidate is reciting vocabulary rather than designing with the concepts — encapsulation isn't a label you apply, it's a property you produce by making fields private and gating mutations through methods, and the same is true for the other three. Naming the pillars doesn't substitute for applying them.",
+        "The candidate would have produced a stronger design by skipping the OOP-concepts framing entirely and starting from requirements; naming the four pillars at the top of an answer biases toward over-abstracting because it primes the candidate to reach for vocabulary they then have to fit somewhere in the design."
+      ],
+      "correctIndex": 2,
+      "explanation": "OOP concepts are mechanisms for implementing design ideas — properties you produce in the design, not labels you apply to it. A class with public fields hasn't been encapsulated by the candidate saying 'encapsulation'; an inheritance hierarchy that adds one field isn't applying inheritance well even though it uses the keyword. The candidate is conflating naming the concepts with using them, which is the recitation failure mode the article warns against. Option A misdiagnoses the gap as language-idiom rather than design-vs-vocabulary. Option B cherry-picks one issue and ignores that the other three concepts are also being labeled rather than applied. Option D over-corrects — naming the canon isn't the problem; the design failing to demonstrate any of the four concepts is.",
+      "interviewScript": "In your interview, say: 'I'm going to keep Reservation's fields private and expose deposit/cancel/extend methods so the class enforces its own state rules; I'll define a small interface for the few User capabilities each consumer actually needs rather than a fat User type; and I'll model premium pricing as a strategy or a price-rule rather than a subclass that just adds a field. I won't name the concepts unless you ask — they should show through.'",
+      "proTip": "If you find yourself naming an OOP concept while designing, ask: 'what concrete property of this class shows that?' If the answer is 'I said the word', the concept isn't actually present yet."
+    },
+    {
+      "id": "q2",
+      "part": "A — Framing",
+      "subtopic": "OOP concepts as implementation mechanisms",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["A1", "A3"],
+      "l5Pattern": null,
+      "question": "An interviewer says: 'Walk me through where you used each of the four OOP concepts in your parking-lot design.' Two candidates respond differently. Candidate X immediately scans their design and labels each spot: 'Encapsulation here on the spot fields, abstraction here in the Vehicle interface, polymorphism here in getRequiredSpotSize, inheritance here in Truck extending Vehicle.' Candidate Y pauses and answers: 'Vehicle is an interface so adding a new size doesn't touch the parking lot, the spots are private so the lot controls how a vehicle gets parked, and getRequiredSpotSize means the lot doesn't care about vehicle types. I haven't used inheritance — composition fit better.' Why does Y typically score higher even though X correctly identifies more concepts?",
+      "options": [
+        "X scores higher in most rubrics — they identify all four concepts, while Y admits to skipping one; rubrics reward coverage of the full canon, and Y's framing as 'what it buys' is a stylistic preference that doesn't compensate for missing inheritance entirely.",
+        "Y describes what each concept *delivers* in the specific design — what change becomes cheap, what knowledge stays inside one class, what code never has to touch a type-check. X labels each design element with a concept name, which is one level removed from showing understanding; you can map labels onto a design without grasping what the concept is doing for you. Y also defends a real design choice by naming the absent concept, which is a senior signal in itself.",
+        "Y scores higher because they spoke for longer and added detail; the concept-naming Y omits is offset by the additional words. The substantive content is roughly the same, and the difference is mostly that Y sounded more thorough and Y's pacing matched the interviewer's expected elaboration depth in this round.",
+        "Y scores higher only with US-tradition interviewers; in pattern-naming traditions where coverage of the canon is valued, X's identification of all four pillars would score higher and Y's explicit non-use of inheritance would read as either confusion or evasion. The right move is to read the interviewer first and choose accordingly."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article's closing framing of OOP concepts is that they 'show through in how you design, not in what you name.' Y's answer describes what each concept *buys* in the design — cheap extension, owned state, no type-checking — which is what shows understanding; labeling parts of a design with concept names is one indirection removed. Y also benefits from naming a real choice ('I haven't used inheritance — composition fit better'), which the article specifically calls out as the right default for most LLD problems. Option A applies a coverage-as-signal rubric the article rejects. Option C reduces the difference to verbosity. Option D inverts the seniority gradient — experienced interviewers in any tradition recognize labeling-without-substance quickly, and 'I deliberately didn't use it' with a reason is stronger than naming a vacuous use.",
+      "interviewScript": "In your interview, when an interviewer asks you to label OOP concepts, replace each label with what the concept buys you in this design: 'Vehicle is an interface so adding a new size doesn't touch the parking lot,' 'spots are private so the lot owns how a vehicle gets parked,' 'no inheritance — I prefer composition for behavior variation here.' That phrasing demonstrates the concept; the label by itself only proves you remember the word.",
+      "proTip": "When asked which OOP concepts you used, replace 'I used X' with 'X means Y here, which buys me Z.' That sentence shape forces you to demonstrate the concept rather than recite it."
+    },
+    {
+      "id": "q3",
+      "part": "A — Framing",
+      "subtopic": "OOP concepts as implementation mechanisms",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["A1", "A3", "F1", "F5"],
+      "l5Pattern": "framing-is-wrong",
+      "question": "An interviewer at a company with a strict pattern-naming culture says: 'In this design, name exactly which of encapsulation, abstraction, polymorphism, and inheritance you used. I want to hear all four, and if any are missing I want to hear why.' You used encapsulation and abstraction comfortably and polymorphism implicitly through your interfaces, but you deliberately did not use inheritance because composition was a better fit. What is the strongest senior response that respects the interviewer's framing without surrendering the design judgment?",
+      "options": [
+        "Concede the request and add a small inheritance hierarchy on the fly — even something like splitting Vehicle into ConcreteVehicle and AbstractVehicle — so all four concepts have a representative in the design; the interviewer wants to see the full canon and offering a token use costs little, so the cost/benefit of compliance favors adding it.",
+        "Engage the framing on its terms but don't fake the missing concept: 'Encapsulation: spots and balance live behind methods that enforce invariants. Abstraction: PaymentMethod and Vehicle are interfaces shaped by what callers need. Polymorphism: Vehicle.getRequiredSpotSize means the lot never branches on type. Inheritance: deliberately not used — behavior variation here is a composition fit, and inheriting would couple subclasses to a parent contract they don't share. I'd reach for inheritance only for stable shared implementation, which this design doesn't have.'",
+        "Decline the framing — explain that OOP concepts show through in how you design and that naming them is a stylistic preference of one tradition; the interviewer should grade the design itself rather than its vocabulary alignment, and accommodating a naming request implicitly endorses the wrong rubric. The senior move is to defend the principle that concepts are properties, not labels, even at some cost to rapport.",
+        "Reframe the existing Decorator usage as inheritance — 'EncryptedPayment extends Payment' qualifies — so the canon is technically covered while the underlying design stays correct; this is a low-risk dual-fit that satisfies the naming requirement without distorting the design, since decorators are subtypes of the wrapped interface in a strict definitional sense."
+      ],
+      "correctIndex": 1,
+      "explanation": "The framing-is-wrong move at L5: the question isn't entirely wrong — it's worth describing each present concept by what it buys, and it's worth defending the absent one with reasoning. The wrong move is to fake the missing concept (Option A) or refuse the framing (Option C). Why other options tempt: Option A is seductive in pattern-naming cultures where coverage rewards exist, but fake inheritance produces a design the candidate can't defend on follow-up. Option C tempts because the article does say concepts 'show through' rather than being named, but that's guidance for *how* to answer, not license to refuse. Option D conflates Decorator with inheritance — Decorator is composition that *implements* the same interface as the wrapped object; calling it inheritance signals fuzziness on the very distinction (composition vs inheritance) the question is testing. The deeper insight: senior signal is describing each present concept by its concrete effect *and* defending an explicit non-use with a trigger condition. Both halves matter; either alone is shallow.",
+      "interviewScript": "In your interview, when asked to name all four concepts and justify omissions, run the format: 'Encapsulation: this. Abstraction: this. Polymorphism: this. Inheritance: deliberately not — composition was a better fit because (concrete reason). I'd add inheritance if (concrete trigger).' That answers the question, demonstrates each concept by its effect, and turns the omission into a defended judgment.",
+      "proTip": "When asked 'where did you use X concept,' answer with what the concept *delivers* in this design. When asked 'why didn't you use Y,' answer with the *trigger condition* under which you would. Both halves prove understanding; either alone is recitation."
+    },
+    {
+      "id": "q4",
+      "part": "B — Encapsulation",
+      "subtopic": "Encapsulation",
+      "difficulty": "L1",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["B1", "B3", "B4", "B5"],
+      "l5Pattern": null,
+      "question": "Two ParkingLot designs are placed side by side. Design X exposes a public `vector<ParkingSpot> spots` field that any caller can read or modify directly. Design Y keeps `spots` private and provides `parkVehicle(v)` (which finds an available spot and marks it occupied) plus a `getSpots()` that returns a copy of the list. Both compile, both run, both have the same memory layout. Which capability does Y give the ParkingLot class that X structurally cannot, and why is that the encapsulation point?",
+      "options": [
+        "Y can guarantee that whenever a vehicle is added, related state stays consistent — the spot is marked occupied, audit logs are written, capacity counters update — because mutations have to go through parkVehicle. X cannot guarantee this even with the best intentions because any caller can write directly to `spots` and skip the bookkeeping; encapsulation is the property that the class owns the only path to its state changes.",
+        "Y is faster than X at runtime because returning a copy from getSpots avoids the JIT's escape-analysis penalty on the public field reference; X also forces an extra heap-fence on every read because the field is publicly addressable. Encapsulation in this case is primarily a runtime-performance property under modern compilers.",
+        "Y has better thread safety than X because private fields in C++ are subject to stricter memory-ordering guarantees than public ones; encapsulation here is a concurrency property, and parkVehicle becomes the natural place to add a lock if the lot needs to be thread-safe later.",
+        "Y has better testability than X because mocking the parkVehicle method is easier than mocking field access; X forces tests to set up the full spots vector by hand, while Y lets tests stub the method directly. Encapsulation primarily buys testability rather than correctness, since correctness can be enforced by code review on either design."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's exact framing: 'When your Account class owns its balance field and only lets you modify it through deposit() and withdraw(), you can enforce rules in those methods. You can prevent negative balances, log transactions, update related state. If the balance was public and anyone could write to it directly, you'd have no guarantee those rules get followed.' That's the encapsulation point: the class has the only path to its mutations, so invariants and side effects are guaranteed rather than hoped for. Option B invents a runtime-performance angle that isn't the real concern. Option C invents a thread-safety distinction that isn't real (private vs public has no memory-ordering effect). Option D notes a real benefit (testability) but misranks it — correctness via guaranteed invariants is the structural win; testability is downstream.",
+      "interviewScript": "In your interview, say: 'I'd keep spots private and expose parkVehicle. The reason isn't aesthetics — it's that parkVehicle becomes the only path to mutating the lot, so anything I need to keep consistent (occupied flag, audit log, capacity counter, billing event) lives next to the mutation and runs every time. With a public spots field I could write the same checks but I have no way to guarantee callers go through them.'",
+      "proTip": "Encapsulation isn't about field visibility for its own sake — it's about owning the *only path* to a class's state changes so invariants and side effects can't be skipped."
+    },
+    {
+      "id": "q5",
+      "part": "B — Encapsulation",
+      "subtopic": "Encapsulation",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["B1", "B2", "B7"],
+      "l5Pattern": null,
+      "question": "You're designing an `Account` class. The `balance` field is private. A junior teammate asks: 'Why bother with `getBalance()` and `setBalance(amount)` if all setBalance does is assign? It's the same as making the field public, with extra typing.' What's the most precise answer that doesn't require invoking the abstract word 'encapsulation'?",
+      "options": [
+        "The accessor methods are mainly a convention for IDEs and serializers — most JSON libraries, ORMs, and reflection-based frameworks expect getter/setter pairs to recognize a field as a 'property,' so the methods exist to satisfy tooling rather than to provide any runtime guarantee the public field couldn't.",
+        "If the only thing setBalance does today is assign, then your teammate is essentially right and the methods can be replaced with a public field; encapsulation is only worth the extra typing once setBalance has at least one real check, and adding it before that is premature engineering of a concern that doesn't exist yet.",
+        "The methods give the class a place to *put* a check or side effect when one becomes necessary — preventing negative balance, writing an audit log, firing an event — without changing every caller. With a public field, the day a check is needed, every call site that assigned to it has to be found and changed, and the type system can't help you find them.",
+        "The methods make the field accessible across compilation units in ways the public field cannot; in C++ specifically, public fields are subject to ABI-stability constraints across DLL boundaries that getter/setter pairs avoid, so the convention exists primarily to insulate library consumers from binary breakage when the field's representation changes."
+      ],
+      "correctIndex": 2,
+      "explanation": "The article's exact point: the methods exist so the class can later enforce invariants (prevent negative balance, log transactions, update related state) without callers needing to change. The accessor isn't 'extra typing for nothing' — it's the seam at which checks and side effects can be added without a global refactor. Option A is partially true (frameworks do recognize getter/setter pairs) but misranks the reason — that's a downstream effect, not the structural one. Option B inverts the principle: the article specifically recommends defaulting to the getter even when it does nothing, because the cost is small and the future-proofing is real. Option D invents a C++ ABI-binary-compatibility argument that's real for libraries but not the LLD-interview encapsulation point.",
+      "interviewScript": "In your interview, say: 'The accessor isn't typing for typing's sake — it's the seam where I can add a check, an audit log, or an event later without touching every call site. If I make balance public today and tomorrow we need to prevent negative balances, I have to find every assignment in the codebase and add the check; with setBalance I add it in one place and every caller is automatically covered.'",
+      "proTip": "When deciding between a public field and a getter/setter pair, ask: 'is there any chance an invariant or side effect attaches to this field later?' If yes — and for almost every field on a domain object the answer is yes — write the methods now while the cost is one line."
+    },
+    {
+      "id": "q6",
+      "part": "B — Encapsulation",
+      "subtopic": "Encapsulation",
+      "difficulty": "L3",
+      "style": "Gotcha/Trap",
+      "conceptIds": ["B6"],
+      "l5Pattern": null,
+      "question": "Your `ShoppingCart` class keeps `private List<Item> items` and exposes `getItems()` that returns the field directly. A teammate writes `cart.getItems().add(newItem)` to bypass cart-level validation (e.g. quantity caps, banned-item checks). The fields are private, the methods are well-named, and yet the cart's invariants are violated. What is the precise structural failure here, and what is the canonical fix?",
+      "options": [
+        "The failure is that getItems is named like a getter rather than a copier; renaming it to `snapshotItems()` or `currentItems()` signals to callers that the returned list shouldn't be modified, which fixes the misuse without changing the runtime behavior or the underlying data structure.",
+        "The failure is that getItems returns a reference to the live internal list, so callers can mutate the cart's state by mutating that list — sidestepping every method on the cart. The fix is to return a copy, an unmodifiable view (Collections.unmodifiableList), or a read-only iterator; the class regains ownership of state changes because the only path to mutating items is the cart's own methods.",
+        "The failure is that the cart doesn't implement a `Collection` interface itself, so callers fall back to manipulating the internal list directly. The fix is to make ShoppingCart implement Iterable<Item> and Collection<Item> so consumers can use idiomatic operations on the cart without ever calling getItems, eliminating the seam where misuse occurs.",
+        "The failure is a teammate-discipline problem — the codebase needs a code-review rule, a static-analysis lint, or a runtime assertion that flags mutations on returned collections; the class itself is structurally sound and the leak is a process issue rather than a design issue, since C++/Java cannot prevent this through the type system alone."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article's exact warning: 'Are you returning references to mutable internal collections that callers can modify, or are you returning copies?' Returning a live reference defeats encapsulation because callers can mutate the cart's state without going through any cart method — every invariant in addItem, removeItem, applyDiscount is bypassed. The fix is to return a copy or an unmodifiable view; the cart regains the property that its methods are the only path to its mutations. Option A's rename is a documentation patch that doesn't change behavior — disciplined callers might respect it but the type system still permits the misuse. Option C goes the other way (more exposure, not less) and makes the problem worse. Option D off-loads a structural problem onto process; the type system *can* prevent this through unmodifiable views or copies, and that's the article's recommended fix.",
+      "interviewScript": "In your interview, say: 'I'd return Collections.unmodifiableList(items) or a copy from getItems. The bug here is that returning the live list lets callers mutate the cart's internal state without going through addItem or removeItem, which means none of the cart's checks or side effects run. Returning a copy or unmodifiable view restores the property that the cart's methods are the only path to mutating its items.'",
+      "proTip": "If a getter returns a collection field directly, the class has effectively made that collection public — every method that's supposed to gate mutations can be sidestepped. Default to returning copies or unmodifiable views; opt out only when the performance cost is real and measured."
+    },
+    {
+      "id": "q7",
+      "part": "B — Encapsulation",
+      "subtopic": "Encapsulation",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["B8"],
+      "l5Pattern": null,
+      "question": "Your interviewer reviews your design and says: 'Your getters and setters are pure pass-throughs — getBalance returns balance, setBalance assigns balance. You haven't actually encapsulated anything; the methods are just public fields with extra steps. You could delete them and your design would be identical.' Two candidates respond. Candidate X immediately deletes the methods and uses public fields. Candidate Y disagrees: 'They look pass-through today, but the seam is what I'm preserving — the day someone asks for an audit log or a non-negative invariant, the methods stay and the call sites don't change. Public fields would make that change a global refactor.' Why does Y's response carry more senior signal even though X's claim is technically true *right now*?",
+      "options": [
+        "Y carries more senior signal because the article specifically prescribes the getter as a default — 'if you're designing a class and wondering whether to expose a field or write a getter, write the getter.' Y is following the prescription and preserving the seam at which future invariants can attach without touching call sites; X is optimizing for today's exact code at the cost of tomorrow's refactor.",
+        "Y carries more senior signal because deleting the methods would violate Java Bean conventions used by serialization frameworks like Jackson and ORM frameworks like JPA, breaking integration with the rest of the system. X's deletion would compile but cause runtime serialization failures whenever the Account class crosses a framework boundary.",
+        "X is actually correct in this specific case — pure pass-through methods are a code smell, and modern style guides recommend public final fields for value-like objects (Java records, Kotlin data classes, C# auto-properties). Y is following an outdated 1990s convention; the senior move is to recognize when the convention has been superseded.",
+        "Both responses are defensible — Y's argument is a stylistic preference for forward compatibility, X's is a stylistic preference for code minimalism. The interviewer is looking for any coherent justification, and either response would score equivalently because neither is structurally wrong on the current code."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's explicit recommendation: 'If you're designing a class and wondering whether to expose a field or write a getter, write the getter.' The reason isn't ceremony — it's that the getter is the *seam* at which a future invariant or side effect attaches without changing call sites. Y's response captures exactly this: the method looks pass-through today, but its presence is what makes adding tomorrow's audit log or non-negative check a one-line change inside the class rather than a hunt across every call site. Option B introduces a real-but-narrower concern (Bean conventions) that's true for some frameworks but isn't the structural argument. Option C invokes records/data classes correctly for *value* types but misapplies it to Account — value types are immutable; Account holds mutable state with invariants. Option D treats this as stylistic when the article explicitly prescribes the getter as the default.",
+      "interviewScript": "In your interview, when an interviewer challenges pass-through accessors, say: 'They look pass-through today, but the method is the seam where a check, audit log, or event hooks in tomorrow without touching the callers. Public fields make that future change a global refactor; the getter makes it a one-line edit inside the class. The cost of the seam is one line of code; the cost of removing it is paid the first time we need an invariant.'",
+      "proTip": "Pass-through getters aren't waste — they're the seam at which invariants and side effects can be added without rewriting callers. Default to writing them; opt out only for true value types whose fields are genuinely immutable and rule-free."
+    },
+    {
+      "id": "q8",
+      "part": "B — Encapsulation",
+      "subtopic": "Encapsulation",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["B2", "B3", "F5"],
+      "l5Pattern": "future-proofing",
+      "question": "A fintech team's `Wallet` class has had a public `balance` field for three years. The original argument was 'YAGNI — we don't have any rules on balance, just deposits and withdrawals that always run on validated amounts.' That argument has held: there are no negative-balance bugs in production. Now legal requires that every balance change writes an audit row to a compliance log within the same transaction, and that any change exceeding $10,000 raises a real-time alert. A junior proposes: 'Add the audit and alert at every call site that assigns to balance.' What is the most accurate critique of the proposal AND the original public-field decision?",
+      "options": [
+        "The proposal is fine — distributing the audit and alert across call sites keeps the Wallet class simple, and grep is a sufficient tool to find every assignment in modern IDEs. The original public-field decision was also fine; YAGNI was correctly applied because the requirement only landed today, and the change cost is bounded.",
+        "The proposal is wrong because audit and alert are cross-cutting concerns that belong in an aspect or interceptor, not at every call site. The original public-field decision was fine; YAGNI was correctly applied. The fix is to add an aspect that intercepts assignments to balance via reflection or bytecode rewriting, leaving the field public.",
+        "The proposal is wrong AND the original decision was wrong. The proposal is wrong because every call site has to be located and modified, and any missed site is a compliance defect with regulatory consequences — and the type system can't help you find them. The original decision was wrong because encapsulation isn't a YAGNI-able concern; the cost of the getter/setter at the start was nearly zero and the cost of *not* having them is now this exact refactor under deadline pressure. The seam is what YAGNI should never strip out.",
+        "The original decision was fine but the proposal should be replaced with a database trigger — every UPDATE on the wallet row fires the audit insert and the alert publish, so the application code doesn't change at all. This is the standard fix for compliance retrofits and avoids touching the wallet class entirely while satisfying the requirement."
+      ],
+      "correctIndex": 2,
+      "explanation": "The future-proofing trap at L5: a design that 'works today' can have a hidden cost that materializes when a new requirement lands. The public balance field worked for three years not because encapsulation was unnecessary but because no rule had attached yet. The moment a rule attaches — audit, alert, non-negative invariant, currency conversion, anything — the missing seam costs you a global refactor across every call site, and any missed site is a defect. Encapsulation is the future-proofing primitive: the getter/setter at the start was a one-line cost that bought a one-line edit point for the rest of the class's life. Why other options tempt: Option A is the comfortable view — YAGNI was applied, and the refactor is bounded. The trap is that the refactor isn't bounded by code size; it's bounded by 'every call site must be found and changed correctly' which is a compliance-grade requirement. Option B's aspect-oriented fix tries to work around the missing seam at the language level — it's possible in Java/Kotlin via AspectJ but adds bytecode magic and doesn't work portably; the original miss is still the root cause. Option D's database-trigger fix is real but misses the operational concern (the alert needs to fire from the application path with context the DB doesn't have) and dodges the design-level lesson. Deeper insight: encapsulation isn't a feature you add when needed — it's a seam you preserve so future features can attach without a global edit. YAGNI applies to *features*, not to *seams*.",
+      "interviewScript": "In your interview, say: 'The proposal is wrong because every call site has to be found and modified correctly — any missed site is a compliance defect, and the type system can't help us find them. But the deeper point is that the original public-field decision was also wrong. Encapsulation isn't a feature; it's the seam where future invariants attach. YAGNI applies to features — the audit, the alert — not to the seam itself, because the cost of the seam was one line and the cost of not having it is this refactor. I'd add the methods now, route every existing assignment through them, then add the audit and alert in one place inside the setter.'",
+      "proTip": "YAGNI is for features, not for seams. A getter/setter pair costs one line and preserves the place where invariants can attach later — never delete it 'because it's pass-through.' That's exactly when its real value is being banked."
+    },
+    {
+      "id": "q9",
+      "part": "C — Abstraction",
+      "subtopic": "Abstraction",
+      "difficulty": "L1",
+      "style": "Scenario-Based",
+      "conceptIds": ["C1", "C2"],
+      "l5Pattern": null,
+      "question": "Two designs handle payments. Design X has `OrderService` containing logic to call Stripe's REST API directly: build a charge request, set the API key, parse the response, handle Stripe-specific error codes. Design Y has `OrderService` calling `paymentMethod.process(amount)` where `paymentMethod` is some implementation of a `PaymentMethod` interface. Both work today against Stripe. What does Design Y let OrderService stay ignorant of, and why is that the abstraction point?",
+      "options": [
+        "Y lets OrderService stay ignorant of how the payment actually happens — whether it hits Stripe's API, charges a stored token, calls PayPal, or does something else entirely — because the interface only commits to 'process this amount and tell me the result.' That ignorance is the abstraction: the caller depends on what the operation does, not on how it does it, so swapping how it's done doesn't propagate into OrderService.",
+        "Y lets OrderService stay ignorant of network failures — by hiding the HTTP layer behind a method call, the caller doesn't have to handle timeouts, retries, or status codes. The abstraction here is primarily error-handling encapsulation, and the interface's value is that exceptions become the only failure surface OrderService sees.",
+        "Y lets OrderService stay ignorant of testing concerns — the interface lets unit tests inject a stub PaymentMethod, while X requires either a mock HTTP server or live Stripe credentials. Abstraction in this design is primarily a testability win, since the production behavior of X and Y is identical against the same Stripe backend.",
+        "Y lets OrderService stay ignorant of payment-provider pricing — by routing through an abstraction, the wiring layer can choose the cheapest provider per transaction (Stripe for cards, PayPal for some markets, Square for in-person). The abstraction's primary value is cost optimization across providers, not testability or encapsulation."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's exact point: 'When your payment processing code depends on a PaymentMethod interface instead of concrete classes like CreditCardProcessor or PayPalProcessor, you can swap implementations without touching the code that uses them. The caller doesn't need to know whether you're hitting Stripe's API or storing payment tokens in a database. It just calls process() and gets a result.' Abstraction is the property that the caller depends on *what* the operation does, not *how* — so the how can change without propagating. Option B picks a real downstream effect (error-handling cleanup) but misranks it; the structural win is implementation independence. Option C also picks a real downstream effect (testability) but misranks it for the same reason. Option D invents a cross-provider routing scenario that isn't the article's point and isn't a typical default for the abstraction.",
+      "interviewScript": "In your interview, say: 'OrderService calls paymentMethod.process(amount) and doesn't know — or care — whether that hits Stripe, PayPal, or a stored token. That ignorance is the point. Tomorrow we add Apple Pay; OrderService doesn't change. Tomorrow we replace Stripe with Adyen; OrderService doesn't change. The interface promises a result; how it gets there is somebody else's problem.'",
+      "proTip": "When you write an abstraction, name the *one thing* the caller is staying ignorant of. If you can't name it in a sentence, the abstraction probably isn't pulling its weight."
+    },
+    {
+      "id": "q10",
+      "part": "C — Abstraction",
+      "subtopic": "Abstraction",
+      "difficulty": "L2",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["C2", "C5"],
+      "l5Pattern": null,
+      "question": "An interviewer asks: 'What's the difference between the abstraction your PaymentMethod interface provides and the encapsulation your Wallet class provides? They both seem to be about hiding things.' Two candidates respond. Candidate X says: 'They're pretty much the same — both hide implementation details from callers, just at different scopes.' Candidate Y says: 'Encapsulation hides *state*; abstraction hides *which implementation*. Wallet has private balance so callers can't bypass deposit/withdraw rules — that's about owning state. PaymentMethod has Stripe and PayPal implementations so callers don't depend on which one is in use — that's about decoupling from a choice.' Which response is more accurate, and why?",
+      "options": [
+        "X is closer to right — at a deep level, both concepts hide things from callers, and the distinction Y draws is artificial; modern OO discussions treat the two as overlapping aspects of information hiding rather than as separate concepts. The interviewer is testing whether you can see the underlying unity rather than parse vocabulary.",
+        "Y is more accurate. Encapsulation owns *state* — the private fields and the methods that gate mutations to them; the win is that invariants can't be bypassed. Abstraction owns *which implementation* — the interface that lets callers depend on a contract rather than a class; the win is that the implementation can change without touching callers. They overlap (both involve hiding) but they answer different design questions: 'who can change this state?' (encapsulation) vs 'which implementation am I depending on?' (abstraction).",
+        "Both are roughly correct but X's framing is more useful in interviews because it lets you talk about a single concept (information hiding) and apply it broadly; Y's distinction is technically right but operationally fussy and slows down the design conversation when interviewers want broad coverage.",
+        "Y is more accurate but the framing is incomplete — encapsulation and abstraction both also hide *behavior variation* and *future changes*, so the two-axis split (state vs implementation) misses the polymorphism axis where both contribute. The full answer needs all three axes to be precise."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article distinguishes the two concepts crisply: encapsulation 'means keeping an object's data private and letting the object control how that data is used' — this is about owning state. Abstraction 'means exposing only what's essential and hiding implementation details behind clear interfaces' — this is about owning which implementation a caller depends on. The two overlap (both hide) but they answer different questions: encapsulation is the answer to 'who can change this object's state?' and abstraction is the answer to 'which implementation am I depending on?' Option A flattens a real distinction into 'information hiding' — a useful umbrella but not a substitute for the two specific concepts. Option C concedes the distinction but devalues it; in interviews, the precision is what proves understanding. Option D adds a 'behavior variation' axis that's actually polymorphism's domain (which the article treats separately) and conflates the three concepts.",
+      "interviewScript": "In your interview, say: 'Encapsulation owns state — Wallet's balance is private so deposit/withdraw can enforce rules nothing else can bypass. Abstraction owns which implementation — PaymentMethod is an interface so OrderService doesn't depend on Stripe specifically. They overlap because both hide things, but they answer different questions: encapsulation is who-owns-this-state, abstraction is which-implementation-am-I-depending-on. Polymorphism is then how-different-implementations-actually-behave-at-runtime.'",
+      "proTip": "When interviewers ask about overlapping concepts, give the *axis of distinction* explicitly — 'state ownership' vs 'implementation dependency' — rather than a hand-wave at 'information hiding.' The precise framing is the senior signal."
+    },
+    {
+      "id": "q11",
+      "part": "C — Abstraction",
+      "subtopic": "Abstraction",
+      "difficulty": "L3",
+      "style": "Scenario-Based",
+      "conceptIds": ["C3", "C4", "C5"],
+      "l5Pattern": null,
+      "question": "Your `OrderService.checkout(order)` method currently does: `StripeAPI stripe; stripe.setApiKey(apiKey); stripe.createCharge(order.total, order.creditCard);`. The interviewer says: 'We're adding PayPal next sprint, then Apple Pay the sprint after.' A junior teammate proposes: 'Add `if (order.paymentType == \"paypal\") { paypal.charge(...); } else { stripe.createCharge(...); }` for now and we'll generalize when we add Apple Pay.' What's the most defensible critique that points at the right abstraction without over-engineering it?",
+      "options": [
+        "The proposal is fine for the next sprint — adding the if/else is the smallest change and it gets PayPal shipped without speculative design. The Apple Pay sprint is when generalization becomes worthwhile because three implementations is the rule-of-three threshold for abstraction; abstracting before then is premature.",
+        "The proposal hardcodes a structural decision (which provider to call) into checkout, which is exactly what abstraction prevents. With a `PaymentMethod` interface and `process(amount)` method, checkout becomes one line that delegates; PayPal is a new class implementing the interface and Apple Pay is another. The rule isn't 'wait for three' — it's 'as soon as the choice of implementation is varying, the caller shouldn't depend on the specific one.' Abstracting now is responding to the requirement that just landed, not speculating about the future.",
+        "The proposal is fine because if/else statements compile faster than virtual dispatch in modern JIT compilers; the structural cost of the conditional is offset by the runtime benefit, and the abstraction can be added later with no migration cost since the interface refactor is mechanical in modern IDEs.",
+        "The proposal is wrong but the right fix is heavier than an interface — checkout should be split into a Strategy + Factory + Builder stack so future payment providers can be wired through configuration without code changes. The interface alone leaves the wiring to the OrderService caller, which is incomplete decoupling; the full pattern stack is the abstraction-correct answer."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article's exact framing: when 'requirements suggest multiple approaches,' that's the signal to introduce an abstraction. The trigger isn't 'rule of three'; it's that the choice of implementation is now varying, so the caller shouldn't depend on the specific one. Replacing the StripeAPI hardcoding with a PaymentMethod interface is responding to the requirement that just landed (PayPal is shipping next sprint), not speculating. Option A invokes rule-of-three, but the rule applies to *speculative* abstractions; here the second implementation is a confirmed near-term requirement. Option C invents a JIT-performance argument that's the wrong axis — micro-optimizations don't outweigh structural cost. Option D over-engineers — the interface alone handles the requirement; Strategy + Factory + Builder is what the design-principles page warns against ('parking lot' over-engineering anti-pattern).",
+      "interviewScript": "In your interview, say: 'I'd extract a PaymentMethod interface with process(amount). StripePayment and PayPalPayment implement it. Checkout calls paymentMethod.process(order.total) and never references either. Apple Pay is a new class, not a new branch in checkout. The trigger isn't rule-of-three — it's that the choice of implementation is now varying, so the caller shouldn't depend on the specific one. That's the abstraction, and it's the smallest change that matches the requirement.'",
+      "proTip": "The abstraction trigger isn't a count of duplications — it's the moment the choice of implementation starts varying. As soon as a second implementation is confirmed, depending on the specific one becomes a coupling cost the design doesn't need to pay."
+    },
+    {
+      "id": "q12",
+      "part": "C — Abstraction",
+      "subtopic": "Abstraction",
+      "difficulty": "L4",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["C6", "C7", "C8"],
+      "l5Pattern": null,
+      "question": "A candidate's design for a chess game introduces a `GameAction` interface with one method: `execute(context)`. Concrete implementations include `MoveAction`, `UndoAction`, `ResignAction`, and even `RenderBoardAction`. The interviewer asks: 'What does GameAction promise the caller about what execute does?' The candidate replies: 'It does something to the game state.' What is the precise critique of this abstraction, and where is the right level?",
+      "options": [
+        "The abstraction is fine — `GameAction.execute(context)` is the canonical Command pattern from GoF and is widely used in undo/redo systems; the candidate is correctly applying a well-known pattern, and the interviewer's pushback reflects unfamiliarity with the Command pattern rather than a real design flaw.",
+        "The abstraction is too specific — bundling RenderBoardAction with MoveAction conflates rendering and game-state mutation, and the fix is to split into two interfaces (one for state-changing actions, one for view-side actions). The level is right; the *grouping* is wrong, and the two-interface split fixes it without changing the abstraction's depth.",
+        "The abstraction is too abstract. `execute(context)` makes no commitment to *what* execute does — every concrete implementation can do anything, so callers learn nothing from depending on the interface. The article warns against this exact pattern: 'Too abstract and your interface becomes meaningless (doWork(), handleRequest()).' The right level is one where the interface name and method signature describe what the caller can rely on — `Move.apply(board)`, `UndoStack.pop()`, etc. — even if it means the interface covers fewer cases.",
+        "The abstraction is fine in concept but should be parameterized — `GameAction<T>` with `execute(context): T` so the return type carries information about what the action produces. The current `execute(context)` signature loses information at the type level, and adding a type parameter restores it without changing the structural depth of the abstraction."
+      ],
+      "correctIndex": 2,
+      "explanation": "The article's exact warning: 'Too abstract and your interface becomes meaningless (doWork(), handleRequest()). Too specific and you haven't actually abstracted anything.' GameAction.execute(context) is the meaningless-end of the spectrum: the interface promises nothing the caller can actually rely on, since 'execute does something' is true of any function ever. The right level is one where the operation's meaning is committed to in the interface — Move.apply(board) tells the caller this changes board state in a specific way; UndoStack.pop() tells the caller this rewinds. Option A invokes Command pattern, which is real but the article's specific critique is about *meaningless abstractions*, not about whether GoF named a similar shape. Option B picks one symptom (rendering vs state) but misses the deeper problem: even after splitting, `StateAction.execute(context)` is still meaningless. Option D adds type-level structure that doesn't fix the core issue; a typed return on a meaningless method is still a meaningless method.",
+      "interviewScript": "In your interview, say: 'GameAction.execute(context) is too abstract — the interface promises nothing the caller can rely on; every implementation can do anything. I'd push toward interfaces whose signatures commit to a meaning: Move.apply(board) changes board state in a specific way, UndoStack.pop() rewinds the last move, ResignHandler.resign(player) ends the game. The cost of weaker generality is worth the gain in caller knowability — the interface should describe what the caller can depend on, not just that something happens.'",
+      "proTip": "Test your abstractions by asking: 'what can the caller rely on if I depend on this interface?' If the answer is 'something happens' or 'execute is called,' the abstraction is meaningless and pushes complexity into the implementations and the explanations around them."
+    },
+    {
+      "id": "q13",
+      "part": "C — Abstraction",
+      "subtopic": "Abstraction",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["C8", "C9"],
+      "l5Pattern": "two-levels-of-indirection",
+      "question": "Your team designed a `Storage` interface with `save(key, bytes)`, `load(key)`, and `delete(key)`. Three implementations: `S3Storage`, `RedisStorage`, `LocalDiskStorage`. Six months later, a new requirement adds: 'Some uploads are 5GB video files; we need streaming I/O so we don't load the whole file into memory.' A junior proposes adding `saveStream(key, inputStream)` and `loadStream(key)` to the interface. The team lead pushes back: 'That doubles the interface and forces RedisStorage and LocalDiskStorage to implement streaming methods they don't naturally support.' What is the most accurate critique, and what does this scenario expose about choosing the right level of abstraction?",
+      "options": [
+        "The lead is right — adding streaming methods to all three implementations forces them to either support streaming awkwardly or throw on the new methods, which violates LSP. The fix is to keep the original interface, leave streaming as an S3-only extension method on S3Storage specifically, and require callers who need streaming to depend on the concrete S3Storage type rather than the Storage interface.",
+        "The junior is right — extending the interface is the natural evolution; RedisStorage can implement saveStream by buffering the whole stream into memory and calling save (a degenerate but compliant implementation), and LocalDiskStorage can implement saveStream by writing chunk-by-chunk. The interface stays unified, and degenerate implementations are an accepted cost of broad abstractions.",
+        "Both views miss the deeper issue. The original abstraction was at the wrong level — `save(key, bytes)` chose 'opaque blob' as the unit, which works for small payloads but commits the interface to fully-buffered semantics. The streaming requirement isn't a new feature on the same abstraction; it's evidence that the right abstraction unit was 'streaming-by-default with a buffered convenience overload' from the start, and now the design has to either segregate the interface (BlobStorage vs StreamingStorage) or migrate to the streaming-first version. The lesson is that the level of abstraction must match what the *callers actually need to perform*, and 'load 5GB file into memory' was always going to fail on the chosen unit.",
+        "The lead is right but the fix is to use Java NIO's MappedByteBuffer or its equivalent in C++/Python — large files become memory-mapped and the existing save/load interface continues to work without exposing streaming concepts to callers. The 'right level of abstraction' is preserved by relying on the OS to handle the memory-mapping, sidestepping the design question entirely.",
+        "The junior is right and the lead is over-thinking — interface segregation is the canonical fix here, splitting into Storage (read/write) and StreamingStorage (read/write/saveStream/loadStream); RedisStorage and LocalDiskStorage implement only Storage, S3Storage implements both. This is the exact ISP application, and the lead's pushback is rejecting a textbook fix."
+      ],
+      "correctIndex": 2,
+      "explanation": "The two-levels-of-indirection trap: the surface bottleneck looks like 'add streaming methods or not?', but the real bottleneck is that the original abstraction's *unit* was wrong for the workload that just landed. `save(key, bytes)` commits the interface to fully-buffered semantics — every implementation has to materialize the whole payload to satisfy the type, which is fine for small blobs but fundamentally incompatible with 5GB files. The article's framing — 'Think about what operations the caller needs to perform, not how those operations happen internally' — is doing the work here: callers who need to save a 5GB video aren't going to perform 'hand me a fully-loaded byte buffer'; they're going to perform 'stream this from input to storage.' The original abstraction missed that. Why other options tempt: Option A's S3-only extension breaks the abstraction (callers now depend on the concrete type for streaming), but it tempts because it minimizes change. Option B's degenerate implementations is the seductive ISP-violating trap — they technically compile but RedisStorage 'streaming' by buffering is a lie that looks like it works in tests and crashes under load. Option D's mmap fix is a real OS feature but doesn't solve the design-level question (callers still receive a ByteBuffer or equivalent, which doesn't escape the unit choice). Option E's ISP split is plausible-sounding but actually does what Option B critiques — Redis and LocalDisk implementing 'only Storage' means callers using Storage can't migrate to streaming without a type change, so the segregation is real but not a fix for the original level-of-abstraction error. Deeper insight: the level-of-abstraction question is decided by what the *highest-load* caller needs to perform, not by the average case. Choosing a unit that doesn't fit the largest-scale workload is a future-proofing failure dressed as a level-of-abstraction failure.",
+      "interviewScript": "In your interview, say: 'The deeper issue isn't whether to add streaming methods — it's that the original save(key, bytes) abstraction chose the wrong unit for our workload. Bytes-as-unit commits every implementation to fully-buffered semantics, which is fine for small payloads but fundamentally incompatible with 5GB files. The fix is to choose the streaming unit as the primary abstraction (saveStream, loadStream) and provide a buffered convenience overload for callers who genuinely have small payloads in memory. We migrate the existing call sites; new ones use streaming by default. The level-of-abstraction lesson is that the unit is decided by what the highest-load caller needs to perform, not by the easy case.'",
+      "proTip": "The right level of abstraction is decided by the caller's heaviest use case, not the easiest one. If your interface's unit can't accommodate the largest-scale operation a caller might need to perform, the unit is wrong — and adding methods later just spreads the wrongness across more implementations."
+    },
+    {
+      "id": "q14",
+      "part": "D — Polymorphism",
+      "subtopic": "Polymorphism",
+      "difficulty": "L1",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["D1", "D2", "D4", "D5", "D7"],
+      "l5Pattern": null,
+      "question": "Two ParkingLot designs handle vehicle parking. Design X has `parkVehicle(v)` containing `if (v.type == \"car\") {...} else if (v.type == \"motorcycle\") {...} else if (v.type == \"truck\") {...}` selecting a spot size based on the string field. Design Y defines a `Vehicle` interface with `getRequiredSpotSize()`, has `Car`, `Motorcycle`, and `Truck` implement it, and has parkVehicle simply do `findSpotBySize(v.getRequiredSpotSize())`. A new requirement lands: support electric scooters. What's the difference in how the two designs absorb the change, and why is that the polymorphism point?",
+      "options": [
+        "Design Y absorbs the change by adding a single new class (ElectricScooter implements Vehicle, returns the appropriate spot size) without touching parkVehicle at all. Design X requires editing the if/elif chain inside parkVehicle to add a new branch — the same code that handles cars and trucks now has to be opened, reviewed, and re-tested for the scooter case. Polymorphism is the property that adding a new variant is a *new class*, not an *edit to existing code*; the existing parkVehicle code never changes.",
+        "Design Y is faster at runtime because virtual dispatch on a small set of concrete types is well-optimized by modern JITs and CPUs (inline caches), while string comparisons in the if/elif chain incur cache misses and branch mispredictions; the polymorphism point is primarily about steady-state performance under load.",
+        "Design Y has better testability than X because each Vehicle subtype can be tested in isolation, while X requires exercising the parkVehicle method through every branch to achieve coverage. Polymorphism is primarily a unit-testing convenience, since both designs produce identical runtime behavior for the same inputs.",
+        "Design Y is more idiomatic in object-oriented languages — the if/elif chain is a procedural pattern that languages like C++ and Java were specifically designed to discourage. Polymorphism is the language-level move that makes object-oriented code 'feel right' compared to the procedural alternative, even when both designs work."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's exact framing: 'Now when you add a new vehicle type, you just create a new class that implements Vehicle. The ParkingLot code never changes.' Polymorphism replaces type-checks with dispatch — adding a variant is a new class, not an edit to existing code. The structural payoff is that parkVehicle stays closed under the change. Option B picks a real-but-secondary downstream effect (JIT performance) and misranks it. Option C does the same with testability. Option D appeals to idiom, which is also a downstream effect of the structural property. The structural property — adding a variant doesn't touch existing code — is the article's argument and the senior signal.",
+      "interviewScript": "In your interview, say: 'Adding electric scooters in Design Y is a single new class — ElectricScooter implements Vehicle, returns the appropriate spot size. parkVehicle never opens. In Design X I have to edit parkVehicle and add a new branch — every existing case has to be re-tested because the same method changed. That's the polymorphism point: a new variant is a new class, not an edit to existing code.'",
+      "proTip": "When you see a switch or if/elif chain branching on a type field, that's the structural cue for polymorphism. The test isn't 'does this work?' — it's 'does adding a new variant force me to edit existing code?' If yes, an interface and dispatch will pay back."
+    },
+    {
+      "id": "q15",
+      "part": "D — Polymorphism",
+      "subtopic": "Polymorphism",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["D3", "D6", "D7"],
+      "l5Pattern": null,
+      "question": "An interviewer asks: 'You said earlier that abstraction lets you swap implementations. Now you're saying polymorphism lets each type handle itself. What's the actual relationship between abstraction and polymorphism, and why does the article say polymorphism *follows from* abstraction?' Two candidates respond. Candidate X says: 'They're basically the same thing — both are about hiding implementation behind an interface.' Candidate Y says: 'Abstraction is the interface — the contract you depend on. Polymorphism is what happens at runtime when different concrete types fulfill that contract differently. You need the abstraction first (the interface, the contract) for polymorphism to have anywhere to dispatch from. So abstraction is the design move; polymorphism is the runtime payoff.' Why is Y more accurate, and what does this distinction buy you in interviews?",
+      "options": [
+        "Y is more accurate. Abstraction is the *design move* — defining an interface or contract that callers depend on. Polymorphism is the *runtime behavior* — different concrete types responding to the same call differently. Polymorphism follows from abstraction in the sense that you need the contract to dispatch over before different implementations can fulfill it differently; without the interface, there's nothing for polymorphism to substitute *into*. The buy-in interviews: when you say 'I'll define a PaymentMethod interface,' you're doing abstraction; when each implementation's process method runs differently, that's polymorphism — naming both correctly shows you understand the design step and its runtime payoff as distinct things.",
+        "X is closer to right. The article uses both terms but the underlying phenomenon is the same — interfaces with multiple implementations. Distinguishing 'design move' and 'runtime behavior' is a fine pedagogical distinction but not one interviewers grade on, and over-precision in this area can sound like vocabulary-fixation rather than fluency.",
+        "Y is correct on the relationship but wrong on the dependency direction — polymorphism doesn't follow from abstraction; abstraction follows from polymorphism, because the practical motivation for defining an interface in the first place is that you've already noticed different concrete behaviors need to share a call site. The article's phrasing ('polymorphism follows from abstraction') is loose; the actual implementation order is polymorphism first, then the interface emerges.",
+        "Y is broadly right but misses that polymorphism also occurs without abstraction in some languages (e.g. via duck typing in Python), where the dispatch happens at runtime without a declared interface. So the dependency 'polymorphism follows from abstraction' holds in Java/C++ but not universally; in dynamically-typed languages the order can be reversed and the design moves differently."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's exact framing: 'Polymorphism naturally follows from abstraction. Once you define an interface like PaymentMethod or Vehicle, each implementation can provide its own behavior.' Y captures this correctly: abstraction is the design step (define the contract); polymorphism is the runtime payoff (different types fulfill the contract differently). The dependency is real because polymorphism dispatches *over* an interface — you need the interface to exist for there to be anything to dispatch from. The buy-in is precision: in interviews, naming the design move (abstraction) and the runtime payoff (polymorphism) as distinct shows you understand them as two related but separate concepts. Option B flattens the distinction. Option C inverts the dependency direction; in OO design, the interface is the design unit and runtime dispatch is its consequence — even when the practical motivation for defining the interface comes from observing varied behavior, the design output is interface-first. Option D introduces duck typing as an exception, but duck typing still requires *some* implicit contract (the methods called must exist on the receiver) — the article's framing holds even there, just with an implicit rather than explicit contract.",
+      "interviewScript": "In your interview, say: 'Abstraction is the design move — I define PaymentMethod with process(amount). Polymorphism is the runtime payoff — when checkout calls paymentMethod.process(amount), the right concrete implementation runs based on what was wired in. Polymorphism follows from abstraction because the dispatch needs a contract to dispatch over; without the interface there's nothing for polymorphism to substitute into. Naming them as separate makes my reasoning clearer when the design and the runtime behavior are doing different things in the same diagram.'",
+      "proTip": "Treat abstraction and polymorphism as two layers of the same design: abstraction is what you write (the interface), polymorphism is what runs (the dispatch). When asked about either, mention both and where the boundary sits."
+    },
+    {
+      "id": "q16",
+      "part": "D — Polymorphism",
+      "subtopic": "Polymorphism",
+      "difficulty": "L3",
+      "style": "Scenario-Based Trade-offs",
+      "conceptIds": ["D2", "D8"],
+      "l5Pattern": null,
+      "question": "A new engineer joins the team and asks: 'I'm trying to debug why the wrong shipping label is being printed for one customer. The code does `shipper.generateLabel(order)` and shipper is some kind of `ShippingProvider`. There are 14 ShippingProvider implementations across the codebase. How do I know which one runs in this case?' What is the most accurate diagnosis of the trade-off polymorphism has imposed here, and what's the senior framing for an interview answer?",
+      "options": [
+        "Polymorphism never imposes a real cost in modern IDEs — IntelliJ, VS Code, and CLion all support 'find implementations' and 'go to definition' for interface methods, so the new engineer can navigate to the actual implementation in seconds. The complaint is a tooling literacy issue, not a structural cost of polymorphism, and the senior framing is to teach the engineer the keyboard shortcut.",
+        "The polymorphic call is a runtime decision, so reading the code at the call site doesn't reveal which implementation runs — the engineer has to trace the wiring (DI configuration, factory, runtime selection logic) to know which ShippingProvider was injected. That's a real and acknowledged trade-off: polymorphism buys extensibility by hiding the concrete type at the call site, and pays for it with debug-time indirection that grows with the number of implementations. The senior framing is to name the trade-off explicitly: polymorphism is right when extensibility wins more than traceability costs; with 14 implementations and a debug team that has to reason across them, that balance might have already tipped.",
+        "Polymorphism's debug cost is real but the fix is more polymorphism, not less — adding an interface for the wiring layer (`ShippingProviderFactory`) so the same code that selects the implementation is itself testable and trackable. The fix doesn't reduce indirection; it makes the indirection itself first-class so debugging it is a single grep instead of a multi-file trace.",
+        "The new engineer's complaint is symptomatic of a deeper LSP issue — if the 14 implementations behaved identically (as LSP requires) the question of 'which one runs' would be irrelevant since the answer wouldn't matter. The real fix is to audit the implementations and merge any that genuinely behave the same; the remainder probably belong behind separate interfaces, which would reduce the population per interface and make debugging tractable."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article's exact trade-off framing: 'Highly polymorphic code can be difficult to trace and debug, especially as the number of implementations grows... Polymorphism offers flexibility and extensibility, but it can also make code flows less obvious and harder to follow when debugging or onboarding new engineers.' The new engineer's experience is the canonical manifestation: the call site `shipper.generateLabel(order)` doesn't reveal which of 14 implementations runs because that decision happens elsewhere (DI wiring, factory, runtime selection). The senior framing names the trade-off explicitly and acknowledges that the balance can tip — at 14 implementations with active debug load, more polymorphism might be net negative. Option A blames tooling, which dodges the structural point. Option C's 'more polymorphism' fix increases the indirection rather than acknowledging it. Option D's LSP framing is real for some cases but doesn't address the new engineer's situation — even fully-LSP-compliant implementations can vary in details (logging, metrics, retry behavior) that matter when debugging.",
+      "interviewScript": "In your interview, say: 'The cost is real and it grows with the number of implementations. Polymorphism buys extensibility — adding a new ShippingProvider doesn't change call sites — but it pays for it with debug-time indirection because the call site doesn't tell you which concrete type runs; you have to trace the wiring. With 14 implementations and active debug load, the balance might already have tipped. The senior move is to name the trade-off explicitly: I'm choosing extensibility over traceability, and I'd reconsider if the debug burden grows past what the team can absorb.'",
+      "proTip": "Polymorphism's cost is invisible at design time and visible at debug time. When you reach for an interface, ask: 'how many implementations are likely to grow under it, and who will read this code six months from now?' The trade-off is real, not theoretical."
+    },
+    {
+      "id": "q17",
+      "part": "D — Polymorphism",
+      "subtopic": "Polymorphism",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["D8", "D9"],
+      "l5Pattern": null,
+      "question": "Your interviewer says: 'At our company, we have a strict no-polymorphism rule for new code — explicit switch statements only, even when there are clear interface candidates. We've found that with 50 engineers across the codebase, polymorphic dispatch makes onboarding too slow and review too hard. How do you react to that?' Two candidates respond. Candidate X: 'I disagree — polymorphism is OO best practice, and switch statements are a procedural anti-pattern.' Candidate Y: 'That's a real trade-off and I can see the reasoning. Switches are explicit at every call site about which case runs, which makes review and onboarding faster; the cost is that adding a new variant means editing every switch instead of writing a new class. If you'd like, I can design with switches; I'd just want to understand what triggers a re-evaluation — is it specific to teams of certain sizes, or to specific subsystems?' Why does Y's response carry more senior signal?",
+      "options": [
+        "Y's response is more senior because it accommodates the interviewer's stated rule rather than fighting it; senior engineers calibrate to the team's conventions and X's resistance signals inflexibility. Convention-following is the dominant signal in interviews of this type.",
+        "Y's response is more senior because they articulate the trade-off the company has already made (explicitness over extensibility) and accept it without surrendering judgment — they ask about trigger conditions for revisiting, which is the senior pattern of managing tensions rather than defending a side. X's response treats polymorphism as a rule with no trade-off, which is exactly the kind of 'principle-as-slogan' the article warns against; the article specifically says 'each company has a different tolerance for polymorphism' and 'always be ready to explain the tradeoff.' Y demonstrates that readiness; X demonstrates principle-recitation.",
+        "X is closer to right — the OO community has consensus that polymorphism beats switches at scale, and X is correctly defending that consensus; Y's accommodation reads as caving on a technical question for political reasons. The interviewer's stated rule is itself a code smell that a senior engineer should push back on.",
+        "Both are equivalent — X defends a principle and Y defers to context, and the interviewer's preference between them is mostly stylistic. Most rubrics grade both responses similarly because the underlying technical content is the same and the difference is in interpersonal framing."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article's exact framing: 'Each company has a different tolerance for polymorphism. Some prefer clear, explicit branches for each type, while others embrace the extensibility polymorphism offers. In interviews, always be ready to explain the tradeoff. Polymorphism offers flexibility and extensibility, but it can also make code flows less obvious and harder to follow when debugging or onboarding new engineers.' Y captures this exactly: they articulate the trade-off the company has already made (explicitness over extensibility), accept it as a real engineering choice rather than a flaw, and ask about trigger conditions for revisiting — which is the senior pattern of *managing* tensions explicitly. X treats polymorphism as a rule, which is the principle-as-slogan failure the article warns against. Option A frames Y's response as social-accommodation; the actual senior content is the trade-off articulation. Option C inverts the gradient — defending a principle without acknowledging the trade-off is the junior signal in this scenario. Option D flattens a real difference into stylistic.",
+      "interviewScript": "In your interview, when an interviewer states a company-specific convention, articulate the trade-off the convention represents and accept it: 'That's a real choice — switches are explicit at every call site about which case runs, which speeds review; the cost is that adding a variant edits every switch. I can design that way; I'd want to know what triggers a re-evaluation so I can recommend escalation if the cost ever crosses that line.' Naming the trade-off shows you understand both sides; accepting it shows you can calibrate.",
+      "proTip": "When a company tells you they avoid polymorphism, name the trade-off they've made (explicitness for extensibility) and ask about trigger conditions for revisiting. That's the managing-tension senior signal; defending polymorphism in the abstract is the recitation signal."
+    },
+    {
+      "id": "q18",
+      "part": "D — Polymorphism",
+      "subtopic": "Polymorphism",
+      "difficulty": "L5",
+      "style": "Estimation-Backed Reasoning",
+      "conceptIds": ["D6", "D8"],
+      "l5Pattern": "estimation-backed-scenario",
+      "question": "Your team's `OrderRouter.routeOrder(order)` currently has a 7-branch switch on `order.fulfillmentType` (warehouse, dropship, third-party, locker, in-store, partner, refund). Product is forecasting that next year you'll add 30 more fulfillment partner integrations, each with slight routing variations, and the team that owns OrderRouter is 2 engineers. The question is whether to refactor the switch to a polymorphic FulfillmentHandler interface now. A junior says: 'We're already at 7 branches and it works; let's add the 30 as more branches.' Apply the article's trade-off framing — flexibility/extensibility versus trace/debug-and-onboarding — to this specific population and team and identify the most defensible move.",
+      "options": [
+        "Keep the switch and add the 30 branches; the team's intimacy with the codebase means tracing won't be a problem, and the cost of refactoring 37 cases into a polymorphic structure is higher than the cost of editing the switch each time. The senior move is to recognize that 'small team + their own code' inverts the usual extensibility argument because adds-per-engineer-per-month is what matters, not absolute branch count.",
+        "Refactor to polymorphism now. With 7 branches today, the switch is already at the upper end of readable; at 37 branches it crosses the threshold where every change requires re-reading and re-testing the entire method. The senior move is to recognize that 7→37 is a 5× growth in a single year, and the cost of editing a 37-branch switch on every add — review burden, accidental fall-through, regression risk — eventually exceeds the cost of routing through dispatch. With 2 engineers maintaining the file, the marginal cost per add is exactly what polymorphism reduces, even with the article's acknowledged trace-and-debug cost. The trigger isn't 'switch is bad' — it's 'this specific population is about to make every edit a 37-case re-test.'",
+        "Keep the switch but auto-generate it from a registry — the 30 new fulfillment types are loaded from a config file at startup and the switch is built dynamically. This combines the explicitness of switch (each case is named and visible) with the extensibility of polymorphism (new types add a config line, not a code edit), and avoids the dispatch indirection that makes debugging harder.",
+        "Refactor to polymorphism but skip the interface step — make FulfillmentHandler a function pointer or callable type, with each fulfillment type registering its handler at startup. This gets the extensibility benefit without committing to interface inheritance, which is the heaviest part of the polymorphism trade-off, and matches modern functional-style design for dispatch tables."
+      ],
+      "correctIndex": 1,
+      "explanation": "The estimation-backed-scenario at L5: numbers force the recommendation. 7 branches today is workable; 37 next year is not. Each add to a 37-branch switch requires reviewing the whole method (because the switch is one method body, and any change to one branch can affect another via fall-through, ordering, or shared state); each add to a polymorphic handler is a new file. With 2 engineers maintaining and 30 adds projected, the per-add cost is exactly what polymorphism reduces — even after paying the trace-and-debug cost the article acknowledges. The trigger isn't 'switches are bad'; it's 'this specific population at this specific team size makes every edit unsustainable.' Why other options tempt: Option A's 'small team inverts the argument' is plausible but wrong on the math — small teams *especially* benefit from structural reductions in per-add cost, because they have no spare reviewer capacity to absorb 37-case re-tests. Option C's auto-generated switch is real (some codebases use code generators for dispatch tables) but adds a build-time complexity that makes onboarding *harder*, not easier; the article's debug cost concern applies equally to generated code. Option D's function-pointer registry is structurally similar to polymorphism but loses the type-system support that makes the dispatch checkable at compile time; you trade interface ceremony for runtime KeyError or NPE on unregistered types. The deeper insight: the polymorphism vs switch decision isn't a static rule — it's a function of (population × team size × adds-per-period). At 7 branches and stable, switches win on simplicity; at 37 branches and growing, polymorphism wins on per-add cost; the senior move is to recognize the inflection and act before crossing it.",
+      "interviewScript": "In your interview, say: 'Refactor now, before the 30 adds land. At 7 branches the switch is already at readability's upper bound; at 37 it crosses the threshold where every edit requires re-reading the whole method and re-testing every case for regressions. The polymorphism trade-off — buying extensibility with trace-and-debug cost — is acceptable here because the team is 2 engineers absorbing 30 adds in a year, and adds-per-engineer-per-month is exactly what polymorphism reduces. I'd accept the debug-time indirection cost because the alternative — 30 reviews of an ever-growing switch — is more expensive in this specific population.'",
+      "proTip": "The polymorphism vs switch decision is a function of (variant count × team size × add rate). Estimate the inflection: a 7-branch switch is fine; a 37-branch switch in front of a 2-engineer team is not. Refactor *before* you cross the inflection, not after."
+    },
+    {
+      "id": "q19",
+      "part": "E — Inheritance",
+      "subtopic": "Inheritance",
+      "difficulty": "L1",
+      "style": "Anti-Pattern Identification",
+      "conceptIds": ["E1", "E2", "E4", "E9", "E10"],
+      "l5Pattern": null,
+      "question": "A candidate designs a vehicle simulator. They introduce `class Car { virtual void startEngine() { /* gas engine logic */ } }` and then `class ElectricCar : public Car { void startEngine() override { /* electric motor startup */ } }`. The interviewer says: 'You're inheriting Car's gas-engine startup just to override it with completely different electric-motor logic — what behavior is actually being shared?' What is the most accurate critique, and what does this pattern reveal about the wrong use of inheritance?",
+      "options": [
+        "The critique is valid — inheritance for behavior variation is the article's named anti-pattern. ElectricCar isn't sharing any meaningful logic with Car; the parent's startEngine implementation is irrelevant to electric cars (which don't have engines), and the override doesn't reuse parent code in any way. Inheritance here creates a parent-child relationship that buys nothing structurally and creates rigidity — when a hybrid arrives, the hierarchy can't accommodate it cleanly because hybrids are neither purely a Car (extending it would lose electric behavior) nor purely an ElectricCar (extending it would lose engine behavior). The right move is composition: extract the varying behavior into its own abstraction (Drivetrain) and let cars hold a Drivetrain rather than be a Car or ElectricCar.",
+        "The critique is valid but the fix is to use inheritance more carefully — keep Car as the parent but make startEngine abstract (no default implementation), so each subclass must provide its own logic without the parent's misleading default. This preserves the inheritance hierarchy while removing the anti-pattern of inheriting code that gets fully overridden, and it documents at the type level that engine startup varies by type.",
+        "The critique is wrong — gas-engine and electric-motor startup are both forms of 'starting the propulsion system,' so the override is a legitimate use of polymorphism through inheritance; ElectricCar is a more specific kind of Car. The hybrid case is handled by multiple inheritance or interface composition, but the basic Car/ElectricCar relationship is sound and matches how vehicles are categorized in real domains (vehicle → car → electric car).",
+        "The critique is valid but the design's real flaw is the missing factory — without a VehicleFactory deciding which subclass to instantiate based on input parameters, the choice between Car and ElectricCar leaks to call sites; once the factory is added, the inheritance hierarchy is fine because the parent-child relationship is hidden behind a creational seam, and the override becomes acceptable polymorphic behavior rather than an anti-pattern."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's exact framing: 'Electric cars don't have engines. They don't share useful engine logic. You're forcing a behavior difference into a class hierarchy, which creates fragile code. When you add a hybrid car, do you extend Car or ElectricCar? Neither works cleanly.' Inheritance is for sharing *stable implementation*, not for modeling *behavior variation*; when subclasses override methods to provide entirely different implementations, the hierarchy isn't sharing — it's coupling. The fix is composition: isolate the varying behavior (Drivetrain) and let cars hold one. Option B's abstract-startEngine fix preserves the wrong structural choice — the fundamental problem isn't the parent's default implementation, it's that ElectricCar IS-A Car was wrong to begin with for behavior-variation purposes. Option C defends the design by appeal to domain hierarchy, which the article rejects: real-world IS-A doesn't imply OO IS-A when behavior diverges. Option D's factory addition is orthogonal — hiding the choice doesn't fix the structural rigidity; the hybrid problem still exists.",
+      "interviewScript": "In your interview, say: 'ElectricCar inheriting Car just to override startEngine with completely different logic isn't sharing — it's coupling. Electric cars don't have engines, so there's no useful gas-engine logic to inherit; the override discards the parent entirely. The fragile-base-class problem is right around the corner: when a hybrid arrives, do I extend Car or ElectricCar? Neither works. The fix is composition: isolate the varying behavior into its own abstraction — Drivetrain, with GasEngine and ElectricMotor implementations — and have CarWithDrivetrain hold one. Hybrids hold two; hydrogen cars get a new Drivetrain; the car class never changes.'",
+      "proTip": "When a subclass overrides a parent method to provide completely different logic, that's a sign you're using inheritance to model behavior variation — exactly what inheritance is bad at. Default to composition: extract the varying behavior into its own interface and inject it."
+    },
+    {
+      "id": "q20",
+      "part": "E — Inheritance",
+      "subtopic": "Inheritance",
+      "difficulty": "L2",
+      "style": "Scenario-Based",
+      "conceptIds": ["E2", "E3", "E7", "E8"],
+      "l5Pattern": null,
+      "question": "Two designs use inheritance, but the article calls one a good fit and the other an anti-pattern. Design A: `BankAccount` has `deposit`, `withdraw`, `getBalance` with full implementations; `SavingsAccount extends BankAccount` adds an `interestRate` field; `CheckingAccount extends BankAccount` adds an `overdraftLimit` field. Neither subclass overrides the parent methods. Design B: `Car` has `startEngine` with gas-engine logic; `ElectricCar extends Car` overrides `startEngine` with electric-motor logic. Both designs use the same language feature. What is the precise distinction that makes A a good fit and B an anti-pattern, and why does the article flag the difference?",
+      "options": [
+        "A and B both work; the distinction the article draws is largely stylistic preference. Inheritance can be used either to share or to override, and the choice between them is up to the designer's taste; calling B an anti-pattern is overstated because the override compiles and the runtime behavior is correct.",
+        "A is fine because BankAccount has fewer methods than Car, so the coupling cost is smaller; B is an anti-pattern because Car has more methods that ElectricCar would inherit and not use. The distinction is method count: keep parent classes small to keep inheritance safe, and Car was simply too large.",
+        "A shares *stable implementation* — deposit, withdraw, and getBalance are identical across all account types, so the parent provides real reuse and the children don't override anything. B uses inheritance to model *behavior variation* — startEngine has fundamentally different logic for gas vs electric, so the parent's implementation isn't shared, only overridden. The article's exact criterion: inheritance is a fit when subclasses 'don't need to override the inherited behavior in ways that break the parent's contract'; B violates that criterion because the override is the entire reason for the subclass.",
+        "A is good because Account is a value-object hierarchy and B is bad because Car is a behavior-rich hierarchy; value-object inheritance is safe (data sharing) while behavior-rich inheritance is fragile (logic sharing). The fix for B is to convert Car to a value object first (a struct of properties) and then re-establish the hierarchy at the value level."
+      ],
+      "correctIndex": 2,
+      "explanation": "The article's exact distinction: 'Here, the shared implementation is stable and meaningful. Both subclasses genuinely are forms of BankAccount, and they don't need to override the inherited behavior in ways that break the parent's contract. So inheritance is a good fit... The classic mistake made in interviews is using inheritance to model behavior differences. If subclasses need to override methods to provide completely different implementations, that's a sign you're using the wrong tool.' BankAccount works because deposit/withdraw/getBalance are identical across account types — the parent provides real shared implementation. Car/ElectricCar fails because the override is the entire purpose of the subclass; nothing is being shared, only varied. Option A flattens a real distinction. Option B picks a wrong axis (method count) — small parents can still be misused for behavior variation. Option D invents a value-object distinction that's not the article's argument and doesn't apply (BankAccount has methods with logic, not just fields).",
+      "interviewScript": "In your interview, say: 'BankAccount works because deposit, withdraw, and getBalance are identical across all account types — the parent provides real shared implementation, and SavingsAccount and CheckingAccount add data without overriding the methods. Car/ElectricCar fails because the override is the entire reason ElectricCar exists — nothing is being shared, only varied. The distinction the article draws is: inheritance for stable shared implementation is a fit; inheritance for behavior variation is the anti-pattern.'",
+      "proTip": "Before reaching for inheritance, ask: 'will the subclasses use the parent's methods as-is, or will they override them to do something different?' If the answer is override, you're using inheritance to model variation — composition is almost always a better fit."
+    },
+    {
+      "id": "q21",
+      "part": "E — Inheritance",
+      "subtopic": "Inheritance",
+      "difficulty": "L3",
+      "style": "Scenario-Based",
+      "conceptIds": ["E5", "E6", "E12", "E13"],
+      "l5Pattern": null,
+      "question": "You decide to model varying car-startup behavior with composition rather than inheritance. You define `class Drivetrain { virtual void start() = 0; }` with `GasEngine` and `ElectricMotor` implementations, and `class Car { Drivetrain& drivetrain; void start() { drivetrain.start(); } }`. Compared to the inheritance-based Car/ElectricCar, what design properties does this composition give you, and what is the trade-off you're explicitly accepting?",
+      "options": [
+        "The composition design lets you model any combination of drivetrains without forcing a Car-vs-ElectricCar choice — hybrids hold two drivetrains, hydrogen cars get a new Drivetrain implementation, and Car itself never changes. You still get polymorphism (drivetrain.start() dispatches to the right concrete type) and abstraction (Car depends on the Drivetrain interface, not on a concrete startup). The trade-off you're accepting is one extra object reference per Car — Car holds a Drivetrain rather than being a more-specific kind of Car — and the slight ceremony of constructing the Drivetrain separately and injecting it; in exchange you lose the parent-child coupling and the fragile-base-class risk that came with the inheritance shape.",
+        "The composition design is structurally identical to inheritance — Drivetrain plays the same role as the parent class, and GasEngine/ElectricMotor play the role of subclasses. The only difference is syntactic: composition uses a field reference where inheritance uses a class hierarchy. The trade-off is that composition requires more boilerplate to wire up but produces equivalent runtime behavior, so the choice is mostly stylistic.",
+        "The composition design lets you change a car's drivetrain at runtime by reassigning the field, while inheritance fixes the type at construction; this is the major win and is sometimes called 'state-pattern composition.' The trade-off you're accepting is reduced type-system safety — at compile time the Car doesn't know which drivetrain it has, while inheritance pins the type and lets the compiler reason about it.",
+        "The composition design gives Car implicit access to all Drivetrain subclasses' methods through the field — calling drivetrain.start() is equivalent to a virtual function call on the parent class. The trade-off you're accepting is heavier memory usage because each Car holds a separate Drivetrain object rather than directly inheriting the data; in performance-critical code this overhead can add up across millions of car instances."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's exact framing: 'Now you can model any kind of car without breaking the hierarchy or overriding logic awkwardly. Want a hybrid? Give it two drivetrains. Want a hydrogen car? Add a new Drivetrain implementation. The CarWithDrivetrain class never changes.' Composition gives you the polymorphism payoff (right drivetrain runs at startup), the abstraction payoff (Car depends on the interface, not the concrete), and the open-ended extensibility (hybrid = two drivetrains; hydrogen = new implementation) without the parent-child coupling and fragile-base-class risk. The cost is the small overhead of holding and wiring a Drivetrain object — one extra reference per Car and the ceremony of separate construction. Option B claims the two are equivalent, which the article explicitly rejects (inheritance creates parent-child coupling that composition avoids). Option C invents a runtime-reassignment benefit that's possible but not the structural argument; the article's framing is about the hybrid-modeling capability, not field reassignment. Option D inverts the comparison — composition with an interface preserves type-system safety identically to inheritance with virtual methods; the cost is operational ceremony, not type safety.",
+      "interviewScript": "In your interview, say: 'Composition lets me model hybrids by giving Car two drivetrains, and hydrogen cars by adding a new Drivetrain implementation, without touching Car itself. The polymorphism — drivetrain.start() dispatches to the right concrete type — is preserved; the abstraction — Car depends on the Drivetrain interface — is preserved; what's lost is the parent-child coupling and the fragile-base-class problem. The cost I'm explicitly paying is one extra object reference per Car and the wiring ceremony to construct the drivetrain separately and inject it. That's a small operational cost in exchange for being able to model arbitrary combinations.'",
+      "proTip": "When you replace inheritance with composition, name what you gained (extensibility, no fragile-base-class) and what you paid (extra reference, wiring ceremony). The trade-off is real and worth saying out loud — that's what proves you're choosing composition rather than just preferring it."
+    },
+    {
+      "id": "q22",
+      "part": "E — Inheritance",
+      "subtopic": "Inheritance",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["E5", "E9", "E11", "E14", "E15"],
+      "l5Pattern": null,
+      "question": "Your interviewer says: 'You said inheritance is wrong for Car/ElectricCar, but the existing codebase has thousands of lines that use it. We're going to add a hybrid car next quarter. Walk me through your migration plan.' Two candidates respond. Candidate X: 'Let me design the composition version from scratch and we can migrate later — I'll show you the clean version.' Candidate Y: 'I'd add hybrid support without ripping out the existing inheritance. First step: define a Drivetrain interface and adapt GasEngine and ElectricMotor as new implementations that wrap the existing Car.startEngine and ElectricCar.startEngine logic. Hybrid is a new class that holds two drivetrains and isn't a subclass of either. Existing code keeps working; new code targets the interface. Migration of legacy classes happens incrementally as engineers touch them.' Why does Y's answer score higher despite X's design being structurally cleaner?",
+      "options": [
+        "Y scores higher because they read the interviewer's framing — 'thousands of lines exist' — as a real constraint rather than as background to ignore. Y proposes an incremental migration that adds the new capability (hybrid) immediately while leaving existing code working, which is what real teams do; X's 'let me show you the clean version' answers a different question (greenfield design) and signals X may not have absorbed the constraint. The senior move is to deliver the new capability without a big-bang rewrite, treating the legacy inheritance as an inherited reality to migrate around rather than to delete; the strangler-fig migration pattern handles exactly this case and the article's framing supports it (default to composition for new behavior, keep inheritance only for stable shared implementation that exists today).",
+        "X scores higher in most rubrics — clean designs are what interviews are for, and Y's incremental migration sounds slow; the interviewer wants to see your best design and then evaluate whether you can rationalize a migration after. Y's response sounds like they're avoiding committing to a specific design.",
+        "Both responses are equivalent — X demonstrates design vision and Y demonstrates migration pragmatism, and the interviewer is testing for either; the difference between them is mostly tactical and the choice depends on how the interviewer frames the follow-up. Most rubrics grade both around the same.",
+        "Y scores higher specifically because they invoke the strangler-fig pattern, which is the named industry practice for this exact migration shape; X's response would be acceptable in a startup but not in a senior LLD interview, where pattern-naming for migrations is expected. The decisive factor is naming the strangler-fig pattern."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's framing supports Y's approach implicitly through its prescription: 'For your interview, default to interfaces with composition. Only use inheritance when you genuinely need to share implementation across classes and the relationship is stable. In most LLD interviews, you don't need inheritance at all.' Y honors this for new code (hybrid is composition-based) while leaving existing inheritance in place — because the article doesn't prescribe ripping out existing inheritance that's stable. The migration is incremental: define the Drivetrain interface, adapt existing classes as implementations, route new behavior through the interface, migrate legacy as opportunities arise. X's greenfield-design answer doesn't address the actual constraint (thousands of lines exist) and signals constraint-blindness. Option B inverts the seniority gradient — design vision without constraint-handling is the junior signal; senior signal is delivering the new capability under the real legacy. Option C flattens a real difference. Option D over-emphasizes pattern naming; Y's response is structurally correct without invoking the strangler-fig label, and the article doesn't prescribe pattern naming as the decisive factor.",
+      "interviewScript": "In your interview, when an interviewer flags existing legacy as a constraint, structure your answer around the constraint: 'I'd add the new capability without ripping out the legacy. Define the interface, adapt the legacy as implementations of it, route new code through the interface, and migrate existing classes incrementally as engineers touch them. The hybrid lands next quarter as composition; the existing Car/ElectricCar stay until they're touched for other reasons.' That delivers the capability immediately, respects the legacy reality, and doesn't trade short-term speed for a long-term migration debt.",
+      "proTip": "When asked to migrate from inheritance to composition under a 'thousands of lines exist' constraint, deliver the new capability through composition immediately, adapt the legacy as a current implementation of the new interface, and migrate the legacy incrementally as it's touched. Big-bang rewrites are the wrong answer to a constraint they refuse to acknowledge."
+    },
+    {
+      "id": "q23",
+      "part": "E — Inheritance",
+      "subtopic": "Inheritance",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["E3", "E15", "E16"],
+      "l5Pattern": "trade-off-inversion",
+      "question": "Your team uses the article's approved inheritance shape for accounts: `BankAccount` has full deposit/withdraw/getBalance implementations, and `SavingsAccount`, `CheckingAccount`, and `MoneyMarketAccount` all extend it without overriding. Six months in, a regulatory requirement lands: SavingsAccount's withdraw must enforce a 6-per-month limit (Regulation D historical example); CheckingAccount's withdraw must support overdraft up to a configured limit; MoneyMarketAccount's withdraw must apply a per-withdrawal fee above 3 transactions per month. The team's first instinct is to override withdraw in each subclass. What's the senior critique, and what does this scenario reveal about even the article's approved inheritance shape?",
+      "options": [
+        "Override withdraw in each subclass — that's exactly what inheritance is for, and the regulatory requirement is the kind of subclass-specific behavior the hierarchy was designed to support. The deeper insight is that 'approved' inheritance shapes still benefit from selective overrides; the article's rule against overrides applies only when the override is the *entire reason for the subclass*, which isn't the case here.",
+        "The first-instinct override is a fragile-base-class trap. The subclasses started as data-only extensions (interestRate, overdraftLimit) of stable parent behavior — that was the article's approved shape — but the new requirement is *behavior variation*, which is the article's named anti-pattern. The trade-off has inverted: what was inheritance-fit is now composition-fit. The senior fix is to extract the withdraw logic into a WithdrawPolicy interface, give each account a policy via composition, and route BankAccount.withdraw through it. The hierarchy can keep the parent class for data and the few methods that are still stable, or be flattened entirely into account-with-policy if no shared behavior remains. The deeper insight: even an approved inheritance shape becomes wrong when the kind of variation you need flips from data-extension to behavior-variation. The fit isn't a permanent property of the design; it's a function of what the requirements ask of it.",
+        "Override withdraw but do it through the Template Method pattern — make BankAccount.withdraw call a protected withdrawCore() and a protected validateWithdraw() that subclasses override. This preserves the inheritance shape, gives subclasses the variation point they need, and is the GoF-canonical answer to 'inheritance with selective behavior variation' in stable hierarchies.",
+        "The first instinct is wrong, and the fix is to abandon inheritance entirely — a single Account class with a Type field and a strategy-driven withdraw. The hierarchy was a mistake from the start because regulatory requirements were always coming and account types are inherently behavior-varying; the article's 'approved' shape was a temporary fit that was destined to break, and the senior insight is to anticipate this from day one."
+      ],
+      "correctIndex": 1,
+      "explanation": "The trade-off-inversion at L5: a design fit can flip when the kind of variation required changes. The original BankAccount shape was an approved fit because subclasses extended data without overriding methods — stable shared implementation, the article's named-good case. The regulatory requirement converts the situation: each subclass now needs *behavior variation* in withdraw, which is the article's named-bad case. What was inheritance-fit is now composition-fit. The senior move is to recognize the inversion and migrate: extract WithdrawPolicy as an interface, compose each account with a policy, and route the parent's withdraw through it. The hierarchy may keep some shared behavior (deposit, getBalance) and lose withdraw to composition, or be flattened entirely if no shared behavior remains. Why other options tempt: Option A's 'override is fine for selective variation' tempts because the override pattern is widely used in practice, but the article's argument is that override-for-variation creates exactly the fragile-base-class problem you're now setting up — when MoneyMarketAccount's withdraw needs further regulatory variation later, the parent's withdraw becomes increasingly hollow and the subclasses increasingly disconnected from it. Option C's Template Method tempts because it's the GoF formalization of the override-for-variation pattern, but it doesn't escape the underlying coupling — protected hooks are still places where parent and child contracts intertwine, and the regulatory variation can outgrow them. Option D's 'abandon inheritance entirely' overcorrects: the article doesn't say inheritance was wrong from day one, it says the fit was real until the requirements changed. The deeper insight: design fit is contextual to requirements, not a permanent property; senior engineers detect when a fit has inverted and migrate before the cost compounds.",
+      "interviewScript": "In your interview, say: 'The original inheritance shape was a fit when subclasses only extended data — interest rate, overdraft limit — and the parent's methods were used as-is. The new regulatory requirement asks for behavior variation per subclass, which is exactly what the article warns against in inheritance. The trade-off has inverted: what was inheritance-fit is now composition-fit. I'd extract WithdrawPolicy as an interface, give each account a policy via composition, and route BankAccount.withdraw through it. Deposit and getBalance can stay in the parent if they're still stable, or the hierarchy can be flattened into account-with-policy. The senior signal is recognizing that fit can change with requirements and migrating before the override pattern compounds into a fragile-base-class problem.'",
+      "proTip": "Design fit is contextual to requirements, not a permanent property. When the kind of variation a hierarchy needs changes — from data-extension to behavior-variation — the fit can invert. Detect the inversion early and migrate to composition before the override pattern entrenches."
+    },
+    {
+      "id": "q24",
+      "part": "F — Synthesis",
+      "subtopic": "Concepts show through how you design",
+      "difficulty": "L3",
+      "style": "Scenario-Based",
+      "conceptIds": ["F1", "F2", "F3", "F4"],
+      "l5Pattern": null,
+      "question": "Three design situations land in the same interview. (1) Requirements say: 'support email, SMS, and push notifications.' (2) You're sketching a `Cart` class and deciding what to make public. (3) Your draft has `if (user.role == \"admin\") {...} else if (user.role == \"editor\") {...} else if (user.role == \"viewer\") {...}` for permission checks. The candidate, asked to 'apply OOP concepts,' starts naming each one and finding a place to attach it. What's the structural critique, and what's the right framing for treating these three situations?",
+      "options": [
+        "The candidate's approach is fine — naming the concepts and attaching them to design decisions is exactly what 'apply OOP concepts' asks for, and the three situations cleanly map to three concepts (abstraction, encapsulation, polymorphism). The structural critique is that the candidate didn't name inheritance for a fourth attachment, which leaves the canon incomplete.",
+        "Each situation has a *cue* that suggests one of the OOP concepts as the right move — but the senior approach isn't to name the concept, it's to make the move and let the concept show through. (1) Multiple notification types is the cue for an interface: define Notifier with send(message), implement Email/SMS/Push; that's abstraction. (2) Designing a class is the cue to default to private fields with methods: Cart owns its items, addItem and removeItem gate mutations; that's encapsulation. (3) Type-checks on a role field is the cue for an interface and dispatch: define Permission with check(action), each role implements it; that's polymorphism. The article's exact framing: 'The concepts show through in how you design, not in what you name.' Naming them while designing is the recitation failure; recognizing the cue and making the structural move is the application that matters.",
+        "The candidate's approach is correct in concept but wrong in application — the three situations actually call for two concepts (abstraction and polymorphism), not three; encapsulation isn't applicable to (2) because Cart's items are inherently public-facing in most cart designs. The fix is to drop encapsulation from the analysis and apply abstraction and polymorphism more deeply.",
+        "The candidate's approach is fundamentally flawed because OOP concepts aren't attached to design situations at all — they're emergent properties of well-applied SOLID principles, and the right way to handle the three situations is to apply SOLID first (Single Responsibility for the cart, Open/Closed for the notifications, Dependency Inversion for the permissions) and let OOP concepts fall out as consequences."
+      ],
+      "correctIndex": 1,
+      "explanation": "The article's closing prescription: 'The concepts show through in how you design, not in what you name. Focus on applying them naturally: Encapsulation: Hide state, expose behavior... Abstraction: Define interfaces for variations... Polymorphism: Let objects handle themselves... Inheritance: Compose behavior, don't inherit it.' Each cue maps to a structural move: multiple-types-of-X → interface; designing-a-class → private fields with methods; type-checks → interface with dispatch. The senior approach is to make the move and let the concept be a *property* of the resulting design, not a label attached to it. Option A normalizes the recitation failure. Option C drops encapsulation incorrectly — the article specifically frames Cart-style designs as encapsulation cues regardless of what's 'public-facing,' since the question is about owning state-changing operations. Option D over-routes through SOLID and inverts the article's framing; the article treats OOP concepts as the implementation mechanisms and SOLID/principles as guidance about when to use them, not the other way around.",
+      "interviewScript": "In your interview, when situations cue OOP concepts, make the move rather than name the concept: 'Multiple notification types — I'll define a Notifier interface with send(message). Cart class — I'll keep items private and expose addItem/removeItem so the cart owns its state. Role-based checks — I'll define a Permission interface with check(action) and each role implements it.' The interviewer hears the design moves and the concepts are visible without being named.",
+      "proTip": "OOP concepts are diagnostic cues, not labels. When you see a cue (multiple types, designing a class, type-checks), make the structural move. Don't name the concept; let it be a property of the resulting design."
+    },
+    {
+      "id": "q25",
+      "part": "F — Synthesis",
+      "subtopic": "Concepts show through how you design",
+      "difficulty": "L4",
+      "style": "Interviewer Pushback",
+      "conceptIds": ["F5", "F6", "F7", "F8", "F9"],
+      "l5Pattern": null,
+      "question": "Your interviewer ends a parking-lot design with: 'Quick wrap-up — give me a one-line summary of how each of the four OOP concepts shows up in your design, in your own words. No textbook definitions.' What's the strongest answer, and why is the one-liner per concept format what the interviewer is testing for?",
+      "options": [
+        "Encapsulation: ParkingLot's spots are private and the only way to add a vehicle is parkVehicle, so the lot owns how parking happens. Abstraction: Vehicle is an interface that says 'I can tell you my required spot size'; the lot doesn't know if it's a car or a truck. Polymorphism: at runtime, getRequiredSpotSize dispatches to the right subclass, so the lot never branches on type. Inheritance: not used here — composition fit better; I'd reach for inheritance only if a subclass genuinely needed to share parent behavior unchanged.",
+        "Encapsulation: keeping fields private and using getters/setters per Java Bean conventions. Abstraction: defining interfaces in front of classes so swap-out is easier. Polymorphism: virtual function dispatch on a class hierarchy. Inheritance: a subclass automatically gets parent behavior. This is the textbook definition for each concept and shows the candidate has the formal vocabulary down.",
+        "Encapsulation: SOLID's Single Responsibility Principle, applied at the field level. Abstraction: SOLID's Dependency Inversion Principle, applied at the type level. Polymorphism: the runtime expression of the Open/Closed Principle. Inheritance: a violation of the Composition-over-Inheritance maxim except in cases of stable shared implementation. This grounds each concept in its corresponding SOLID principle for theoretical rigor.",
+        "Encapsulation: I picked it because the textbook says to. Abstraction: same reason. Polymorphism: same. Inheritance: I avoided it because the textbook says inheritance is fragile. Honestly, in interviews these labels matter less than the design itself, so I lean on whatever the interviewer wants to hear and adapt."
+      ],
+      "correctIndex": 0,
+      "explanation": "The article's closing summary, paraphrased into design-specific one-liners: 'Encapsulation: Hide state, expose behavior... Abstraction: Define interfaces for variations... Polymorphism: Let objects handle themselves... Inheritance: Compose behavior, don't inherit it.' Option A captures each one as it shows up *in this specific design* — what is private, what is interfaced, what dispatches, what was deliberately not used. The interviewer is testing whether the candidate can describe each concept by its concrete effect rather than by formal definition; the one-liner format forces this because there's no room to recite, only room to point at the design move. Option B reverts to textbook definitions, which is exactly what the interviewer asked the candidate not to do. Option C re-routes through SOLID, which is one level removed from the structural moves the question is about. Option D dismisses the question entirely and signals lack of judgment — the interviewer is asking for design-by-effect, not for principle-skepticism.",
+      "interviewScript": "In your interview, when asked for one-liners per concept, point at the design move, not the textbook definition: 'Encapsulation: <what is private here, and what method gates the mutation>. Abstraction: <which interface, and what callers stay ignorant of>. Polymorphism: <where dispatch happens, and what type-check it replaces>. Inheritance: <used here for stable shared behavior, OR deliberately not used because composition fit better>.' Each one-liner names a specific design element and what it buys.",
+      "proTip": "When asked to summarize OOP concepts in a design, name the *element* (private field X, interface Y, dispatch site Z) and *what it buys*. Avoid textbook definitions — they signal that you can recite, not that you can apply."
+    },
+    {
+      "id": "q26",
+      "part": "F — Synthesis",
+      "subtopic": "Concepts show through how you design",
+      "difficulty": "L5",
+      "style": "Cross-Part Bridge",
+      "conceptIds": ["A3", "F1", "F5"],
+      "l5Pattern": "framing-is-wrong",
+      "question": "An interviewer ends a strong design conversation with: 'You never named encapsulation, abstraction, polymorphism, or inheritance during the entire design. Some interviewers would mark you down for that — they want to hear the vocabulary as evidence you understand the concepts. What's your response if the next interviewer in the loop pushes back on that ground?' What is the strongest senior framing of how to handle this consistently across diverse interviewer expectations?",
+      "options": [
+        "Concede on the vocabulary point and start naming the concepts proactively in future interviews — even if it feels like recitation, the cost of saying the words is low and the upside (avoiding markdowns from naming-oriented interviewers) is real. The senior move is to calibrate to the lowest-common-denominator interviewer in any loop.",
+        "Defend the design-first approach absolutely — interviewers who grade on vocabulary are applying the wrong rubric, and the senior move is to educate them on why the design itself is the evidence. Push back firmly and trust that genuinely senior interviewers will recognize the difference; capitulating on this point trains the wrong incentive across the industry.",
+        "The framing of the question is partially wrong — there isn't a single right answer because the choice isn't between 'always name' and 'never name.' The senior move is to *make the concepts visible by their effects* by default ('items is private so the cart owns mutations,' 'Vehicle is an interface so the lot doesn't branch on type'), and to *also name them on request* without surrendering the design-by-effect framing. When an interviewer asks 'where did you use encapsulation,' the answer points at the design element AND uses the word: 'Encapsulation here — items is private, addItem is the only mutation path, so the cart enforces invariants nothing can bypass.' That answer satisfies naming-oriented interviewers (the word is present) and design-oriented interviewers (the effect is named). It also distinguishes you from candidates who can only do one or the other. The deeper insight: the question forces a false choice; the senior move is to do both, with the effect leading and the label following.",
+        "Adapt the strategy by interviewer signal — name concepts in the first 30 seconds of meeting them; if they don't react, drop the naming for the rest of the conversation and shift to design-by-effect. This is a tactical optimization that protects against vocabulary-graders without committing to recitation across the entire round."
+      ],
+      "correctIndex": 2,
+      "explanation": "The framing-is-wrong move at L5: the question presents a binary choice (name or don't name) and asks the candidate to pick a side. The senior move is to refuse the binary. The article's prescription — 'concepts show through in how you design, not in what you name' — is guidance about *how* to demonstrate understanding, not a vow of silence. A senior candidate makes the concepts visible by their effects by default ('items is private so the cart owns mutations') and adds the label on request ('encapsulation here — same effect, named'). That answer satisfies both interview rubrics simultaneously: naming-oriented interviewers hear the word; design-oriented interviewers hear the effect. It also distinguishes you from candidates who can only do one or the other. Why other options tempt: Option A's 'concede and recite' protects against the worst-case interviewer at the cost of sounding like a recitation candidate to the best-case interviewer — a net loss across a full loop. Option B's 'defend absolutely' is a principled stance that the article does support, but it forfeits real signal to interviewers who expect vocabulary; principled stances cost real signal when the interviewer's frame isn't wrong, just different. Option D's 'tactical adapt-by-signal' is operationally fragile — reading the interviewer in 30 seconds is hard, the cost of misreading is high, and the strategy makes the candidate inconsistent across interviewers in the same loop, which can be flagged as 'not the same person across rounds.' The deeper insight: in any loop with diverse interviewer expectations, the right strategy is to do both halves of the spectrum simultaneously, not to pick a side.",
+      "interviewScript": "In your interview, when faced with naming-vs-effect tension, do both: lead with the effect ('items is private so the cart owns mutations'), then add the label ('that's encapsulation') if the interviewer is naming-oriented or if the format calls for a wrap-up. The effect is the substance; the label is the courtesy. Doing both simultaneously satisfies divergent interviewer rubrics without sacrificing either signal.",
+      "proTip": "When asked whether to name OOP concepts in interviews, refuse the binary. Lead with the design effect ('items is private, the cart owns mutations'), follow with the label ('that's encapsulation') if the interviewer is naming-oriented. Both halves cost almost nothing together and signal you can demonstrate concepts and articulate them."
+    }
+  ],
+  "partsOrder": [
+    "A — Framing",
+    "B — Encapsulation",
+    "C — Abstraction",
+    "D — Polymorphism",
+    "E — Inheritance",
+    "F — Synthesis"
+  ],
+  "subtopicsOrder": [
+    "OOP concepts as implementation mechanisms",
+    "Encapsulation",
+    "Abstraction",
+    "Polymorphism",
+    "Inheritance",
+    "Concepts show through how you design"
+  ],
+  "difficultyTiers": ["L1", "L2", "L3", "L4", "L5"],
+  "active": true
+}
