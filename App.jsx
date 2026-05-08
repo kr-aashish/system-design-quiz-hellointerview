@@ -926,6 +926,7 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
           {items.map(item => {
             const hasQuiz = hasRunnableQuiz(item);
             const hasReview = !!quizDataBySlug[item.slug];
+            const isStandaloneQuiz = !!standaloneQuizBySlug[item.slug];
             const progress = summaries[item.slug];
             const status = progress?.status || 'not_started';
             const hasProgress = !!progress;
@@ -964,6 +965,11 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                       <span className={`text-[15px] font-medium transition-colors truncate ${nameColor}`}>
                         {item.name}
                       </span>
+                      {isStandaloneQuiz && (
+                        <span className="shrink-0 text-[10px] uppercase tracking-wide bg-amber-500/10 text-amber-300 border border-amber-500/20 px-2 py-0.5 rounded">
+                          Standalone
+                        </span>
+                      )}
                     </div>
                     
                     <div className="flex items-center gap-2 shrink-0">
@@ -980,7 +986,7 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                       )}
                       
                       {/* Action buttons — always visible on hover */}
-                      <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity">
+                      <div className={`flex items-center gap-1.5 opacity-100 ${isStandaloneQuiz ? '' : 'sm:opacity-0'} sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity`}>
                         {hasQuiz && (
                           <Link
                             to={getPrimaryQuizRoute(item, status)}
