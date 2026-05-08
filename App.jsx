@@ -8,8 +8,27 @@ import QuizEngine from './QuizEngine';
 import QuizReview from './QuizReview';
 import ShortcutHelp from './ShortcutHelp';
 import { useKeyboardShortcuts } from './keyboardShortcuts';
+import LldDesignPrinciplesHardQuiz from './Hard Quiz Generator v2.jsx';
 
 const quizModules = import.meta.glob('./data/quizzes/**/*.json', { eager: true, import: 'default' });
+
+const STANDALONE_QUIZ_PAGES = [
+  {
+    category: 'In a Hurry',
+    name: 'Design Principles Hard Quiz',
+    path: '/learn/low-level-design/in-a-hurry/design-principles',
+    slug: 'lld-design-principles-hard-v2',
+    status: 'pending',
+    lastAttempt: null,
+    retryCount: 0,
+    quizDataPath: null,
+    component: LldDesignPrinciplesHardQuiz,
+  },
+];
+
+const standaloneQuizBySlug = Object.fromEntries(
+  STANDALONE_QUIZ_PAGES.map((page) => [page.slug, page])
+);
 
 const TRACK_CONFIG = [
   {
@@ -144,7 +163,10 @@ function buildQuizEntry(article) {
   };
 }
 
-const learningTracks = buildLearningTracks(quizState.topics || []);
+const learningTracks = buildLearningTracks([
+  ...(quizState.topics || []),
+  ...STANDALONE_QUIZ_PAGES,
+]);
 const articleTopics = learningTracks.flatMap(track =>
   (track.sections || []).flatMap(section => section.articles || [])
 );
@@ -156,6 +178,10 @@ const quizDataBySlug = Object.fromEntries(
 );
 const quizArticles = articleTopics.filter(article => quizDataBySlug[article.slug]);
 const INDEX_SCROLL_STATE_KEY = 'hello-interview:index-scroll-state';
+
+function hasRunnableQuiz(topic) {
+  return Boolean(topic && (quizDataBySlug[topic.slug] || standaloneQuizBySlug[topic.slug]));
+}
 
 function getActiveIndexSlug() {
   return document.activeElement?.closest?.('[data-keyboard-row="quiz-index"]')?.dataset.slug || null;
@@ -671,7 +697,7 @@ function Index() {
   }, [getFocusedRow]);
 
   const navigateToTopicQuiz = useCallback((topic) => {
-    if (!topic || !quizDataBySlug[topic.slug]) return false;
+    if (!hasRunnableQuiz(topic)) return false;
     const status = summaries[topic.slug]?.status || 'not_started';
     saveIndexScrollState(topic.slug);
     navigate(getPrimaryQuizRoute(topic, status));
@@ -837,7 +863,7 @@ function TrackSection({ title, subtitle, icon: Icon, accent = 'teal', entries, s
   const a = TRACK_ACCENTS[accent] || TRACK_ACCENTS.teal;
   const totalArticles = entries.reduce((sum, [, items]) => sum + items.length, 0);
   const quizCount = entries.reduce(
-    (sum, [, items]) => sum + items.filter(i => quizDataBySlug[i.slug]).length,
+    (sum, [, items]) => sum + items.filter(hasRunnableQuiz).length,
     0,
   );
 
@@ -898,7 +924,8 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
       {isOpen && (
         <ul className="mt-1 pl-[18px] border-l border-[#374151] ml-[14px] space-y-1">
           {items.map(item => {
-            const hasQuiz = !!quizDataBySlug[item.slug];
+            const hasQuiz = hasRunnableQuiz(item);
+            const hasReview = !!quizDataBySlug[item.slug];
             const progress = summaries[item.slug];
             const status = progress?.status || 'not_started';
             const hasProgress = !!progress;
@@ -978,7 +1005,7 @@ function CategorySection({ category, items, summaries, onClearQuiz, defaultOpen 
                             )}
                           </Link>
                         )}
-                        {hasQuiz && (
+                        {hasReview && (
                           <Link
                             to={`/${item.slug}/review`}
                             className="flex items-center gap-1.5 text-xs bg-violet-500/10 text-violet-300 px-2.5 py-1.5 rounded-md hover:bg-violet-500/20 transition-colors font-semibold"
@@ -1042,6 +1069,13 @@ export default function App() {
               element={<QuizReview quiz={quizDataBySlug[quiz.slug]} />}
             />,
           ])}
+          {STANDALONE_QUIZ_PAGES.map(({ slug, component: Component }) => (
+            <Route
+              key={slug}
+              path={`/${slug}`}
+              element={<Component />}
+            />
+          ))}
         </Routes>
       </div>
     </HashRouter>
